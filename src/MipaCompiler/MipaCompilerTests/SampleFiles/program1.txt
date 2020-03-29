@@ -1,9 +1,12 @@
 program GCD;
 begin
     var i, j : integer;
-    read (i, j); 
+    read (i, j); {*
+	while i <> j+1 do nothing... 
+	this is inside a comment
+	*}
     while i <> j do
-        if  i > j then i := i – j; 
-        else j := j – i;      
+        if  i > j then i := i - j; 
+        else j := j - i;      
     writeln (i);  
 end.

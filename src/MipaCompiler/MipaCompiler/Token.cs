@@ -18,7 +18,7 @@ namespace MipaCompiler
         ERROR,                  // error token for returning error information for parser
         GREATER_THAN,           // ">" symbol (greater than comparison)
         GREATER_THAN_OR_EQUAL,  // ">=" symbol (greater than comparison)
-        IDENTIFIER,             // token for identifier symbols in source code
+        IDENTIFIER,             // token for variable identifier symbols in source code
         KEYWORD_ARRAY,          // "array" symbol (used when declaring array)
         KEYWORD_ASSERT,         // "assert" symbol (assert function)
         KEYWORD_BEGIN,          // "begin" symbol (keyword)
@@ -51,6 +51,7 @@ namespace MipaCompiler
         PREDEFINED_REAL,        // "real" symbol (predefined identifier)
         PREDEFINED_SIZE,        // "size" symbol (predefined identifier)
         PREDEFINED_STRING,      // "string" symbol (predefined identifier)
+        PREDEFINED_TRUE,        // "true" symbol (predefined identifier)
         PREDEFINED_WRITELN,     // "writeln" symbol (predefined identifier)
         SEPARATOR,              // ":" symbol (used in function and variable declarations)
         STATEMENT_END,          // ";" symbol (used to end statement)
@@ -134,7 +135,7 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>FindTokenType</c> returns the type of the token for given string.
+        /// Static method <c>FindTokenType</c> returns the type of the token for given string.
         /// If string cannot be interpreted as a valid token, then ERROR token is returned.
         /// </summary>
         public static TokenType FindTokenType(string value)
@@ -235,6 +236,92 @@ namespace MipaCompiler
                     return TokenType.SUBSTRACTION;
                 default:
                     return TokenType.ERROR;
+            }
+        }
+
+        /// <summary>
+        /// Static method <c>IsKeyword</c> checks if given string matches keyword token.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns>true if string is a keyword token</returns>
+        public static bool IsKeyword(string value)
+        {
+            string valueLower = value.ToLower();
+            switch (valueLower)
+            {
+                case "array":
+                case "assert":
+                case "begin":
+                case "do":
+                case "else":
+                case "function":
+                case "end":
+                case "if":
+                case "of":
+                case "procedure":
+                case "program":
+                case "return":
+                case "then":
+                case "var":
+                case "while":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// Static method <c>IsPredefinedIdentifier</c> checks if the string matches 
+        /// predefined identifier token.
+        /// </summary>
+        /// <param name="value"></param>
+        /// <returns>true if string matches predefined identifier token</returns>
+        public static bool IsPredefinedIdentifier(string value)
+        {
+            string valueLower = value.ToLower();
+            switch (valueLower)
+            {
+                case "boolean":
+                case "false":
+                case "integer":
+                case "read":
+                case "real":
+                case "size":
+                case "string":
+                case "true":
+                case "writeln":
+                    return true;
+                default:
+                    return false;
+            }
+        }
+
+        /// <summary>
+        /// Static method <c>IsSingleCharToken</c> checks if the given char is matches
+        /// a single char token.
+        /// </summary>
+        /// <param name="c"></param>
+        /// <returns>true if char matches a single char token</returns>
+        public static bool IsSinleCharToken(char c)
+        {
+            switch (c)
+            {
+                case '.':
+                case ',':
+                case '[':
+                case ']':
+                case '(':
+                case ')':
+                case '+':
+                case '-':
+                case '*':
+                case '/':
+                case '%':
+                case ';':
+                case '=':
+                    return true;
+                default:
+                    return false;
             }
         }
     }
