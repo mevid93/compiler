@@ -6,7 +6,12 @@ using System.Threading.Tasks;
 
 namespace MipaCompiler
 {
-    class Parser
+    public class Parser
     {
+
+        public Parser(Scanner scanner)
+        {
+
+        }
     }
 }

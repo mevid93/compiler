@@ -248,8 +248,7 @@ namespace MipaCompiler
         /// <returns>true if string is a keyword token</returns>
         public static bool IsKeyword(string value)
         {
-            string valueLower = value.ToLower();
-            switch (valueLower)
+            switch (value)
             {
                 case "array":
                 case "assert":
