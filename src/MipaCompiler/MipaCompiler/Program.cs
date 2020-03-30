@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
 
 namespace MipaCompiler
@@ -19,7 +18,7 @@ namespace MipaCompiler
             if (args.Length == 0)
             {
                 Console.WriteLine($"IOError::Please provide a path to Mini-Pascal source file!");
-                Console.WriteLine("Expected command is: <program.exe> <sourcecode.txt>");
+                Console.WriteLine("Usage: <compiler.exe> <sourcecode.txt> [<targetcode.c>]");
                 return -1;
             }
 
@@ -31,11 +30,31 @@ namespace MipaCompiler
                 return -1;
             }
 
+            // file exists, so set default output file name according to it
+            string outputFilePath = Path.ChangeExtension(sourceFilePath, ".c");
+
+            // if outputfile name/path was given, check that the extension is .c
+            if (args.Length == 2)
+            {
+                string output = args[1];
+                string extension = Path.GetExtension(output);
+                if (extension != null && extension.Equals(".c"))
+                {
+                    outputFilePath = args[1];
+                }
+                else
+                {
+                    Console.WriteLine($"IOError::Extension of the target code file is not valid (must be \".c\")!");
+                    return -1;
+                }
+            }
+
+
             // create Scanner-object for lexical analysis
             Scanner scanner = new Scanner(sourceFilePath);
 
             // create Parser-object for syntax analysis
-            // Parser parser = new Parser(scanner);
+            Parser parser = new Parser(scanner);
 
             // syntax analysis and create AST intermediate representation
             // List<INode> ast = parser.Parse();
