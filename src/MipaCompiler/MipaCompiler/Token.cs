@@ -56,7 +56,6 @@ namespace MipaCompiler
         SEPARATOR,              // ":" symbol (used in function and variable declarations)
         STATEMENT_END,          // ";" symbol (used to end statement)
         SUBSTRACTION,           // "-" symbol (substraction operation)
-        VAL_BOOL,               // token for boolean values
         VAL_INTEGER,            // token for integer values
         VAL_REAL,               // token for real values
         VAL_STRING              // token for string values
