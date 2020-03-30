@@ -114,10 +114,6 @@ namespace MipaCompiler
                     }
 
 
-                    /*
-
-                  
-
                     // check if character is " --> start of string
                     if (line[c] == '"')
                     {
@@ -132,20 +128,7 @@ namespace MipaCompiler
                                 ended = true;
                                 break;
                             }
-                            if (line[c] == '\\' && c < line.Length && line[c + 1] == 'n')
-                            {
-                                c++;
-                                value += "\n";
-                            }
-                            else if (line[c] == '\\' && c < line.Length && line[c + 1] == '"')
-                            {
-                                c++;
-                                value += "\"";
-                            }
-                            else
-                            {
-                                value += line[c];
-                            }
+                            value += line[c];
                             c++;
                         }
                         if (ended)
@@ -156,19 +139,20 @@ namespace MipaCompiler
                         colNum = c - 1;
                         string errorSlash = $"LexicalError::Row {r + 1}::Column {c + 1}::Expected '\"'!";
                         return new Token(errorSlash, TokenType.ERROR, r + 1, c + 1);
-                    }*/
+                    }
+
 
                     // check if character is digit --> start of number
                     if (char.IsDigit(line[c]))
                     {
                         int startCol = c + 1;
-                        string number = "" + line[c];
-                        while (c + 1 < line.Length && char.IsDigit(line[c + 1]))
+                        string number = "" + line[c++];
+                        while (c < line.Length && char.IsDigit(line[c]))
                         {
-                            number += line[c + 1];
+                            number += line[c];
                             c++;
                         }
-                        colNum = c + 1;
+                        colNum = c;
                         if (c < line.Length && line[c] == '.')
                         {
                             number += ".";
@@ -183,7 +167,7 @@ namespace MipaCompiler
                                 number += line[c];
                                 c++;
                             }
-                            colNum = c + 1;
+                            colNum = c;
                             return new Token(number, TokenType.VAL_REAL, r + 1, startCol);
                         }
                         return new Token(number, TokenType.VAL_INTEGER, r + 1, startCol);

@@ -1,0 +1,12 @@
+program Types; 
+begin
+    var b1_ : boolean;
+    var int : integer;
+    var r_ : real;
+    var s : string;
+  
+    b1_ := true;
+    int := 666;
+    r_ := 3.141;
+    s := "Hello, World!";
+end.

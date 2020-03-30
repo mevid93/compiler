@@ -234,6 +234,8 @@ namespace MipaCompiler
                     return TokenType.STATEMENT_END;
                 case "-":
                     return TokenType.SUBSTRACTION;
+                case "true":
+                    return TokenType.PREDEFINED_TRUE;
                 default:
                     return TokenType.ERROR;
             }
