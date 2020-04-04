@@ -52,6 +52,7 @@
     <Compile Include="ScannerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TokenTests.cs" />
+    <Compile Include="ParserTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
