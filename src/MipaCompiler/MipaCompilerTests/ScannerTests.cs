@@ -17,6 +17,16 @@ namespace MipaCompilerTests
 
         [TestMethod]
         [DeploymentItem("SampleFiles\\program1.txt")]
+        public void ScannerPeekNthTokenWorks()
+        {
+            string filename = "program1.txt";
+            Scanner scanner = new Scanner(filename);
+            Assert.AreEqual(TokenType.KEYWORD_PROGRAM, scanner.PeekNthToken(1).GetTokenType());
+            Assert.AreEqual(TokenType.KEYWORD_PROGRAM, scanner.PeekNthToken(1).GetTokenType());
+        }
+
+        [TestMethod]
+        [DeploymentItem("SampleFiles\\program1.txt")]
         public void ScanNextTokenWorks1()
         {
             string filename = "program1.txt";

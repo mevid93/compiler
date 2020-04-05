@@ -1,5 +1,6 @@
 ﻿using MipaCompiler.Node;
 using System;
+using System.Collections.Generic;
 
 namespace MipaCompiler
 {
@@ -16,7 +17,7 @@ namespace MipaCompiler
         private Token inputToken;           // current token in input
         private bool errorsDetected;        // flag telling if errors were detected during parsing
         private string lastError;           // variable to hold last reported error message
-        private bool errorCurrent;          // flag for current statement error status
+        private bool errorStatement;        // flag for current statement error status
 
         /// <summary>
         /// Constructor <c>Parser</c> creates new Parser-object.
@@ -56,8 +57,8 @@ namespace MipaCompiler
         private void HandleError()
         {
             // check if errors have already been noticed from current statement/code structure
-            if (errorCurrent) return;
-            errorCurrent = true;
+            if (errorStatement) return;
+            errorStatement = true;
             
             // different error messages
             string defaultError = $"SyntaxError::Row {inputToken.GetRow()}::Column {inputToken.GetColumn()}::Invalid syntax!";
@@ -130,16 +131,9 @@ namespace MipaCompiler
             Match(TokenType.KEYWORD_PROGRAM);
             string programName = Match(TokenType.IDENTIFIER);
             Match(TokenType.STATEMENT_END);
-            if (!errorsDetected)
-            {
-                ast = new ProgramNode(row, col, programName);
-            }
-            else
-            {
-                return;
-            }
-
-
+            if (!errorsDetected) ast = new ProgramNode(row, col, programName);
+            if (errorsDetected) return;
+            
             while (inputToken.GetTokenType() != TokenType.EOF && inputToken.GetTokenType() != TokenType.ERROR)
             {
                 switch (inputToken.GetTokenType())
@@ -202,6 +196,7 @@ namespace MipaCompiler
 
             // each block must have one statement
             INode statement = ParseStatement();
+            if (statement == null) errorStatement = false;
             if (statement != null) blockNode.AddStatement(statement);
 
             // if statement does not follow with "end" then there should be ";"
@@ -215,6 +210,7 @@ namespace MipaCompiler
             {
                 statement = ParseStatement();
                 if (statement != null) blockNode.AddStatement(statement);
+                if (statement == null) errorStatement = false;
                 if (inputToken.GetTokenType() != TokenType.KEYWORD_END)
                 {
                     Match(TokenType.STATEMENT_END);
@@ -231,10 +227,173 @@ namespace MipaCompiler
             return null;
         }
 
+        /// <summary>
+        /// Method <c>ParseStatement</c> handles the parsing of a single statement.
+        /// </summary>
         private INode ParseStatement()
         {
-            //TODO
+            switch (inputToken.GetTokenType())
+            {
+                case TokenType.PREDEFINED_READ:
+                    return ParseRead();
+                case TokenType.IDENTIFIER:
+                case TokenType.PREDEFINED_BOOLEAN:
+                case TokenType.PREDEFINED_FALSE:
+                case TokenType.PREDEFINED_INTEGER:
+                case TokenType.PREDEFINED_REAL:
+                case TokenType.PREDEFINED_SIZE:
+                case TokenType.PREDEFINED_STRING:
+                case TokenType.PREDEFINED_TRUE:
+                case TokenType.PREDEFINED_WRITELN:
+                    // TODO
+                    Match(TokenType.ERROR);
+                    return null;
+                case TokenType.KEYWORD_RETURN:
+                    // TODO
+                    Match(TokenType.KEYWORD_RETURN);
+                    return null;
+                case TokenType.KEYWORD_BEGIN:
+                    // TODO
+                    Match(TokenType.KEYWORD_BEGIN);
+                    return null;
+                case TokenType.KEYWORD_IF:
+                    // TODO
+                    Match(TokenType.KEYWORD_IF);
+                    return null;
+                case TokenType.KEYWORD_WHILE:
+                    // TODO
+                    Match(TokenType.KEYWORD_WHILE);
+                    return null;
+                case TokenType.KEYWORD_VAR:
+                    return ParseVariableDeclaration();
+                default:
+                    HandleError();
+                    return null;
+            }
+        }
+
+        /// <summary>
+        /// Method <c>ParseRead</c> handles that parsing of assignment
+        /// that starts with predefined identifier "read".
+        /// </summary>
+        private INode ParseRead()
+        {
+            if (inputToken.GetTokenType() != TokenType.PREDEFINED_READ)
+            {
+                HandleError();
+                return null;
+            }
+
+
+            Token first = scanner.PeekNthToken(1);
+            Token second = scanner.PeekNthToken(2);
+            
+            switch (first.GetTokenType())
+            {
+                case TokenType.ASSIGNMENT:
+                    // TODO:
+                    return null;
+                case TokenType.PARENTHIS_LEFT:
+                    switch (second.GetTokenType())
+                    {
+                        case TokenType.IDENTIFIER:
+                        case TokenType.PREDEFINED_READ:
+                        case TokenType.PREDEFINED_BOOLEAN:
+                        case TokenType.PREDEFINED_FALSE:
+                        case TokenType.PREDEFINED_INTEGER:
+                        case TokenType.PREDEFINED_REAL:
+                        case TokenType.PREDEFINED_SIZE:
+                        case TokenType.PREDEFINED_STRING:
+                        case TokenType.PREDEFINED_TRUE:
+                        case TokenType.PREDEFINED_WRITELN:
+                            return ParseCall();
+                        default:
+                            HandleError();
+                            return null;
+                    }
+                default:
+                    HandleError();
+                    return null;
+            }
+        }
+
+        /// <summary>
+        /// Method <c>ParseCall</c> handles the parsing of a call assignment.
+        /// </summary>
+        private INode ParseCall()
+        {
+            // TODO
             return null;
+        }
+
+        /// <summary>
+        /// Method <c>ParseVariableDeclaration</c> handles the parsing of a variable declaration.
+        /// </summary>
+        private INode ParseVariableDeclaration()
+        {
+            int row = inputToken.GetRow();
+            int col = inputToken.GetColumn();
+            Match(TokenType.KEYWORD_VAR);
+            List<string> ids = new List<string>();
+
+            while (!errorStatement)
+            {
+                switch (inputToken.GetTokenType())
+                {
+                    case TokenType.IDENTIFIER:
+                    case TokenType.PREDEFINED_BOOLEAN:
+                    case TokenType.PREDEFINED_FALSE:
+                    case TokenType.PREDEFINED_INTEGER:
+                    case TokenType.PREDEFINED_READ:
+                    case TokenType.PREDEFINED_REAL:
+                    case TokenType.PREDEFINED_SIZE:
+                    case TokenType.PREDEFINED_STRING:
+                    case TokenType.PREDEFINED_TRUE:
+                    case TokenType.PREDEFINED_WRITELN:
+                        ids.Add(inputToken.GetTokenValue());
+                        inputToken = scanner.ScanNextToken();
+                        break;
+                    default:
+                        HandleError();
+                        return null;
+                }
+
+                // check if multiple variables are declared
+                if (inputToken.GetTokenType() != TokenType.COMMA)
+                {
+                    break;
+                }
+                Match(TokenType.COMMA);
+            }
+
+            if (errorStatement) return null;
+            Match(TokenType.SEPARATOR);
+            if (errorStatement) return null;
+
+            string type;
+            // parse the type of variable/variables
+            switch (inputToken.GetTokenType())
+            {
+                case TokenType.PREDEFINED_INTEGER:
+                case TokenType.PREDEFINED_REAL:
+                case TokenType.PREDEFINED_BOOLEAN:
+                case TokenType.PREDEFINED_STRING:
+                    type = inputToken.GetTokenValue().ToLower();
+                    inputToken = scanner.ScanNextToken();
+                    break;
+                case TokenType.KEYWORD_ARRAY:
+                    // TODO
+                default:
+                    HandleError();
+                    return null;
+            }
+
+            VariableDclNode varDclNode = new VariableDclNode(row, col, type);
+            foreach(string name in ids)
+            {
+                varDclNode.AddVariableName(name);
+            }
+            return varDclNode;
         }
 
     }

@@ -6,10 +6,21 @@ namespace MipaCompiler.Node
     /// </summary>
     public enum NodeType
     {
-        PROGRAM,            // program declaration node
-        FUNCTION,           // function declaration node
-        PROCEDURE,          // procedure declaratio node
+        ADDITION,           // node for addition / concat operation
+        ARRAY,              // node holding an array
         BLOCK,              // block declaration node
+        CALL,               // node for calling functions and procedures
+        FUNCTION,           // function declaration node
+        INTEGER,            // node for holding constant integer
+        LOGICAL_AND,        // node for logical and operation
+        LOGICAL_OR,         // node for logical or operation
+        LOGICAL_NOT,        // node for loical not operation
+        PROCEDURE,          // procedure declaratio node
+        PROGRAM,            // program declaration node
+        REAL,               // node for holding constant real
+        STRING,             // node for holding constant string
+        VARIABLE,           // node holding a variable
+        VARIABLE_DCL,       // node for variable declaration
     }
 
     /// <summary>

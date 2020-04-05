@@ -43,9 +43,12 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Node\ArrayNode.cs" />
     <Compile Include="Node\BlockNode.cs" />
     <Compile Include="Node\INode.cs" />
     <Compile Include="Node\ProgramNode.cs" />
+    <Compile Include="Node\VariableDclNode.cs" />
+    <Compile Include="Node\VariableNode.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

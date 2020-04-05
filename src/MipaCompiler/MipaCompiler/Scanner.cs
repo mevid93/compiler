@@ -12,6 +12,8 @@ namespace MipaCompiler
         private bool processingCommentblock;            // flag telling if processing multiline comment block {* *}
         private int rowNum;                             // row of source code that is processed
         private int colNum;                             // column of source code that is processed
+        private int tmpRowNum;                          // tmp variable to hold original row
+        private int tmpColNum;                          // tmp variable to hold original column
         private string[] lines;                         // source code lines
 
         /// <summary>
@@ -25,10 +27,37 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>Scan</c> scans the next token from input source code.
+        /// Method <c>PeekNthToken</c> returns the n:th token, but does not
+        /// update row or column position in source code.
+        /// </summary>
+        /// <returns>n:th token</returns>
+        public Token PeekNthToken(int n)
+        {
+            tmpRowNum = rowNum;
+            tmpColNum = colNum;
+            Token token = null;
+            for(int i = 0; i < n; i++)
+            {
+                token = GetNextToken();
+            }
+            rowNum = tmpRowNum;
+            colNum = tmpColNum;
+            return token;
+        }
+
+        /// <summary>
+        /// Method <c>ScanNextToken</c> scans the next token from input source code.
         /// </summary>
         /// <returns>next token</returns>
         public Token ScanNextToken()
+        {
+            return GetNextToken();
+        }
+
+        /// <summary>
+        /// Method <c>GetNextToken</c> returns the next token from input source code.
+        /// </summary>
+        private Token GetNextToken()
         {
             for (int r = rowNum; r < lines.Length; r++)
             {
