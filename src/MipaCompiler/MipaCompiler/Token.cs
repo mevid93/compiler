@@ -324,5 +324,31 @@ namespace MipaCompiler
                     return false;
             }
         }
+
+        /// <summary>
+        /// Static method <c>CanBeIdentifier</c> check if the given token can be
+        /// used as identifier.
+        /// </summary>
+        /// <param name="token"></param>
+        /// <returns>true if token can be used as identifier</returns>
+        public static bool CanBeIdentifier(Token token)
+        {
+            switch (token.GetTokenType())
+            {
+                case TokenType.PREDEFINED_READ:
+                case TokenType.IDENTIFIER:
+                case TokenType.PREDEFINED_BOOLEAN:
+                case TokenType.PREDEFINED_FALSE:
+                case TokenType.PREDEFINED_INTEGER:
+                case TokenType.PREDEFINED_REAL:
+                case TokenType.PREDEFINED_SIZE:
+                case TokenType.PREDEFINED_STRING:
+                case TokenType.PREDEFINED_TRUE:
+                case TokenType.PREDEFINED_WRITELN:
+                    return true;
+                default:
+                    return false;
+            }
+        }
     }
 }

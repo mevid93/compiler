@@ -7,9 +7,11 @@ namespace MipaCompiler.Node
     public enum NodeType
     {
         ADDITION,           // node for addition / concat operation
+        ARGUMENTS,          // node for arguments 
         ARRAY,              // node holding an array
         BLOCK,              // block declaration node
         CALL,               // node for calling functions and procedures
+        BINARY_EXPRESSION,  // expression node with two child nodes
         FUNCTION,           // function declaration node
         INTEGER,            // node for holding constant integer
         LOGICAL_AND,        // node for logical and operation

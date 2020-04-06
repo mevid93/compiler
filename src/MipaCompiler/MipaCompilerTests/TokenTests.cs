@@ -92,5 +92,16 @@ namespace MipaCompilerTests
             Assert.IsFalse(Token.IsSinleCharToken('<'));
             Assert.IsFalse(Token.IsSinleCharToken('>'));
         }
+
+        [TestMethod]
+        public void CanBeUsedAsIdentifierWorks()
+        {
+            Token valid = new Token("yes", TokenType.IDENTIFIER, 1, 1);
+            Token valid2 = new Token("yes2", TokenType.PREDEFINED_READ, 1, 1);
+            Token notValid = new Token("no", TokenType.ADDITION, 1, 1);
+            Assert.IsTrue(Token.CanBeIdentifier(valid));
+            Assert.IsTrue(Token.CanBeIdentifier(valid2));
+            Assert.IsFalse(Token.CanBeIdentifier(notValid));
+        }
     }
 }

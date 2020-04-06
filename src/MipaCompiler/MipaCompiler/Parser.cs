@@ -17,7 +17,7 @@ namespace MipaCompiler
         private Token inputToken;           // current token in input
         private bool errorsDetected;        // flag telling if errors were detected during parsing
         private string lastError;           // variable to hold last reported error message
-        private bool errorStatement;        // flag for current statement error status
+        private bool errorInStatement;      // flag for current statement error status
 
         /// <summary>
         /// Constructor <c>Parser</c> creates new Parser-object.
@@ -57,8 +57,8 @@ namespace MipaCompiler
         private void HandleError()
         {
             // check if errors have already been noticed from current statement/code structure
-            if (errorStatement) return;
-            errorStatement = true;
+            if (errorInStatement) return;
+            errorInStatement = true;
             
             // different error messages
             string defaultError = $"SyntaxError::Row {inputToken.GetRow()}::Column {inputToken.GetColumn()}::Invalid syntax!";
@@ -196,7 +196,7 @@ namespace MipaCompiler
 
             // each block must have one statement
             INode statement = ParseStatement();
-            if (statement == null) errorStatement = false;
+            if (statement == null) errorInStatement = false;
             if (statement != null) blockNode.AddStatement(statement);
 
             // if statement does not follow with "end" then there should be ";"
@@ -210,7 +210,7 @@ namespace MipaCompiler
             {
                 statement = ParseStatement();
                 if (statement != null) blockNode.AddStatement(statement);
-                if (statement == null) errorStatement = false;
+                if (statement == null) errorInStatement = false;
                 if (inputToken.GetTokenType() != TokenType.KEYWORD_END)
                 {
                     Match(TokenType.STATEMENT_END);
@@ -322,8 +322,62 @@ namespace MipaCompiler
         /// </summary>
         private INode ParseCall()
         {
-            // TODO
-            return null;
+            string id;
+            int idRow;
+            int idCol;
+
+            if (Token.CanBeIdentifier(inputToken))
+            {
+                id = inputToken.GetTokenValue();
+                idRow = inputToken.GetRow();
+                idCol = inputToken.GetColumn();
+                inputToken = scanner.ScanNextToken();
+            }
+            else
+            {
+                HandleError();
+                return null;
+            }
+
+            Match(TokenType.PARENTHIS_LEFT);
+            if (errorInStatement) return null;
+
+            INode args = ParseArguments();
+            if (errorInStatement) return null;
+
+            Match(TokenType.PARENTHIS_RIGHT);
+            if (errorInStatement) return null;
+
+            return new CallNode(idRow, idCol, id, args);
+        }
+
+        /// <summary>
+        /// Method <c>ParseArguments</c> handles the pargins of arguments
+        /// for function or procedure call.
+        /// </summary>
+        private INode ParseArguments()
+        {
+            int row = inputToken.GetRow();
+            int col = inputToken.GetColumn();
+            List<INode> expressions = new List<INode>();
+
+            while (!errorInStatement && inputToken.GetTokenType() != TokenType.PARENTHIS_RIGHT)
+            {
+                INode expression = ParseExpression();
+                expression = ParseExpressionTail(expression);
+                if(!errorInStatement)
+                {
+                    expressions.Add(expression);
+                    if(inputToken.GetTokenType() == TokenType.COMMA)
+                    {
+                        Match(TokenType.COMMA);
+                    }
+                }
+            }
+
+            if (errorInStatement) return null;
+
+            return new ArgumentsNode(row, col, expressions);
         }
 
         /// <summary>
@@ -336,7 +390,7 @@ namespace MipaCompiler
             Match(TokenType.KEYWORD_VAR);
             List<string> ids = new List<string>();
 
-            while (!errorStatement)
+            while (!errorInStatement)
             {
                 switch (inputToken.GetTokenType())
                 {
@@ -366,9 +420,9 @@ namespace MipaCompiler
                 Match(TokenType.COMMA);
             }
 
-            if (errorStatement) return null;
+            if (errorInStatement) return null;
             Match(TokenType.SEPARATOR);
-            if (errorStatement) return null;
+            if (errorInStatement) return null;
 
             string type;
             // parse the type of variable/variables
@@ -396,5 +450,63 @@ namespace MipaCompiler
             return varDclNode;
         }
 
+        /// <summary>
+        /// Method <c>ParseExpression</c> handles the parsing of expression (front).
+        /// </summary>
+        private INode ParseExpression()
+        {
+            if (errorInStatement) return null;
+            INode node = ParseSimpleExpression();
+            node = ParseSimpleExpressionTail();
+            return node;
+        }
+
+        /// <summary>
+        /// Method <c>ParseExpressionTail</c> handles the parsing of expression tail.
+        /// </summary>
+        private INode ParseExpressionTail(INode rhs)
+        {
+            if (errorInStatement) return null;
+            switch (inputToken.GetTokenType())
+            {
+                case TokenType.EQUALS:
+                case TokenType.NOT_EQUALS:
+                case TokenType.LESS_THAN:
+                case TokenType.LESS_THAN_OR_EQUAL:
+                case TokenType.GREATER_THAN_OR_EQUAL:
+                case TokenType.GREATER_THAN:
+                    int row = inputToken.GetRow();
+                    int col = inputToken.GetColumn();
+                    string value = inputToken.GetTokenValue();
+
+                    inputToken = scanner.ScanNextToken();
+
+                    INode lhs = ParseSimpleExpression();
+                    lhs = ParseSimpleExpressionTail(lhs);
+                    if (errorInStatement) return null;
+
+                    return new BinaryExpressionNode(row, col, value, rhs, lhs);
+                default:
+                    return rhs;
+            }
+        }
+
+        /// <summary>
+        /// Method <c>ParseSimpleExpression</c> handles the parsing of simple expression (front).
+        /// </summary>
+        private INode ParseSimpleExpression()
+        {
+            // TODO
+            return null;
+        }
+
+        /// <summary>
+        /// Method <c>ParseSimpleExpressionTail</c> handles the parsing of simple expression tail.
+        /// </summary>
+        private INode ParseSimpleExpressionTail(INode node)
+        {
+            // TODO
+            return null;
+        }
     }
 }
