@@ -261,15 +261,40 @@ namespace MipaCompiler
                     Match(TokenType.KEYWORD_IF);
                     return null;
                 case TokenType.KEYWORD_WHILE:
-                    // TODO
-                    Match(TokenType.KEYWORD_WHILE);
-                    return null;
+                    return ParseWhileStatement();
                 case TokenType.KEYWORD_VAR:
                     return ParseVariableDeclaration();
                 default:
                     HandleError();
                     return null;
             }
+        }
+
+        /// <summary>
+        /// Method <c>ParseWhileStatement</c> handles the parsing of while statement.
+        /// </summary>
+        private INode ParseWhileStatement()
+        {
+            if (errorInStatement) return null;
+
+            int row = inputToken.GetRow();
+            int column = inputToken.GetColumn();
+
+            Match(TokenType.KEYWORD_WHILE);
+
+            if (errorInStatement) return null;
+
+            INode expr = ParseExpression();
+            expr = ParseExpressionTail(expr);
+            Match(TokenType.KEYWORD_DO);
+
+            if (errorInStatement) return null;
+
+            INode statement = ParseStatement();
+
+            if (errorInStatement) return null;
+
+            return new WhileNode(row, column, expr, statement);
         }
 
         /// <summary>
@@ -457,7 +482,7 @@ namespace MipaCompiler
         {
             if (errorInStatement) return null;
             INode node = ParseSimpleExpression();
-            node = ParseSimpleExpressionTail();
+            node = ParseSimpleExpressionTail(node);
             return node;
         }
 
@@ -496,8 +521,37 @@ namespace MipaCompiler
         /// </summary>
         private INode ParseSimpleExpression()
         {
-            // TODO
-            return null;
+            if (errorInStatement) return null;
+
+            bool isNegative = false;
+            bool hasSign = true;
+            int row = inputToken.GetRow();
+            int col = inputToken.GetColumn();
+
+            switch (inputToken.GetTokenType())
+            {
+                case TokenType.ADDITION:
+                    Match(TokenType.ADDITION);
+                    break;
+                case TokenType.SUBSTRACTION:
+                    isNegative = true;
+                    Match(TokenType.SUBSTRACTION);
+                    break;
+                default:
+                    hasSign = false;
+                    break;
+            }
+
+            INode term = ParseTerm();
+            term = ParseTermTail(term);
+
+            if (errorInStatement) return null;
+
+            if (hasSign)
+            {
+                return new SignNode(row, col, isNegative, term);
+            }
+            return term;
         }
 
         /// <summary>
@@ -505,8 +559,197 @@ namespace MipaCompiler
         /// </summary>
         private INode ParseSimpleExpressionTail(INode node)
         {
-            // TODO
-            return null;
+            if (errorInStatement) return null;
+
+            switch (inputToken.GetTokenType())
+            {
+                case TokenType.ADDITION:
+                case TokenType.SUBSTRACTION:
+                case TokenType.LOGICAL_OR:
+                    int row = inputToken.GetRow();
+                    int col = inputToken.GetColumn();
+                    string value = inputToken.GetTokenValue();
+
+                    inputToken = scanner.ScanNextToken();
+
+                    INode term = ParseTerm();
+                    term = ParseTermTail(term);
+
+                    if (errorInStatement) return null;
+
+                    return new BinaryExpressionNode(row, col, value, node, term);
+                default:
+                    return node;
+            }
+        }
+
+        /// <summary>
+        /// Method <c>ParseTerm</c> handles the parsing of single term (front).
+        /// </summary>
+        private INode ParseTerm()
+        {
+            if (errorInStatement) return null;
+
+            INode factor = ParseFactor();
+            factor = ParseFactorTail(factor);
+
+            if (errorInStatement) return null;
+
+            return factor;
+        }
+
+        /// <summary>
+        ///  Method <c>ParseTermTail</c> handles the parsing of a term tail.
+        /// </summary>
+        private INode ParseTermTail(INode node)
+        {
+            if (errorInStatement) return null;
+
+            switch (inputToken.GetTokenType())
+            {
+                case TokenType.MULTIPLICATION:
+                case TokenType.DIVISION:
+                case TokenType.MODULO:
+                case TokenType.LOGICAL_AND:
+                    int row = inputToken.GetRow();
+                    int col = inputToken.GetColumn();
+                    string value = inputToken.GetTokenValue();
+
+                    inputToken = scanner.ScanNextToken();
+
+                    INode factor = ParseFactor();
+                    factor = ParseFactorTail(factor);
+
+                    if (errorInStatement) return null;
+
+                    return new BinaryExpressionNode(row, col, value, node, factor);
+                default:
+                    return node;
+            }
+        }
+
+        /// <summary>
+        /// Method <c>ParseFactor</c> handles the parsing of factor (front).
+        /// </summary>
+        private INode ParseFactor()
+        {
+            if (errorInStatement) return null;
+
+            Token peek1 = scanner.PeekNthToken(1);
+
+            switch (inputToken.GetTokenType())
+            {
+                case TokenType.IDENTIFIER:
+                case TokenType.PREDEFINED_READ:
+                case TokenType.PREDEFINED_BOOLEAN:
+                case TokenType.PREDEFINED_FALSE:
+                case TokenType.PREDEFINED_INTEGER:
+                case TokenType.PREDEFINED_REAL:
+                case TokenType.PREDEFINED_SIZE:
+                case TokenType.PREDEFINED_STRING:
+                case TokenType.PREDEFINED_TRUE:
+                case TokenType.PREDEFINED_WRITELN:
+                    switch (peek1.GetTokenType())
+                    {
+                        case TokenType.PARENTHIS_LEFT:
+                            return ParseCall();
+                        case TokenType.BRACKET_LEFT:
+                            int row = inputToken.GetRow();
+                            int col = inputToken.GetColumn();
+                            string name = inputToken.GetTokenValue();
+                            INode variable = new VariableNode(row, col, name, null);
+
+                            inputToken = scanner.ScanNextToken();
+                            row = inputToken.GetRow();
+                            col = inputToken.GetColumn();
+                            Match(TokenType.BRACKET_LEFT);
+                            INode expr = ParseExpression();
+                            expr = ParseExpressionTail(expr);
+                            Match(TokenType.BRACKET_RIGHT);
+
+                            if (errorInStatement) return null;
+
+                            return new ArrayIndexNode(row, col, variable, expr);
+                        default:
+                            row = inputToken.GetRow();
+                            col = inputToken.GetColumn();
+                            name = inputToken.GetTokenValue();
+                            inputToken = scanner.ScanNextToken();
+                            return new VariableNode(row, col, name, null);
+                    }
+                case TokenType.VAL_INTEGER:
+                case TokenType.VAL_REAL:
+                case TokenType.VAL_STRING:
+                    return ParseLiteral();
+                case TokenType.PARENTHIS_LEFT:
+                    Match(TokenType.PARENTHIS_LEFT);
+                    INode expression = ParseExpression();
+                    expression = ParseExpressionTail(expression);
+                    Match(TokenType.PARENTHIS_RIGHT);
+                    if (errorInStatement) return null;
+                    return expression;
+                case TokenType.LOGICAL_NOT:
+                    Match(TokenType.LOGICAL_NOT);
+                    INode factor = ParseFactor();
+                    factor = ParseFactorTail(factor);
+                    return factor;
+                default:
+                    HandleError();
+                    return null;
+            }
+        }
+
+        /// <summary>
+        /// Method <c>ParseFactorTail</c> handles the parsing of factor tail.
+        /// </summary>
+        private INode ParseFactorTail(INode node)
+        {
+            if (errorInStatement) return null;
+
+            switch (inputToken.GetTokenType())
+            {
+                case TokenType.DOT:
+                    int row = inputToken.GetRow();
+                    int col = inputToken.GetColumn();
+                    Match(TokenType.DOT);
+                    Match(TokenType.PREDEFINED_SIZE);
+                    if (errorInStatement) return null;
+                    return new ArraySizeNode(row, col, node);
+                default:
+                    return node;
+            }
+        }
+
+        /// <summary>
+        /// Method <c>ParseLiteral</c> handles the parsing of literal.
+        /// </summary>
+        private INode ParseLiteral()
+        {
+            if (errorInStatement) return null;
+
+            switch (inputToken.GetTokenType())
+            {
+                case TokenType.VAL_INTEGER:
+                    int row = inputToken.GetRow();
+                    int col = inputToken.GetColumn();
+                    string value = inputToken.GetTokenValue();
+                    Match(TokenType.VAL_INTEGER);
+                    return new IntegerNode(row, col, value);
+                case TokenType.VAL_REAL:
+                    row = inputToken.GetRow();
+                    col = inputToken.GetColumn();
+                    value = inputToken.GetTokenValue();
+                    Match(TokenType.VAL_REAL);
+                    return new RealNode(row, col, value);
+                case TokenType.VAL_STRING:
+                    row = inputToken.GetRow();
+                    col = inputToken.GetColumn();
+                    value = inputToken.GetTokenValue();
+                    return new StringNode(row, col, value);
+                default:
+                    HandleError();
+                    return null;
+            }
         }
     }
 }

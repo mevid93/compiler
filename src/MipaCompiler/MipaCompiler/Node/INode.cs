@@ -9,6 +9,8 @@ namespace MipaCompiler.Node
         ADDITION,           // node for addition / concat operation
         ARGUMENTS,          // node for arguments 
         ARRAY,              // node holding an array
+        ARRAY_SIZE,         // node for holding array size operation
+        ARRAY_INDEX,        // node for holding index of array operation
         BLOCK,              // block declaration node
         CALL,               // node for calling functions and procedures
         BINARY_EXPRESSION,  // expression node with two child nodes
@@ -20,9 +22,11 @@ namespace MipaCompiler.Node
         PROCEDURE,          // procedure declaratio node
         PROGRAM,            // program declaration node
         REAL,               // node for holding constant real
+        SIGN,               // node for defining sign of term
         STRING,             // node for holding constant string
         VARIABLE,           // node holding a variable
         VARIABLE_DCL,       // node for variable declaration
+        WHILE,              // node for while loop
     }
 
     /// <summary>

@@ -25,7 +25,7 @@ namespace MipaCompiler.Node
         {
             this.row = row;
             this.col = col;
-            this.value = value;
+            value = operation;
             this.lhs = lhs;
             this.rhs = rhs;
         }
