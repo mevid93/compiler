@@ -7,7 +7,7 @@ namespace MipaCompiler.Node
     public enum NodeType
     {
         ADDITION,           // node for addition / concat operation
-        ARGUMENTS,          // node for arguments 
+        ARGUMENTS,          // node for parameters 
         ARRAY,              // node holding an array
         ARRAY_SIZE,         // node for holding array size operation
         ARRAY_INDEX,        // node for holding index of array operation
@@ -24,6 +24,7 @@ namespace MipaCompiler.Node
         PROCEDURE,          // procedure declaratio node
         PROGRAM,            // program declaration node
         REAL,               // node for holding constant real
+        RETURN,             // node for return statement
         SIGN,               // node for defining sign of term
         STRING,             // node for holding constant string
         VARIABLE,           // node holding a variable

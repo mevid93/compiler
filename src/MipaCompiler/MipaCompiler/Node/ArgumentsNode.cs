@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace MipaCompiler.Node
 {
     /// <summary>
-    /// Class <c>ArgumentsNode</c> represents arguments for function or
+    /// Class <c>ArgumentsNode</c> represents parameters for function or
     /// procedure in AST.
     /// </summary>
     public class ArgumentsNode : INode
@@ -27,9 +27,9 @@ namespace MipaCompiler.Node
         }
 
         /// <summary>
-        /// Method <c>GetArguments</c> returns the list of arguments.
+        /// Method <c>GetArguments</c> returns the list of parameters.
         /// </summary>
-        /// <returns>arguments list</returns>
+        /// <returns>parameters list</returns>
         public List<INode> GetArguments()
         {
             return args;

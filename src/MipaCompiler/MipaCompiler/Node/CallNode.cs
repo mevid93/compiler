@@ -11,7 +11,7 @@ namespace MipaCompiler.Node
         private readonly int row;       // row in source code
         private readonly int col;       // column in source code
         private readonly string id;     // identifier for fucntion or procedure
-        private readonly INode args;    // arguments for function or procedure
+        private readonly INode args;    // parameters for function or procedure
 
         /// <summary>
         /// Constructor <c>CallNode</c> creates new CallNode-object.
@@ -39,9 +39,9 @@ namespace MipaCompiler.Node
         }
 
         /// <summary>
-        /// Method <c>GetArguments</c> returns the arguments of the call operation.
+        /// Method <c>GetArguments</c> returns the parameters of the call operation.
         /// </summary>
-        /// <returns>arguments</returns>
+        /// <returns>parameters</returns>
         public INode GetArguments()
         {
             return args;

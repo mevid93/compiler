@@ -147,7 +147,7 @@ namespace MipaCompiler
                         }
                         break;
                     case TokenType.KEYWORD_FUNCTION:
-                        INode function = ParseBlock();
+                        INode function = ParseFunction();
                         if (function != null)
                         {
                             ProgramNode pn = (ProgramNode)ast;
@@ -171,17 +171,97 @@ namespace MipaCompiler
             }
         }
 
+        /// <summary>
+        /// Method <c>ParseProcedure</c> handles the parsing of single procedure.
+        /// </summary>
         private INode ParseProcedure()
         {
             //TODO
             return null;
         }
 
-
+        /// <summary>
+        /// Method <c>ParseFunction</c> handles the parsing of single function.
+        /// </summary>
         private INode ParseFunction()
         {
-            //TODO
-            return null;
+            if (errorInStatement) return null;
+
+            Match(TokenType.KEYWORD_FUNCTION);
+            if (errorInStatement) return null;
+
+            if (!Token.CanBeIdentifier(inputToken))
+            {
+                HandleError();
+                return null;
+            }
+
+            int rowFunction = inputToken.GetRow();
+            int colFunction = inputToken.GetColumn();
+            string functionName = inputToken.GetTokenValue();
+            inputToken = scanner.ScanNextToken();
+
+            Match(TokenType.PARENTHIS_LEFT);
+            List<INode> parameters = new List<INode>();
+
+            if(inputToken.GetTokenType() != TokenType.PARENTHIS_RIGHT)
+            {
+                while(!errorInStatement)
+                {
+                    if (inputToken.GetTokenType() == TokenType.KEYWORD_VAR) Match(TokenType.KEYWORD_VAR);
+
+                    int rowP = inputToken.GetRow();
+                    int colP = inputToken.GetColumn();
+                    string identifier = inputToken.GetTokenValue();
+                    string type;
+                    inputToken = scanner.ScanNextToken();
+                    Match(TokenType.SEPARATOR);
+
+                    switch (inputToken.GetTokenType())
+                    {
+                        case TokenType.PREDEFINED_INTEGER:
+                        case TokenType.PREDEFINED_BOOLEAN:
+                        case TokenType.PREDEFINED_REAL:
+                        case TokenType.PREDEFINED_STRING:
+                            type = inputToken.GetTokenValue();
+                            inputToken = scanner.ScanNextToken();
+                            break;
+                        default:
+                            HandleError();
+                            return null;
+                    }
+
+                    parameters.Add(new VariableNode(rowP, colP, identifier, type));
+
+                    if (inputToken.GetTokenType() == TokenType.COMMA) Match(TokenType.COMMA);
+                    if (!Token.CanBeIdentifier(inputToken)) break;
+                }
+            }
+
+            Match(TokenType.PARENTHIS_RIGHT);
+            Match(TokenType.SEPARATOR);
+            string returnType;
+            switch (inputToken.GetTokenType())
+            {
+                case TokenType.PREDEFINED_INTEGER:
+                case TokenType.PREDEFINED_BOOLEAN:
+                case TokenType.PREDEFINED_REAL:
+                case TokenType.PREDEFINED_STRING:
+                    returnType = inputToken.GetTokenValue();
+                    inputToken = scanner.ScanNextToken();
+                    break;
+                default:
+                    HandleError();
+                    return null;
+            }
+            Match(TokenType.STATEMENT_END);
+            if (errorInStatement) return null;
+
+            INode block = ParseBlock();
+            Match(TokenType.STATEMENT_END);
+            if (errorInStatement) return null;
+
+            return new FunctionNode(rowFunction, colFunction, functionName, returnType, parameters, block);
         }
 
         /// <summary>
@@ -258,13 +338,9 @@ namespace MipaCompiler
                             return null;
                     }
                 case TokenType.KEYWORD_RETURN:
-                    // TODO
-                    Match(TokenType.KEYWORD_RETURN);
-                    return null;
+                    return ParseReturnStatement();
                 case TokenType.KEYWORD_BEGIN:
-                    // TODO
-                    Match(TokenType.KEYWORD_BEGIN);
-                    return null;
+                    return ParseBlock();
                 case TokenType.KEYWORD_IF:
                     return ParseIfStatement();
                 case TokenType.KEYWORD_WHILE:
@@ -278,13 +354,40 @@ namespace MipaCompiler
         }
 
         /// <summary>
+        /// Method <c>ParseReturnStatement</c> handles the parsing of return statement.
+        /// </summary>
+        private INode ParseReturnStatement()
+        {
+            if (errorInStatement) return null;
+
+            int row = inputToken.GetRow();
+            int col = inputToken.GetColumn();
+            Match(TokenType.KEYWORD_RETURN);
+            if (errorInStatement) return null;
+
+            INode expr = null;
+            if (inputToken.GetTokenType() != TokenType.STATEMENT_END && inputToken.GetTokenType() != TokenType.KEYWORD_END)
+            {
+                expr = ParseExpression();
+                expr = ParseExpressionTail(expr);
+            }
+
+            if (errorInStatement) return null;
+
+            return new ReturnNode(row, col, expr);
+        }
+
+        /// <summary>
         /// Method <c>ParseAssignment</c> handles the parsing of assignment.
         /// </summary>
         private INode ParseAssignment()
         {
             if (errorInStatement) return null;
 
-            if (!Token.CanBeIdentifier(inputToken)) return null;
+            if (!Token.CanBeIdentifier(inputToken)) {
+                HandleError();
+                return null;
+            }
 
             int row = inputToken.GetRow();
             int col = inputToken.GetColumn();
@@ -483,7 +586,7 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>ParseArguments</c> handles the pargins of arguments
+        /// Method <c>ParseArguments</c> handles the pargins of parameters
         /// for function or procedure call.
         /// </summary>
         private INode ParseArguments()

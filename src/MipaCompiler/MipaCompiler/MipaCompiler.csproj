@@ -50,11 +50,13 @@
     <Compile Include="Node\BlockNode.cs" />
     <Compile Include="Node\CallNode.cs" />
     <Compile Include="Node\BinaryExpressionNode.cs" />
+    <Compile Include="Node\FunctionNode.cs" />
     <Compile Include="Node\IfElseNode.cs" />
     <Compile Include="Node\INode.cs" />
     <Compile Include="Node\IntegerNode.cs" />
     <Compile Include="Node\ProgramNode.cs" />
     <Compile Include="Node\RealNode.cs" />
+    <Compile Include="Node\ReturnNode.cs" />
     <Compile Include="Node\SignNode.cs" />
     <Compile Include="Node\ArraySizeNode.cs" />
     <Compile Include="Node\StringNode.cs" />
