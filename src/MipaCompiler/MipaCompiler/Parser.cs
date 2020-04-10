@@ -59,11 +59,11 @@ namespace MipaCompiler
             // check if errors have already been noticed from current statement/code structure
             if (errorInStatement) return;
             errorInStatement = true;
-            
+
             // different error messages
             string defaultError = $"SyntaxError::Row {inputToken.GetRow()}::Column {inputToken.GetColumn()}::Invalid syntax!";
             string eofError = $"SyntaxError::Row {inputToken.GetRow()}::Column {inputToken.GetColumn()}::Unexpected end of file!";
-            
+
             // print error to user
             if (inputToken.GetTokenType() == TokenType.ERROR)
             {
@@ -133,7 +133,7 @@ namespace MipaCompiler
             Match(TokenType.STATEMENT_END);
             if (!errorsDetected) ast = new ProgramNode(row, col, programName);
             if (errorsDetected) return;
-            
+
             while (inputToken.GetTokenType() != TokenType.EOF && inputToken.GetTokenType() != TokenType.ERROR)
             {
                 switch (inputToken.GetTokenType())
@@ -176,8 +176,39 @@ namespace MipaCompiler
         /// </summary>
         private INode ParseProcedure()
         {
-            //TODO
-            return null;
+            if (errorInStatement) return null;
+
+            Match(TokenType.KEYWORD_PROCEDURE);
+            if (errorInStatement) return null;
+
+            if (!Token.CanBeIdentifier(inputToken))
+            {
+                HandleError();
+                return null;
+            }
+
+            int rowProcedure = inputToken.GetRow();
+            int colProcedure = inputToken.GetColumn();
+            string procedureName = inputToken.GetTokenValue();
+            inputToken = scanner.ScanNextToken();
+
+            Match(TokenType.PARENTHIS_LEFT);
+            List<INode> parameters = new List<INode>();
+
+            if (inputToken.GetTokenType() != TokenType.PARENTHIS_RIGHT)
+            {
+                parameters = ParseParameters();
+            }
+
+            Match(TokenType.PARENTHIS_RIGHT);
+            Match(TokenType.STATEMENT_END);
+            if (errorInStatement) return null;
+
+            INode block = ParseBlock();
+            Match(TokenType.STATEMENT_END);
+            if (errorInStatement) return null;
+
+            return new ProcedureNode(rowProcedure, colProcedure, procedureName, parameters, block);
         }
 
         /// <summary>
@@ -203,57 +234,11 @@ namespace MipaCompiler
 
             Match(TokenType.PARENTHIS_LEFT);
             List<INode> parameters = new List<INode>();
-
-            if(inputToken.GetTokenType() != TokenType.PARENTHIS_RIGHT)
-            {
-                while(!errorInStatement)
-                {
-                    if (inputToken.GetTokenType() == TokenType.KEYWORD_VAR) Match(TokenType.KEYWORD_VAR);
-
-                    int rowP = inputToken.GetRow();
-                    int colP = inputToken.GetColumn();
-                    string identifier = inputToken.GetTokenValue();
-                    string type;
-                    inputToken = scanner.ScanNextToken();
-                    Match(TokenType.SEPARATOR);
-
-                    switch (inputToken.GetTokenType())
-                    {
-                        case TokenType.PREDEFINED_INTEGER:
-                        case TokenType.PREDEFINED_BOOLEAN:
-                        case TokenType.PREDEFINED_REAL:
-                        case TokenType.PREDEFINED_STRING:
-                            type = inputToken.GetTokenValue();
-                            inputToken = scanner.ScanNextToken();
-                            break;
-                        default:
-                            HandleError();
-                            return null;
-                    }
-
-                    parameters.Add(new VariableNode(rowP, colP, identifier, type));
-
-                    if (inputToken.GetTokenType() == TokenType.COMMA) Match(TokenType.COMMA);
-                    if (!Token.CanBeIdentifier(inputToken)) break;
-                }
-            }
+            if (inputToken.GetTokenType() != TokenType.PARENTHIS_RIGHT) parameters = ParseParameters();
 
             Match(TokenType.PARENTHIS_RIGHT);
             Match(TokenType.SEPARATOR);
-            string returnType;
-            switch (inputToken.GetTokenType())
-            {
-                case TokenType.PREDEFINED_INTEGER:
-                case TokenType.PREDEFINED_BOOLEAN:
-                case TokenType.PREDEFINED_REAL:
-                case TokenType.PREDEFINED_STRING:
-                    returnType = inputToken.GetTokenValue();
-                    inputToken = scanner.ScanNextToken();
-                    break;
-                default:
-                    HandleError();
-                    return null;
-            }
+            INode returnType = ParseType();
             Match(TokenType.STATEMENT_END);
             if (errorInStatement) return null;
 
@@ -332,9 +317,10 @@ namespace MipaCompiler
                     {
                         case TokenType.ASSIGNMENT:
                             return ParseAssignment();
+                        case TokenType.PARENTHIS_LEFT:
+                            return ParseCall();
                         default:
-                            // TODO
-                            Match(TokenType.ERROR);
+                            HandleError();
                             return null;
                     }
                 case TokenType.KEYWORD_RETURN:
@@ -351,6 +337,122 @@ namespace MipaCompiler
                     HandleError();
                     return null;
             }
+        }
+
+        /// <summary>
+        /// Method <c>ParseType</c> handles the parsing of type.
+        /// </summary>
+        private INode ParseType()
+        {
+            if (errorInStatement) return null;
+
+            switch (inputToken.GetTokenType())
+            {
+                case TokenType.PREDEFINED_INTEGER:
+                case TokenType.PREDEFINED_BOOLEAN:
+                case TokenType.PREDEFINED_STRING:
+                case TokenType.PREDEFINED_REAL:
+                    return ParseSimpleType();
+                case TokenType.KEYWORD_ARRAY:
+                    return ParseArrayType();
+                default:
+                    HandleError();
+                    return null;
+            }
+        }
+
+        /// <summary>
+        /// Method <c>ParseSimpleType</c> handles the parsing of simple type.
+        /// </summary>
+        private INode ParseSimpleType()
+        {
+            if (errorInStatement) return null;
+
+            switch (inputToken.GetTokenType())
+            {
+                case TokenType.PREDEFINED_INTEGER:
+                case TokenType.PREDEFINED_BOOLEAN:
+                case TokenType.PREDEFINED_STRING:
+                case TokenType.PREDEFINED_REAL:
+                    break;
+                default:
+                    HandleError();
+                    return null;
+            }
+
+            int row = inputToken.GetRow();
+            int col = inputToken.GetColumn();
+            string value = inputToken.GetTokenValue();
+            inputToken = scanner.ScanNextToken();
+
+            return new SimpleTypeNode(row, col, value);
+        }
+
+        /// <summary>
+        /// Method <c>ParseArrayType</c> handles the parsing of array type.
+        /// </summary>
+        private INode ParseArrayType()
+        {
+            if (errorInStatement) return null;
+
+            int row = inputToken.GetRow();
+            int column = inputToken.GetColumn();
+            Match(TokenType.KEYWORD_ARRAY);
+            Match(TokenType.BRACKET_LEFT);
+            if (errorInStatement) return null;
+
+            INode expression = null;
+            if (inputToken.GetTokenType() != TokenType.BRACKET_RIGHT)
+            {
+                expression = ParseExpression();
+                expression = ParseExpressionTail(expression);
+            }
+            Match(TokenType.BRACKET_RIGHT);
+            Match(TokenType.KEYWORD_OF);
+            if (errorInStatement) return null;
+
+            INode simpleType = ParseSimpleType();
+            if (errorInStatement) return null;
+
+            return new ArrayTypeNode(row, column, expression, simpleType);
+        }
+
+        /// <summary>
+        /// Method <c>ParseParameters</c> handles the parsing of parametes in procedure
+        /// or function definition.
+        /// </summary>
+        private List<INode> ParseParameters()
+        {
+            if (errorInStatement) return null;
+
+            List<INode> parameters = new List<INode>();
+
+            while (!errorInStatement)
+            {
+                if (inputToken.GetTokenType() == TokenType.KEYWORD_VAR) Match(TokenType.KEYWORD_VAR);
+                if (!Token.CanBeIdentifier(inputToken))
+                {
+                    HandleError();
+                    return null;
+                }
+                int rowP = inputToken.GetRow();
+                int colP = inputToken.GetColumn();
+                string identifier = inputToken.GetTokenValue();
+                inputToken = scanner.ScanNextToken();
+                Match(TokenType.SEPARATOR);
+
+                INode type = ParseType();
+                if (errorInStatement) return null;
+
+                parameters.Add(new VariableNode(rowP, colP, identifier, type));
+
+                if (inputToken.GetTokenType() == TokenType.COMMA) Match(TokenType.COMMA);
+
+                if (inputToken.GetTokenType() != TokenType.KEYWORD_VAR && !Token.CanBeIdentifier(inputToken)) break;
+            }
+
+            if (errorInStatement) return null;
+            return parameters;
         }
 
         /// <summary>
@@ -384,7 +486,8 @@ namespace MipaCompiler
         {
             if (errorInStatement) return null;
 
-            if (!Token.CanBeIdentifier(inputToken)) {
+            if (!Token.CanBeIdentifier(inputToken))
+            {
                 HandleError();
                 return null;
             }
@@ -477,30 +580,13 @@ namespace MipaCompiler
             }
 
             Token first = scanner.PeekNthToken(1);
-            Token second = scanner.PeekNthToken(2);
 
             switch (first.GetTokenType())
             {
                 case TokenType.ASSIGNMENT:
                     return ParseAssignment();
                 case TokenType.PARENTHIS_LEFT:
-                    switch (second.GetTokenType())
-                    {
-                        case TokenType.IDENTIFIER:
-                        case TokenType.PREDEFINED_READ:
-                        case TokenType.PREDEFINED_BOOLEAN:
-                        case TokenType.PREDEFINED_FALSE:
-                        case TokenType.PREDEFINED_INTEGER:
-                        case TokenType.PREDEFINED_REAL:
-                        case TokenType.PREDEFINED_SIZE:
-                        case TokenType.PREDEFINED_STRING:
-                        case TokenType.PREDEFINED_TRUE:
-                        case TokenType.PREDEFINED_WRITELN:
-                            return ParseCall();
-                        default:
-                            HandleError();
-                            return null;
-                    }
+                    return ParseCall();
                 default:
                     HandleError();
                     return null;
@@ -522,7 +608,7 @@ namespace MipaCompiler
 
             Token first = scanner.PeekNthToken(1);
             Token second = scanner.PeekNthToken(2);
-            
+
             switch (first.GetTokenType())
             {
                 case TokenType.ASSIGNMENT:
@@ -560,6 +646,7 @@ namespace MipaCompiler
             int idRow;
             int idCol;
 
+
             if (Token.CanBeIdentifier(inputToken))
             {
                 id = inputToken.GetTokenValue();
@@ -576,7 +663,7 @@ namespace MipaCompiler
             Match(TokenType.PARENTHIS_LEFT);
             if (errorInStatement) return null;
 
-            INode args = ParseArguments();
+            List<INode> args = ParseArguments();
             if (errorInStatement) return null;
 
             Match(TokenType.PARENTHIS_RIGHT);
@@ -589,29 +676,25 @@ namespace MipaCompiler
         /// Method <c>ParseArguments</c> handles the pargins of parameters
         /// for function or procedure call.
         /// </summary>
-        private INode ParseArguments()
+        private List<INode> ParseArguments()
         {
-            int row = inputToken.GetRow();
-            int col = inputToken.GetColumn();
-            List<INode> expressions = new List<INode>();
+            if (errorInStatement) return null;
+            List<INode> args = new List<INode>();
 
             while (!errorInStatement && inputToken.GetTokenType() != TokenType.PARENTHIS_RIGHT)
             {
                 INode expression = ParseExpression();
                 expression = ParseExpressionTail(expression);
-                if(!errorInStatement)
-                {
-                    expressions.Add(expression);
-                    if(inputToken.GetTokenType() == TokenType.COMMA)
-                    {
-                        Match(TokenType.COMMA);
-                    }
-                }
+                if (errorInStatement) return null;
+
+                args.Add(expression);
+                if (inputToken.GetTokenType() == TokenType.COMMA) Match(TokenType.COMMA);
+
             }
 
             if (errorInStatement) return null;
 
-            return new ArgumentsNode(row, col, expressions);
+            return args;
         }
 
         /// <summary>
@@ -658,26 +741,11 @@ namespace MipaCompiler
             Match(TokenType.SEPARATOR);
             if (errorInStatement) return null;
 
-            string type;
-            // parse the type of variable/variables
-            switch (inputToken.GetTokenType())
-            {
-                case TokenType.PREDEFINED_INTEGER:
-                case TokenType.PREDEFINED_REAL:
-                case TokenType.PREDEFINED_BOOLEAN:
-                case TokenType.PREDEFINED_STRING:
-                    type = inputToken.GetTokenValue().ToLower();
-                    inputToken = scanner.ScanNextToken();
-                    break;
-                case TokenType.KEYWORD_ARRAY:
-                    // TODO
-                default:
-                    HandleError();
-                    return null;
-            }
+            INode type = ParseType();
+            if (errorInStatement) return null;
 
             VariableDclNode varDclNode = new VariableDclNode(row, col, type);
-            foreach(string name in ids)
+            foreach (string name in ids)
             {
                 varDclNode.AddVariableName(name);
             }
@@ -954,6 +1022,7 @@ namespace MipaCompiler
                     row = inputToken.GetRow();
                     col = inputToken.GetColumn();
                     value = inputToken.GetTokenValue();
+                    Match(TokenType.VAL_STRING);
                     return new StringNode(row, col, value);
                 default:
                     HandleError();

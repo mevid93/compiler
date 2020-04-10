@@ -11,7 +11,7 @@ namespace MipaCompiler.Node
     {
         private readonly int row;       // row in source code
         private readonly int col;       // column in source code
-        private readonly string type;   // type of variable (int, real, bool, string)
+        private readonly INode type;    // type of variable
         private readonly string name;   // variable name
 
         /// <summary>
@@ -21,7 +21,7 @@ namespace MipaCompiler.Node
         /// <param name="col"></param>
         /// <param name="name"></param>
         /// <param name="type"></param>
-        public VariableNode(int row, int col, string name, string type)
+        public VariableNode(int row, int col, string name, INode type)
         {
             this.row = row;
             this.col = col;
@@ -39,10 +39,10 @@ namespace MipaCompiler.Node
         }
 
         /// <summary>
-        /// Method <c>GetSimpleType</c> returns the type of the variable.
-        /// VariableNode is only used for simple types (int, real, bool, string).
+        /// Method <c>GetVariableType</c> returns the type of the variable.
         /// </summary>
-        public string GetSimpleType()
+        /// ´<returns>variable type</returns>
+        public INode GetSimpleType()
         {
             return type;
         }
@@ -66,8 +66,9 @@ namespace MipaCompiler.Node
         {
             Console.WriteLine($"NodeType: {NodeType.VARIABLE}");
             Console.WriteLine($"Row: {row}, Column: {col}");
-            Console.WriteLine($"Type: {type}");
             Console.WriteLine($"Name: {name}");
+            Console.WriteLine($"Type:");
+            if (type != null) type.PrettyPrint();
         }
     }
 }

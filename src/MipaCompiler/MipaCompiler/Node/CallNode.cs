@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace MipaCompiler.Node
 {
@@ -8,10 +9,10 @@ namespace MipaCompiler.Node
     /// </summary>
     public class CallNode : INode
     {
-        private readonly int row;       // row in source code
-        private readonly int col;       // column in source code
-        private readonly string id;     // identifier for fucntion or procedure
-        private readonly INode args;    // parameters for function or procedure
+        private readonly int row;           // row in source code
+        private readonly int col;           // column in source code
+        private readonly string id;         // identifier for fucntion or procedure
+        private readonly List<INode> args;  // parameters for function or procedure
 
         /// <summary>
         /// Constructor <c>CallNode</c> creates new CallNode-object.
@@ -20,7 +21,7 @@ namespace MipaCompiler.Node
         /// <param name="col"></param>
         /// <param name="id"></param>
         /// <param name="args"></param>
-        public CallNode(int row, int col, string id, INode args)
+        public CallNode(int row, int col, string id, List<INode> args)
         {
             this.row = row;
             this.col = col;
@@ -41,8 +42,8 @@ namespace MipaCompiler.Node
         /// <summary>
         /// Method <c>GetArguments</c> returns the parameters of the call operation.
         /// </summary>
-        /// <returns>parameters</returns>
-        public INode GetArguments()
+        /// <returns>arguments</returns>
+        public List<INode> GetArguments()
         {
             return args;
         }
@@ -67,7 +68,11 @@ namespace MipaCompiler.Node
             Console.WriteLine($"NodeType: {NodeType.CALL}");
             Console.WriteLine($"Row: {row}, Column: {col}");
             Console.WriteLine($"Id: {id}");
-            if (args != null) args.PrettyPrint();
+            Console.WriteLine("Arguments:");
+            foreach(INode arg in args)
+            {
+                arg.PrettyPrint();
+            }
         }
     }
 }

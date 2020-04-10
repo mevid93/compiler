@@ -12,12 +12,15 @@ namespace MipaCompiler.Node
         private readonly int row;       // row in source code
         private readonly int col;       // column in source code
         private List<string> names;     // names of variables
-        private readonly string type;   // type of the variables
+        private readonly INode type;    // type of the variables
 
         /// <summary>
         /// Constructor <c>VariableDclNode</c> creates new VariableDclNode-object.
         /// </summary>
-        public VariableDclNode(int row, int col, string type)
+        /// <param name="row">row in source code</param>
+        /// <param name="col">column in source code</param>
+        /// <param name="type">type of variable</param>
+        public VariableDclNode(int row, int col, INode type)
         {
             this.row = row;
             this.col = col;
@@ -47,7 +50,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetVariableType</c> returns type of variables.
         /// </summary>
         /// <returns>type</returns>
-        public string GetVariableType()
+        public INode GetVariableType()
         {
             return type;
         }
@@ -71,11 +74,11 @@ namespace MipaCompiler.Node
         {
             Console.WriteLine($"NodeType: {NodeType.VARIABLE_DCL}");
             Console.WriteLine($"Row: {row}, Column: {col}");
-            Console.WriteLine($"Type: {type}");
-            foreach(string name in names)
+            foreach (string name in names)
             {
                 Console.WriteLine($"Name: {name}");
             }
+            Console.WriteLine($"Type: {type}");
         }
     }
 }
