@@ -196,6 +196,27 @@ namespace MipaCompiler
                                 number += line[c];
                                 c++;
                             }
+                            if (c < line.Length && line[c] == 'e')
+                            {
+                                number += line[c];
+                                c++;
+                                if(c < line.Length && (line[c] == '+' || line[c] == '-'))
+                                {
+                                    number += line[c];
+                                    c++;
+                                }
+                                if (c < line.Length && !char.IsDigit(line[c]))
+                                {
+                                    string errorDigit = $"LexicalError::Row {r + 1}::Column {c + 1}::Expected a digit!";
+                                    colNum = c + 1;
+                                    return new Token(errorDigit, TokenType.ERROR, r + 1, c + 1);
+                                }
+                                while (c < line.Length && char.IsDigit(line[c]))
+                                {
+                                    number += line[c];
+                                    c++;
+                                }
+                            }
                             colNum = c;
                             return new Token(number, TokenType.VAL_REAL, r + 1, startCol);
                         }

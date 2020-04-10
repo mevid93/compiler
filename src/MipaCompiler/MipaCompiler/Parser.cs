@@ -177,6 +177,7 @@ namespace MipaCompiler
             return null;
         }
 
+
         private INode ParseFunction()
         {
             //TODO
@@ -236,6 +237,8 @@ namespace MipaCompiler
             {
                 case TokenType.PREDEFINED_READ:
                     return ParseRead();
+                case TokenType.PREDEFINED_WRITELN:
+                    return ParseWrite();
                 case TokenType.IDENTIFIER:
                 case TokenType.PREDEFINED_BOOLEAN:
                 case TokenType.PREDEFINED_FALSE:
@@ -244,10 +247,16 @@ namespace MipaCompiler
                 case TokenType.PREDEFINED_SIZE:
                 case TokenType.PREDEFINED_STRING:
                 case TokenType.PREDEFINED_TRUE:
-                case TokenType.PREDEFINED_WRITELN:
-                    // TODO
-                    Match(TokenType.ERROR);
-                    return null;
+                    Token next1 = scanner.PeekNthToken(1);
+                    switch (next1.GetTokenType())
+                    {
+                        case TokenType.ASSIGNMENT:
+                            return ParseAssignment();
+                        default:
+                            // TODO
+                            Match(TokenType.ERROR);
+                            return null;
+                    }
                 case TokenType.KEYWORD_RETURN:
                     // TODO
                     Match(TokenType.KEYWORD_RETURN);
@@ -257,9 +266,7 @@ namespace MipaCompiler
                     Match(TokenType.KEYWORD_BEGIN);
                     return null;
                 case TokenType.KEYWORD_IF:
-                    // TODO
-                    Match(TokenType.KEYWORD_IF);
-                    return null;
+                    return ParseIfStatement();
                 case TokenType.KEYWORD_WHILE:
                     return ParseWhileStatement();
                 case TokenType.KEYWORD_VAR:
@@ -268,6 +275,63 @@ namespace MipaCompiler
                     HandleError();
                     return null;
             }
+        }
+
+        /// <summary>
+        /// Method <c>ParseAssignment</c> handles the parsing of assignment.
+        /// </summary>
+        private INode ParseAssignment()
+        {
+            if (errorInStatement) return null;
+
+            if (!Token.CanBeIdentifier(inputToken)) return null;
+
+            int row = inputToken.GetRow();
+            int col = inputToken.GetColumn();
+            string value = inputToken.GetTokenValue();
+
+            inputToken = scanner.ScanNextToken();
+            Match(TokenType.ASSIGNMENT);
+            if (errorInStatement) return null;
+
+            INode expression = ParseExpression();
+            expression = ParseExpressionTail(expression);
+            if (errorInStatement) return null;
+
+            return new AssignmentNode(row, col, value, expression);
+        }
+
+        /// <summary>
+        /// Method <c>ParseIfStatement</c> handles the parsing of if statement.
+        /// </summary>
+        private INode ParseIfStatement()
+        {
+            if (errorInStatement) return null;
+
+            int rowIf = inputToken.GetRow();
+            int colIf = inputToken.GetColumn();
+            Match(TokenType.KEYWORD_IF);
+            if (errorInStatement) return null;
+
+            INode condition = ParseExpression();
+            condition = ParseExpressionTail(condition);
+            if (errorInStatement) return null;
+
+            Match(TokenType.KEYWORD_THEN);
+            if (errorInStatement) return null;
+
+            INode thenStatement = ParseStatement();
+            if (errorInStatement) return null;
+
+            INode elseStatement = null;
+            if (scanner.PeekNthToken(1).GetTokenType() == TokenType.KEYWORD_ELSE)
+            {
+                Match(TokenType.STATEMENT_END);
+                Match(TokenType.KEYWORD_ELSE);
+                elseStatement = ParseStatement();
+                if (errorInStatement) return null;
+            }
+            return new IfElseNode(rowIf, colIf, condition, thenStatement, elseStatement);
         }
 
         /// <summary>
@@ -293,12 +357,55 @@ namespace MipaCompiler
             INode statement = ParseStatement();
 
             if (errorInStatement) return null;
-
             return new WhileNode(row, column, expr, statement);
         }
 
         /// <summary>
-        /// Method <c>ParseRead</c> handles that parsing of assignment
+        /// Method <c>ParseWrite</c> handles the parsing of statment that starts with
+        /// predefined identifier "writeln".
+        /// </summary>
+        /// <returns></returns>
+        private INode ParseWrite()
+        {
+            if (inputToken.GetTokenType() != TokenType.PREDEFINED_WRITELN)
+            {
+                HandleError();
+                return null;
+            }
+
+            Token first = scanner.PeekNthToken(1);
+            Token second = scanner.PeekNthToken(2);
+
+            switch (first.GetTokenType())
+            {
+                case TokenType.ASSIGNMENT:
+                    return ParseAssignment();
+                case TokenType.PARENTHIS_LEFT:
+                    switch (second.GetTokenType())
+                    {
+                        case TokenType.IDENTIFIER:
+                        case TokenType.PREDEFINED_READ:
+                        case TokenType.PREDEFINED_BOOLEAN:
+                        case TokenType.PREDEFINED_FALSE:
+                        case TokenType.PREDEFINED_INTEGER:
+                        case TokenType.PREDEFINED_REAL:
+                        case TokenType.PREDEFINED_SIZE:
+                        case TokenType.PREDEFINED_STRING:
+                        case TokenType.PREDEFINED_TRUE:
+                        case TokenType.PREDEFINED_WRITELN:
+                            return ParseCall();
+                        default:
+                            HandleError();
+                            return null;
+                    }
+                default:
+                    HandleError();
+                    return null;
+            }
+        }
+
+        /// <summary>
+        /// Method <c>ParseRead</c> handles the parsing of statement
         /// that starts with predefined identifier "read".
         /// </summary>
         private INode ParseRead()
@@ -316,8 +423,7 @@ namespace MipaCompiler
             switch (first.GetTokenType())
             {
                 case TokenType.ASSIGNMENT:
-                    // TODO:
-                    return null;
+                    return ParseAssignment();
                 case TokenType.PARENTHIS_LEFT:
                     switch (second.GetTokenType())
                     {

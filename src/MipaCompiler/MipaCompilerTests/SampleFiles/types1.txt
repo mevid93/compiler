@@ -7,6 +7,6 @@ begin
   
     b1_ := true;
     int := 666;
-    r_ := 3.141;
+    r_ := 3.141e-23;
     s := "Hello, World!";
 end.

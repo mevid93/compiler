@@ -1,6 +1,7 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MipaCompiler;
 using MipaCompiler.Node;
+using System.Collections.Generic;
 
 namespace MipaCompilerTests
 {
@@ -25,6 +26,44 @@ namespace MipaCompilerTests
             Assert.IsTrue(pdn.GetFunctions().Count == 0);
             Assert.IsTrue(pdn.GetProcedures().Count == 0);
             Assert.IsFalse(pdn.GetMainBlock() == null);
+
+            Assert.AreEqual(pdn.GetMainBlock().GetNodeType(),  NodeType.BLOCK);
+            BlockNode bn = (BlockNode)pdn.GetMainBlock();
+            List<INode> statements = bn.GetStatements();
+            Assert.AreEqual(NodeType.VARIABLE_DCL, statements[0].GetNodeType());
+            Assert.AreEqual(NodeType.CALL, statements[1].GetNodeType());
+            Assert.AreEqual(NodeType.WHILE, statements[2].GetNodeType());
+            Assert.AreEqual(NodeType.CALL, statements[3].GetNodeType());
+        }
+
+        [TestMethod]
+        [DeploymentItem("SampleFiles\\program2.txt")]
+        public void ParsingWorksWithValidProgram2()
+        {
+            string filename = "program2.txt";
+            Scanner scanner = new Scanner(filename);
+            Parser parser = new Parser(scanner);
+
+            INode ast = parser.Parse();
+            ast.PrettyPrint();
+            Assert.IsFalse(parser.ErrorsDetected());
+            Assert.IsNotNull(ast);
+            Assert.AreEqual(NodeType.PROGRAM, ast.GetNodeType());
+            ProgramNode pdn = (ProgramNode)ast;
+            Assert.AreEqual("MutualRecursion", pdn.GetProgramName());
+            Assert.IsTrue(pdn.GetFunctions().Count == 2);
+            Assert.IsTrue(pdn.GetProcedures().Count == 0);
+            Assert.IsFalse(pdn.GetMainBlock() == null);
+
+            /*
+            Assert.AreEqual(pdn.GetMainBlock().GetNodeType(), NodeType.BLOCK);
+            BlockNode bn = (BlockNode)pdn.GetMainBlock();
+            List<INode> statements = bn.GetStatements();
+            Assert.AreEqual(NodeType.VARIABLE_DCL, statements[0].GetNodeType());
+            Assert.AreEqual(NodeType.CALL, statements[1].GetNodeType());
+            Assert.AreEqual(NodeType.WHILE, statements[2].GetNodeType());
+            Assert.AreEqual(NodeType.CALL, statements[3].GetNodeType());
+            */
         }
     }
 }

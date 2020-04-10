@@ -11,10 +11,12 @@ namespace MipaCompiler.Node
         ARRAY,              // node holding an array
         ARRAY_SIZE,         // node for holding array size operation
         ARRAY_INDEX,        // node for holding index of array operation
+        ASSIGNMENT,         // node for assignment operation
         BLOCK,              // block declaration node
         CALL,               // node for calling functions and procedures
         BINARY_EXPRESSION,  // expression node with two child nodes
         FUNCTION,           // function declaration node
+        IF_ELSE,            // node for if else statement
         INTEGER,            // node for holding constant integer
         LOGICAL_AND,        // node for logical and operation
         LOGICAL_OR,         // node for logical or operation

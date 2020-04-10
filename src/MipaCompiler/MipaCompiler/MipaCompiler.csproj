@@ -46,9 +46,11 @@
     <Compile Include="Node\ArgumentsNode.cs" />
     <Compile Include="Node\ArrayIndexNode.cs" />
     <Compile Include="Node\ArrayNode.cs" />
+    <Compile Include="Node\AssignmentNode.cs" />
     <Compile Include="Node\BlockNode.cs" />
     <Compile Include="Node\CallNode.cs" />
     <Compile Include="Node\BinaryExpressionNode.cs" />
+    <Compile Include="Node\IfElseNode.cs" />
     <Compile Include="Node\INode.cs" />
     <Compile Include="Node\IntegerNode.cs" />
     <Compile Include="Node\ProgramNode.cs" />
