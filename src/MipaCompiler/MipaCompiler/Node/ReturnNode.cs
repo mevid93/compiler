@@ -12,7 +12,7 @@ namespace MipaCompiler.Node
         private readonly INode expression;      // returned value expression (optional)
 
         /// <summary>
-        /// Constructor <c>ReturnNode</c> creates new ReturnNode.
+        /// Constructor <c>ReturnNode</c> creates new ReturnNode-object.
         /// </summary>
         /// <param name="row">row in source code</param>
         /// <param name="col">column in source code</param>

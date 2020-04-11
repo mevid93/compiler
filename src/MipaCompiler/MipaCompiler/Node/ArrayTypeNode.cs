@@ -37,7 +37,7 @@ namespace MipaCompiler.Node
         }
 
         /// <summary>
-        /// Method <c>GetSimpleType</c> returns the type of values stored in array.
+        /// Method <c>GetVariableType</c> returns the type of values stored in array.
         /// </summary>
         /// <returns>type of values in array</returns>
         public INode GetSimpleType()

@@ -4,37 +4,36 @@ using System.Collections.Generic;
 namespace MipaCompiler.Node
 {
     /// <summary>
-    /// Class <c>ProgramDclNode</c> is root node for the AST.
-    /// When program declaration is parsed, it should be the root of AST.
+    /// Class <c>ProgramDclNode</c> represents root node in AST.
     /// </summary>
     public class ProgramNode : INode
     {
-        private readonly int col;               // column in source code
-        private readonly int row;               // row in source code
-        private readonly string name;           // name of the program
-        private List<INode> functions;          // function declarations
-        private List<INode> procedures;         // procedure declarations
-        private INode mainBlock;                // main code
+        private readonly int col;                   // column in source code
+        private readonly int row;                   // row in source code
+        private readonly string name;               // name of the program
+        private readonly List<INode> functions;     // function declarations
+        private readonly List<INode> procedures;    // procedure declarations
+        private INode mainBlock;                    // main code
 
         /// <summary>
-        /// Constructor <c>ProgramDclNode</c> creates new ProgramDclNode-object.
+        ///  Constructor <c>ProgramDclNode</c> creates new ProgramDclNode-object.
         /// </summary>
-        public ProgramNode(int row, int col, string name)
+        /// <param name="row">row in source code</param>
+        /// <param name="col">column in source code</param>
+        /// <param name="name">name of the program</param>
+        /// <param name="procedures">program procedures</param>
+        /// <param name="functions">program functions</param>
+        /// <param name="mainBlock">main code block</param>
+        public ProgramNode(int row, int col, string name, List<INode> procedures, List<INode> functions, INode mainBlock)
         {
             this.row = row;
             this.col = col;
             this.name = name;
-            functions = new List<INode>();
-            procedures = new List<INode>();
-        }
-
-        /// <summary>
-        /// Method <c>AddFunction</c> adds function to list of functions.
-        /// </summary>
-        /// <param name="functionNode"></param>
-        public void AddFunction(INode functionNode)
-        {
-            functions.Add(functionNode);
+            this.functions = new List<INode>();
+            this.procedures = new List<INode>();
+            if (functions != null) this.functions = functions;
+            if (procedures != null) this.procedures = procedures;
+            this.mainBlock = mainBlock;
         }
 
         /// <summary>
@@ -47,30 +46,12 @@ namespace MipaCompiler.Node
         }
 
         /// <summary>
-        /// Method <c>AddProcedure</c> adds procedure to list of procedures.
-        /// </summary>
-        /// <param name="procedureNode"></param>
-        public void AddProcedure(INode procedureNode)
-        {
-            procedures.Add(procedureNode);
-        }
-
-        /// <summary>
         /// Method <c>GetProcedures</c> returns the procedures in program.
         /// </summary>
         /// <returns>list of procedures</returns>
         public List<INode> GetProcedures()
         {
             return procedures;
-        }
-
-        /// <summary>
-        /// Method <c>SetMainBlock</c> sets the given node as main block.
-        /// </summary>
-        /// <param name="block"></param>
-        public void SetMainBlock(INode block)
-        {
-            mainBlock = block;
         }
 
         /// <summary>

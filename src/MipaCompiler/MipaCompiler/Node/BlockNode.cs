@@ -15,6 +15,9 @@ namespace MipaCompiler.Node
         /// <summary>
         /// Constructor <c>BlockNode</c> creates new BlockNode-object.
         /// </summary>
+        /// <param name="row">row in source code</param>
+        /// <param name="col">column in source code</param>
+        /// <param name="statements">statements inside the block</param>
         public BlockNode(int row, int col, List<INode> statements)
         {
             this.row = row;

@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace MipaCompiler.Node
 {
@@ -17,7 +13,7 @@ namespace MipaCompiler.Node
         private readonly INode index;   // index in source code
 
         /// <summary>
-        /// Constructor <c>ArrayIndexNode</c> creates new ArrayIndex-object.
+        /// Constructor <c>ArrayIndexNode</c> creates new ArrayIndexNode-object.
         /// </summary>
         /// <param name="row">row in source code</param>
         /// <param name="col">column in source code</param>

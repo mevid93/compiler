@@ -3,7 +3,7 @@
 namespace MipaCompiler.Node
 {
     /// <summary>
-    /// Class <c>IfElseNode</c> represents if statement in AST.
+    /// Class <c>IfElseNode</c> represents if-else statement in AST.
     /// </summary>
     public class IfElseNode : INode
     {

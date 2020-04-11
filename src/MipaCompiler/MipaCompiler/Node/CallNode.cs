@@ -17,10 +17,10 @@ namespace MipaCompiler.Node
         /// <summary>
         /// Constructor <c>CallNode</c> creates new CallNode-object.
         /// </summary>
-        /// <param name="row"></param>
-        /// <param name="col"></param>
-        /// <param name="id"></param>
-        /// <param name="args"></param>
+        /// <param name="row">row in source code</param>
+        /// <param name="col">column in source code</param>
+        /// <param name="id">identifier of function or procedure</param>
+        /// <param name="args">arguments</param>
         public CallNode(int row, int col, string id, List<INode> args)
         {
             this.row = row;

@@ -4,8 +4,7 @@ using System.Collections.Generic;
 namespace MipaCompiler.Node
 {
     /// <summary>
-    /// Class <c>VariableDclNode</c> is a node where one or multiple
-    /// variables are declared.
+    /// Class <c>VariableDclNode</c> represents variable declaration statement in AST.
     /// </summary>
     public class VariableDclNode : INode
     {

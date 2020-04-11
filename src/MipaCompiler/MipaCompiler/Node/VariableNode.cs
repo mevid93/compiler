@@ -3,9 +3,8 @@
 namespace MipaCompiler.Node
 {
     /// <summary>
-    /// Class <c>VariableNode</c> is variable holding node.
-    /// When variables are parsed, variable node should be added to AST.
-    /// Arrays are special and have their own node.
+    /// Class <c>VariableNode</c> represents variable in AST. It is also
+    /// used to store parameter and boolean values.
     /// </summary>
     public class VariableNode : INode
     {
@@ -17,10 +16,10 @@ namespace MipaCompiler.Node
         /// <summary>
         /// Constructor <c>VariableNode</c> creates new VariableNode-object.
         /// </summary>
-        /// <param name="row"></param>
-        /// <param name="col"></param>
-        /// <param name="name"></param>
-        /// <param name="type"></param>
+        /// <param name="row">row in source code</param>
+        /// <param name="col">column in source code</param>
+        /// <param name="name">name of the variable</param>
+        /// <param name="type">type of the variable (optional)</param>
         public VariableNode(int row, int col, string name, INode type)
         {
             this.row = row;
@@ -32,7 +31,7 @@ namespace MipaCompiler.Node
         /// <summary>
         /// Method <c>GetName</c> returns the name of the variable.
         /// </summary>
-        /// <returns></returns>
+        /// <returns>variable name</returns>
         public string GetName()
         {
             return name;
@@ -42,7 +41,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetVariableType</c> returns the type of the variable.
         /// </summary>
         /// ´<returns>variable type</returns>
-        public INode GetSimpleType()
+        public INode GetVariableType()
         {
             return type;
         }

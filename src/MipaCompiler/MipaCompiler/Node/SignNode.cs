@@ -15,10 +15,10 @@ namespace MipaCompiler.Node
         /// <summary>
         /// Constructor <c>SignNode</c> creates new SignNode-object.
         /// </summary>
-        /// <param name="row"></param>
-        /// <param name="col"></param>
-        /// <param name="isNegative"></param>
-        /// <param name="term"></param>
+        /// <param name="row">row in source code</param>
+        /// <param name="col">column in source code</param>
+        /// <param name="isNegative">boolean value for negation</param>
+        /// <param name="term">target term of the sign</param>
         public SignNode(int row, int col, bool isNegative, INode term)
         {
             this.row = row;

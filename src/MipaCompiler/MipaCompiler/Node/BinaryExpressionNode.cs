@@ -14,13 +14,13 @@ namespace MipaCompiler.Node
         private readonly INode rhs;         // right hand side of expression
 
         /// <summary>
-        /// Constructor <c>BinaryExpressionNode</c> creates new BinaryExpressionNode.
+        /// Constructor <c>BinaryExpressionNode</c> creates new BinaryExpressionNode-object.
         /// </summary>
-        /// <param name="row"></param>
-        /// <param name="col"></param>
-        /// <param name="operation"></param>
-        /// <param name="lhs"></param>
-        /// <param name="rhs"></param>
+        /// <param name="row">row in source code</param>
+        /// <param name="col">column in source code</param>
+        /// <param name="operation">operator symbol</param>
+        /// <param name="lhs">left hand side of operation</param>
+        /// <param name="rhs">right hand side of operation</param>
         public BinaryExpressionNode(int row, int col, string operation, INode lhs, INode rhs)
         {
             this.row = row;

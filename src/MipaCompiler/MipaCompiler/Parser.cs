@@ -148,46 +148,48 @@ namespace MipaCompiler
 
             // parse statement end
             Match(TokenType.STATEMENT_END);
+            if (errorInStatement) return;
 
-            // create program node to AST if no errors were detected
-            if (!errorsDetected) ast = new ProgramNode(row, col, programName);
-            if (errorsDetected) return;
+            List<INode> procedures = new List<INode>();
+            List<INode> functions = new List<INode>();
+            INode block = null;
 
             // parse functions, procedures and main block
             while (inputToken.GetTokenType() != TokenType.EOF && inputToken.GetTokenType() != TokenType.ERROR)
             {
                 errorInStatement = false;
+                bool exitWhile = false;
 
                 switch (inputToken.GetTokenType())
                 {
                     case TokenType.KEYWORD_PROCEDURE:
                         INode procedure = ParseProcedure();
-                        if (errorInStatement) break;
-                        ProgramNode pn = (ProgramNode)ast;
-                        pn.AddProcedure(procedure);
+                        if (!errorInStatement) procedures.Add(procedure);
                         break;
 
                     case TokenType.KEYWORD_FUNCTION:
                         INode function = ParseFunction();
-                        if (errorInStatement) break;
-                        pn = (ProgramNode)ast;
-                        pn.AddFunction(function);
+                        if (!errorInStatement) functions.Add(function);
                         break;
 
                     case TokenType.KEYWORD_BEGIN:
-                        INode block = ParseBlock();
-                        if (errorInStatement) return;
-                        pn = (ProgramNode)ast;
-                        pn.SetMainBlock(block);
+                        block = ParseBlock();
                         Match(TokenType.DOT);
                         Match(TokenType.EOF);
-                        return;
+                        if (errorInStatement) return;
+                        exitWhile = true;
+                        break;
 
                     default:
                         HandleError();
                         return;
                 }
+
+                if (exitWhile) break;
             }
+
+            // create program node to AST if no errors were detected
+            ast = new ProgramNode(row, col, programName, procedures, functions, block);
         }
 
         /// <summary>
@@ -1042,10 +1044,17 @@ namespace MipaCompiler
                     if (errorInStatement) return null;
                     return expression;
                 case TokenType.LOGICAL_NOT:
-                    Match(TokenType.LOGICAL_NOT);
+                    // parse token
+                    int rowL = inputToken.GetRow();
+                    int colL = inputToken.GetColumn();
+                    string oper = Match(TokenType.LOGICAL_NOT);
+
+                    // parse expression
                     INode factor = ParseFactor();
                     factor = ParseFactorTail(factor);
-                    return factor;
+                    if (errorInStatement) return null;
+
+                    return new UnaryExpressionNode(rowL, colL, oper, factor);
                 default:
                     HandleError();
                     return null;

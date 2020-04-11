@@ -62,6 +62,7 @@
     <Compile Include="Node\SimpleTypeNode.cs" />
     <Compile Include="Node\StringNode.cs" />
     <Compile Include="Node\ArrayTypeNode.cs" />
+    <Compile Include="Node\UnaryExpressionNode.cs" />
     <Compile Include="Node\VariableDclNode.cs" />
     <Compile Include="Node\VariableNode.cs" />
     <Compile Include="Node\WhileNode.cs" />
