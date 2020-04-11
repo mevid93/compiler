@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 
 namespace MipaCompiler
 {
@@ -33,6 +32,7 @@ namespace MipaCompiler
         /// <returns>n:th token</returns>
         public Token PeekNthToken(int n)
         {
+            if (n <= 0) return null;
             tmpRowNum = rowNum;
             tmpColNum = colNum;
             Token token = null;

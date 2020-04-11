@@ -44,6 +44,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Node\ArrayIndexNode.cs" />
+    <Compile Include="Node\AssertNode.cs" />
     <Compile Include="Node\AssignmentNode.cs" />
     <Compile Include="Node\BlockNode.cs" />
     <Compile Include="Node\CallNode.cs" />

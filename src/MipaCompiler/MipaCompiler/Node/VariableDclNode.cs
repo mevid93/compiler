@@ -9,41 +9,34 @@ namespace MipaCompiler.Node
     /// </summary>
     public class VariableDclNode : INode
     {
-        private readonly int row;       // row in source code
-        private readonly int col;       // column in source code
-        private List<string> names;     // names of variables
-        private readonly INode type;    // type of the variables
+        private readonly int row;               // row in source code
+        private readonly int col;               // column in source code
+        private readonly List<INode> variables; // names of variables
+        private readonly INode type;            // type of the variables
 
         /// <summary>
         /// Constructor <c>VariableDclNode</c> creates new VariableDclNode-object.
         /// </summary>
         /// <param name="row">row in source code</param>
         /// <param name="col">column in source code</param>
+        /// <param name="variables">variables to declare</param>
         /// <param name="type">type of variable</param>
-        public VariableDclNode(int row, int col, INode type)
+        public VariableDclNode(int row, int col, List<INode> variables, INode type)
         {
             this.row = row;
             this.col = col;
             this.type = type;
-            names = new List<string>();
+            this.variables = new List<INode>();
+            if (variables != null) this.variables = variables;
         }
 
         /// <summary>
-        /// Method <c>AddVariableName</c> adds new variable to list of variables to be declared.
+        /// Method <c>GetVariables</c> returns the list of variables.
         /// </summary>
-        /// <param name="name"></param>
-        public void AddVariableName(string name)
+        /// <returns>list of variable</returns>
+        public List<INode> GetVariables()
         {
-            names.Add(name);
-        }
-
-        /// <summary>
-        /// Method <c>GetVariableNames</c> returns the list of variable names.
-        /// </summary>
-        /// <returns>list of variable names</returns>
-        public List<string> GetVariableNames()
-        {
-            return names;
+            return variables;
         }
 
         /// <summary>
@@ -74,9 +67,10 @@ namespace MipaCompiler.Node
         {
             Console.WriteLine($"NodeType: {NodeType.VARIABLE_DCL}");
             Console.WriteLine($"Row: {row}, Column: {col}");
-            foreach (string name in names)
+            foreach (INode node in variables)
             {
-                Console.WriteLine($"Name: {name}");
+                VariableNode varNode = (VariableNode)node;
+                Console.WriteLine($"Name: {varNode.GetName()}");
             }
             Console.WriteLine($"Type: {type}");
         }

@@ -4,37 +4,29 @@ using System.Collections.Generic;
 namespace MipaCompiler.Node
 {
     /// <summary>
-    /// Class <c>ProgramDclNode</c> is root node for the AST.
-    /// When program declaration is parsed, it should be the root of AST.
+    /// Class <c>BlockNode</c> represents code block in AST.
     /// </summary>
     public class BlockNode : INode
     {
-        private readonly int row;           // row in source code
-        private readonly int col;           // column in source code
-        private List<INode> statements;     // statements inside the block
+        private readonly int row;                   // row in source code
+        private readonly int col;                   // column in source code
+        private readonly List<INode> statements;    // statements inside the block
 
         /// <summary>
         /// Constructor <c>BlockNode</c> creates new BlockNode-object.
         /// </summary>
-        public BlockNode(int row, int col)
+        public BlockNode(int row, int col, List<INode> statements)
         {
             this.row = row;
             this.col = col;
-            statements = new List<INode>();
+            this.statements = new List<INode>();
+            if (statements != null) this.statements = statements;
         }
 
         /// <summary>
-        /// Method <c>AddStatement</c> adds new statement node in statements list.
+        /// Method <c>GetStatements</c> returns the list of statements inside the block.
         /// </summary>
-        public void AddStatement(INode statement)
-        {
-            statements.Add(statement);
-        }
-
-        /// <summary>
-        /// Method <c>GetStatements</c> 
-        /// </summary>
-        /// <returns></returns>
+        /// <returns>statements</returns>
         public List<INode> GetStatements()
         {
             return statements;

@@ -10,6 +10,7 @@ namespace MipaCompiler.Node
         ARRAY_SIZE,         // node for holding array size operation
         ARRAY_INDEX,        // node for holding index of array operation
         ARRAY_TYPE,         // node for array type
+        ASSERT,             // node for assert statement
         ASSIGNMENT,         // node for assignment operation
         BLOCK,              // block declaration node
         CALL,               // node for calling functions and procedures
