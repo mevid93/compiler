@@ -6,12 +6,12 @@ namespace MipaCompiler.Node
     /// <summary>
     /// Class <c>VariableDclNode</c> represents variable declaration statement in AST.
     /// </summary>
-    public class VariableDclNode : INode
+    public class VariableDclNode : ISymbol
     {
         private readonly int row;               // row in source code
         private readonly int col;               // column in source code
-        private readonly List<INode> variables; // names of variables
-        private readonly INode type;            // type of the variables
+        private readonly List<ISymbol> variables; // names of variables
+        private readonly ISymbol type;            // type of the variables
 
         /// <summary>
         /// Constructor <c>VariableDclNode</c> creates new VariableDclNode-object.
@@ -20,12 +20,12 @@ namespace MipaCompiler.Node
         /// <param name="col">column in source code</param>
         /// <param name="variables">variables to declare</param>
         /// <param name="type">type of variable</param>
-        public VariableDclNode(int row, int col, List<INode> variables, INode type)
+        public VariableDclNode(int row, int col, List<ISymbol> variables, ISymbol type)
         {
             this.row = row;
             this.col = col;
             this.type = type;
-            this.variables = new List<INode>();
+            this.variables = new List<ISymbol>();
             if (variables != null) this.variables = variables;
         }
 
@@ -33,7 +33,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetVariables</c> returns the list of variables.
         /// </summary>
         /// <returns>list of variable</returns>
-        public List<INode> GetVariables()
+        public List<ISymbol> GetVariables()
         {
             return variables;
         }
@@ -42,7 +42,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetVariableType</c> returns type of variables.
         /// </summary>
         /// <returns>type</returns>
-        public INode GetVariableType()
+        public ISymbol GetVariableType()
         {
             return type;
         }
@@ -66,7 +66,7 @@ namespace MipaCompiler.Node
         {
             Console.WriteLine($"NodeType: {NodeType.VARIABLE_DCL}");
             Console.WriteLine($"Row: {row}, Column: {col}");
-            foreach (INode node in variables)
+            foreach (ISymbol node in variables)
             {
                 VariableNode varNode = (VariableNode)node;
                 Console.WriteLine($"Name: {varNode.GetName()}");

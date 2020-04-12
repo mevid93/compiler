@@ -5,11 +5,11 @@ namespace MipaCompiler.Node
     /// <summary>
     /// Class <c>AssertNode</c> represents assert statement in AST.
     /// </summary>
-    public class AssertNode : INode
+    public class AssertNode : ISymbol
     {
         private readonly int row;           // row in source code
         private readonly int col;           // column in source code
-        private readonly INode expression;  // boolen condition
+        private readonly ISymbol expression;  // boolen condition
 
         /// <summary>
         /// Constructor <c>AssertNode</c> creates new AssertNode-object.
@@ -17,7 +17,7 @@ namespace MipaCompiler.Node
         /// <param name="row">row in source code</param>
         /// <param name="col">column in source code</param>
         /// <param name="expression">condition expression</param>
-        public AssertNode(int row, int col, INode expression)
+        public AssertNode(int row, int col, ISymbol expression)
         {
             this.row = row;
             this.col = col;
@@ -28,7 +28,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetExpression</c> returns boolean condition expression.
         /// </summary>
         /// <returns>expression</returns>
-        public INode GetExpression()
+        public ISymbol GetExpression()
         {
             return expression;
         }

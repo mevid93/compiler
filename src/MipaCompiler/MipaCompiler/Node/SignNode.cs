@@ -5,12 +5,12 @@ namespace MipaCompiler.Node
     /// <summary>
     /// Class <c>SignNode</c> represents sign of term in AST.
     /// </summary>
-    public class SignNode : INode
+    public class SignNode : ISymbol
     {
         private readonly int row;               // row in source code
         private readonly int col;               // column in source code
         private readonly bool isNegative;       // is sign negative
-        private readonly INode term;            // target term of sign
+        private readonly ISymbol term;            // target term of sign
 
         /// <summary>
         /// Constructor <c>SignNode</c> creates new SignNode-object.
@@ -19,7 +19,7 @@ namespace MipaCompiler.Node
         /// <param name="col">column in source code</param>
         /// <param name="isNegative">boolean value for negation</param>
         /// <param name="term">target term of the sign</param>
-        public SignNode(int row, int col, bool isNegative, INode term)
+        public SignNode(int row, int col, bool isNegative, ISymbol term)
         {
             this.row = row;
             this.col = col;
@@ -40,7 +40,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetTerm</c> returns term that is affected be sign.
         /// </summary>
         /// <returns>term</returns>
-        public INode GetTerm()
+        public ISymbol GetTerm()
         {
             return term;
         }

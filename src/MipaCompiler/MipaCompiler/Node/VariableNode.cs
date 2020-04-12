@@ -6,11 +6,11 @@ namespace MipaCompiler.Node
     /// Class <c>VariableNode</c> represents variable in AST. It is also
     /// used to store parameter and boolean values.
     /// </summary>
-    public class VariableNode : INode
+    public class VariableNode : ISymbol
     {
         private readonly int row;       // row in source code
         private readonly int col;       // column in source code
-        private readonly INode type;    // type of variable
+        private readonly ISymbol type;    // type of variable
         private readonly string name;   // variable name
 
         /// <summary>
@@ -20,7 +20,7 @@ namespace MipaCompiler.Node
         /// <param name="col">column in source code</param>
         /// <param name="name">name of the variable</param>
         /// <param name="type">type of the variable (optional)</param>
-        public VariableNode(int row, int col, string name, INode type)
+        public VariableNode(int row, int col, string name, ISymbol type)
         {
             this.row = row;
             this.col = col;
@@ -41,7 +41,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetVariableType</c> returns the type of the variable.
         /// </summary>
         /// ´<returns>variable type</returns>
-        public INode GetVariableType()
+        public ISymbol GetVariableType()
         {
             return type;
         }

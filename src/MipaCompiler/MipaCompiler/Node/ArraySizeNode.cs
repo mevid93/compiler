@@ -5,11 +5,11 @@ namespace MipaCompiler.Node
     /// <summary>
     /// Class <c>SizeNode</c> represents size operation of array.
     /// </summary>
-    public class ArraySizeNode : INode
+    public class ArraySizeNode : ISymbol
     {
         private readonly int row;       // row in source code
         private readonly int col;       // column in source code
-        private readonly INode array;   // target array
+        private readonly ISymbol array;   // target array
 
         /// <summary>
         /// Constructor <c>ArraySizeNode</c> creates new ArraySizeNode-object.
@@ -17,7 +17,7 @@ namespace MipaCompiler.Node
         /// <param name="row">row in source code</param>
         /// <param name="col">column in source code</param>
         /// <param name="array">array node</param>
-        public ArraySizeNode(int row, int col, INode array)
+        public ArraySizeNode(int row, int col, ISymbol array)
         {
             this.row = row;
             this.col = col;
@@ -28,7 +28,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetArray</c> returns target array of size operation.
         /// </summary>
         /// <returns>target array node</returns>
-        public INode GetArray()
+        public ISymbol GetArray()
         {
             return array;
         }

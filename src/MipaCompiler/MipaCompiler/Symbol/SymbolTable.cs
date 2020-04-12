@@ -77,8 +77,9 @@ namespace MipaCompiler.Symbol
         }
 
         /// <summary>
-        /// Method <c>IsFunctionSymbolInTable</c> checks if given function is in table.
-        /// Both function name and arguments must match.
+        /// Method <c>IsFunctionSymbolInTable</c> checks if given function is
+        /// already in table. It also checks that procedure with samen information
+        /// does not exist.
         /// </summary>
         /// <returns>true if function in table</returns>
         public bool IsFunctionSymbolInTable(FunctionSymbol symbol)
@@ -87,6 +88,10 @@ namespace MipaCompiler.Symbol
             {
                 if (f.HasSameDefinition(symbol)) return true;
             }
+            foreach(ProcedureSymbol p in procedures)
+            {
+                if (p.HasSameDefinition(symbol)) return true;
+            }
 
             return false;
         }
@@ -94,14 +99,17 @@ namespace MipaCompiler.Symbol
         /// <summary>
         /// Method <c>IsProcedureSymbolInTable</c> checks if given procedure is in table.
         /// </summary>
-        /// <param name="procedureName">name of the procedure</param>
-        /// <param name="args">arguments for procedure</param>
+        /// <param name="symbol">procedure symbol</param>
         /// <returns>true if procedure in table</returns>
         public bool IsProcedureSymbolInTable(ProcedureSymbol symbol)
         {
             foreach (ProcedureSymbol p in procedures)
             {
                 if (p.HasSameDefinition(symbol)) return true;
+            }
+            foreach (FunctionSymbol f in functions)
+            {
+                if (f.HasSameDefinition(symbol)) return true;
             }
 
             return false;
@@ -170,11 +178,11 @@ namespace MipaCompiler.Symbol
         /// that matches parameters. If no match was found, null is returned.
         /// </summary>
         /// <param name="identifier">function name</param>
-        /// <param name="args">function arguments (types)</param>
+        /// <param name="parameters">function parameters (types)</param>
         /// <returns>function symbol</returns>
-        public FunctionSymbol GetFunctionSymbolByIdentifierAndArguments(string identifier, string[] args)
+        public FunctionSymbol GetFunctionSymbolByIdentifierAndArguments(string identifier, string[] parameters)
         {
-            FunctionSymbol f = new FunctionSymbol(identifier, args, null);
+            FunctionSymbol f = new FunctionSymbol(identifier, parameters, null);
 
             foreach(FunctionSymbol symbol in functions)
             {
@@ -189,11 +197,11 @@ namespace MipaCompiler.Symbol
         /// that matches parameters. If no match was found, null is returned.
         /// </summary>
         /// <param name="identifier">procedure name</param>
-        /// <param name="args">procedure arguments (types)</param>
+        /// <param name="parameters">procedure parameters (types)</param>
         /// <returns>function symbol</returns>
-        public ProcedureSymbol GetProcedureSymbolByIdentifierAndArguments(string identifier, string[] args)
+        public ProcedureSymbol GetProcedureSymbolByIdentifierAndArguments(string identifier, string[] parameters)
         {
-            ProcedureSymbol p = new ProcedureSymbol(identifier, args);
+            ProcedureSymbol p = new ProcedureSymbol(identifier, parameters);
 
             foreach (ProcedureSymbol symbol in procedures)
             {

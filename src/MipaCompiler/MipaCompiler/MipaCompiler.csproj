@@ -72,6 +72,7 @@
     <Compile Include="Scanner.cs" />
     <Compile Include="SemanticAnalyzer.cs" />
     <Compile Include="Symbol\FunctionSymbol.cs" />
+    <Compile Include="Symbol\ISymbol.cs" />
     <Compile Include="Symbol\ProcedureSymbol.cs" />
     <Compile Include="Symbol\VariableSymbol.cs" />
     <Compile Include="Symbol\SymbolTable.cs" />

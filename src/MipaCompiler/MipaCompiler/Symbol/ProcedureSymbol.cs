@@ -1,59 +1,52 @@
 ﻿
 namespace MipaCompiler.Symbol
 {
-    public class ProcedureSymbol
+    /// <summary>
+    /// Class <c>ProcedureSymbol</c> represents procedure in symbol table.
+    /// </summary>
+    public class ProcedureSymbol : ISymbol
     {
         private readonly string identifier;     // function name
-        private readonly string[] args;         // array of argument types
+        private readonly string[] parameters;   // array of parameter types
 
         /// <summary>
         /// Constructor <c>FunctionSymbol</c> creates new ProcedureSymbol-object.
         /// </summary>
         /// <param name="identifier">name of the procedure</param>
-        /// <param name="args">argument types</param>
-        public ProcedureSymbol(string identifier, string[] args)
+        /// <param name="parameter">parameter types</param>
+        public ProcedureSymbol(string identifier, string[] parameters)
         {
             this.identifier = identifier;
-            this.args = args;
+            this.parameters = parameters;
         }
 
-        /// <summary>
-        /// Method <c>GetIdentifier</c> returns the procedure name.
-        /// </summary>
-        /// <returns>procedure name</returns>
+        public string[] GetParameterTypes()
+        {
+            return parameters;
+        }
+
+        public bool HasSameDefinition(ISymbol symbol)
+        {
+            if (symbol.GetType() == typeof(VariableSymbol)) return false;
+
+            if (!symbol.GetIdentifier().Equals(identifier)) return false;
+
+            string[] types1 = symbol.GetParameterTypes();
+
+            if (types1.Length != parameters.Length) return false;
+
+            for (int i = 0; i < types1.Length; i++)
+            {
+                if (!types1[i].Equals(parameters[i])) return false;
+            }
+
+            return true;
+        }
+
         public string GetIdentifier()
         {
             return identifier;
         }
 
-        /// <summary>
-        /// Method <c>GetArgumentTypes</c> returns an array of argument types.
-        /// </summary>
-        /// <returns>argument types</returns>
-        public string[] GetArgumentTypes()
-        {
-            return args;
-        }
-
-        /// <summary>
-        /// Method <c>HasSameDefinition</c> returns true if procedure has
-        /// same identifier and argument types array.
-        /// </summary>
-        /// <returns>true if match</returns>
-        public bool HasSameDefinition(ProcedureSymbol f)
-        {
-            if (!f.GetIdentifier().Equals(identifier)) return false;
-
-            string[] types1 = f.GetArgumentTypes();
-
-            if (types1.Length != args.Length) return false;
-
-            for (int i = 0; i < types1.Length; i++)
-            {
-                if (!types1[i].Equals(args[i])) return false;
-            }
-
-            return true;
-        }
     }
 }

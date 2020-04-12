@@ -5,7 +5,7 @@ namespace MipaCompiler.Node
     /// <summary>
     /// Class <c>RealNode</c> represents constant real value in AST.
     /// </summary>
-    public class RealNode : INode
+    public class RealNode : ISymbol
     {
         private readonly int row;       // row in source code
         private readonly int col;       // column in source code

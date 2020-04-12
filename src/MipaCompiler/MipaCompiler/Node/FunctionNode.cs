@@ -6,14 +6,14 @@ namespace MipaCompiler.Node
     /// <summary>
     /// Class <c>FunctionNode</c> represents a function definition in AST.
     /// </summary>
-    public class FunctionNode : INode
+    public class FunctionNode : ISymbol
     {
         private readonly int row;                   // row in source code
         private readonly int col;                   // column in source code
         private readonly string name;               // function name
-        private readonly INode type;                // function type
-        private readonly INode block;               // block of code
-        private readonly List<INode> parameters;    // list of parameters
+        private readonly ISymbol type;                // function type
+        private readonly ISymbol block;               // block of code
+        private readonly List<ISymbol> parameters;    // list of parameters
 
         /// <summary>
         /// Constructor <c>FunctionNode</c> creates new FunctionNode-object.
@@ -24,13 +24,13 @@ namespace MipaCompiler.Node
         /// <param name="type">type of the function</param>
         /// <param name="parameters">parameters list</param>
         /// <param name="block">function code block</param>
-        public FunctionNode(int row, int col, string name, INode type, List<INode> parameters, INode block)
+        public FunctionNode(int row, int col, string name, ISymbol type, List<ISymbol> parameters, ISymbol block)
         {
             this.row = row;
             this.col = col;
             this.name = name;
             this.type = type;
-            this.parameters = new List<INode>();
+            this.parameters = new List<ISymbol>();
             if (parameters != null) this.parameters = parameters;
             this.block = block;
         }
@@ -39,7 +39,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetReturnType</c> returns the return type.
         /// </summary>
         /// <returns>type</returns>
-        public INode GetReturnType()
+        public ISymbol GetReturnType()
         {
             return type;
         }
@@ -57,7 +57,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetBlock</c> returns the function code block.
         /// </summary>
         /// <returns>code block</returns>
-        public INode GetBlock()
+        public ISymbol GetBlock()
         {
             return block;
         }
@@ -66,7 +66,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetParameters</c> retruns the list of parameters.
         /// </summary>
         /// <returns>parameters</returns>
-        public List<INode> GetParameters()
+        public List<ISymbol> GetParameters()
         {
             return parameters;
         }
@@ -94,7 +94,7 @@ namespace MipaCompiler.Node
             Console.WriteLine("Type:");
             if (type != null) type.PrettyPrint();
             Console.WriteLine("Parameters:");
-            foreach (INode node in parameters)
+            foreach (ISymbol node in parameters)
             {
                 node.PrettyPrint();
             }

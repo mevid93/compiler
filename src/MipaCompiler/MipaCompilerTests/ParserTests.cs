@@ -16,7 +16,7 @@ namespace MipaCompilerTests
             Scanner scanner = new Scanner(filename);
             Parser parser = new Parser(scanner);
 
-            INode ast = parser.Parse();
+            ISymbol ast = parser.Parse();
             ast.PrettyPrint();
             Assert.IsFalse(parser.ErrorsDetected());
             Assert.IsNotNull(ast);
@@ -29,7 +29,7 @@ namespace MipaCompilerTests
 
             Assert.AreEqual(pdn.GetMainBlock().GetNodeType(),  NodeType.BLOCK);
             BlockNode bn = (BlockNode)pdn.GetMainBlock();
-            List<INode> statements = bn.GetStatements();
+            List<ISymbol> statements = bn.GetStatements();
             Assert.AreEqual(NodeType.VARIABLE_DCL, statements[0].GetNodeType());
             Assert.AreEqual(NodeType.CALL, statements[1].GetNodeType());
             Assert.AreEqual(NodeType.WHILE, statements[2].GetNodeType());
@@ -44,7 +44,7 @@ namespace MipaCompilerTests
             Scanner scanner = new Scanner(filename);
             Parser parser = new Parser(scanner);
 
-            INode ast = parser.Parse();
+            ISymbol ast = parser.Parse();
             ast.PrettyPrint();
             Assert.IsFalse(parser.ErrorsDetected());
             Assert.IsNotNull(ast);
@@ -58,7 +58,7 @@ namespace MipaCompilerTests
             
             Assert.AreEqual(pdn.GetMainBlock().GetNodeType(), NodeType.BLOCK);
             BlockNode bn = (BlockNode)pdn.GetMainBlock();
-            List<INode> statements = bn.GetStatements();
+            List<ISymbol> statements = bn.GetStatements();
             Assert.AreEqual(NodeType.VARIABLE_DCL, statements[0].GetNodeType());
             Assert.AreEqual(NodeType.ASSIGNMENT, statements[1].GetNodeType());
             Assert.AreEqual(NodeType.WHILE, statements[2].GetNodeType());
@@ -82,7 +82,7 @@ namespace MipaCompilerTests
             Scanner scanner = new Scanner(filename);
             Parser parser = new Parser(scanner);
 
-            INode ast = parser.Parse();
+            ISymbol ast = parser.Parse();
             ast.PrettyPrint();
             Assert.IsFalse(parser.ErrorsDetected());
             Assert.IsNotNull(ast);
@@ -96,7 +96,7 @@ namespace MipaCompilerTests
             Assert.AreEqual(pdn.GetProcedures()[0].GetNodeType(), NodeType.PROCEDURE);
             ProcedureNode pro = (ProcedureNode)pdn.GetProcedures()[0];
             Assert.AreEqual("Swap".ToLower(), pro.GetName());
-            List<INode> pars = pro.GetParameters();
+            List<ISymbol> pars = pro.GetParameters();
             Assert.AreEqual(2, pars.Count);
 
         }
@@ -109,7 +109,7 @@ namespace MipaCompilerTests
             Scanner scanner = new Scanner(filename);
             Parser parser = new Parser(scanner);
 
-            INode ast = parser.Parse();
+            ISymbol ast = parser.Parse();
             ast.PrettyPrint();
             Assert.IsFalse(parser.ErrorsDetected());
             Assert.IsNotNull(ast);

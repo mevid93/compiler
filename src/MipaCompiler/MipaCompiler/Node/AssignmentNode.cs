@@ -5,12 +5,12 @@ namespace MipaCompiler.Node
     /// <summary>
     /// Class <c>AssignmentNode</c> represents assingment operation in AST.
     /// </summary>
-    public class AssignmentNode : INode
+    public class AssignmentNode : ISymbol
     {
         private readonly int row;               // row in source code
         private readonly int col;               // column in source code
         private readonly string identifier;     // identifier that is assigned a value
-        private readonly INode expression;      // expression for value
+        private readonly ISymbol expression;      // expression for value
 
         /// <summary>
         /// Constructor <c>AssignmentNode</c> creates new AssignmentNode-object.
@@ -19,7 +19,7 @@ namespace MipaCompiler.Node
         /// <param name="col">column in source code</param>
         /// <param name="identifier">identifier that is assigned value</param>
         /// <param name="expression">expression for value</param>
-        public AssignmentNode(int row, int col, string identifier, INode expression)
+        public AssignmentNode(int row, int col, string identifier, ISymbol expression)
         {
             this.row = row;
             this.col = col;
@@ -40,7 +40,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetValueExpression</c> returns the expression for value.
         /// </summary>
         /// <returns>value</returns>
-        public INode GetValueExpression()
+        public ISymbol GetValueExpression()
         {
             return expression;
         }

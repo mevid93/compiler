@@ -14,8 +14,8 @@ namespace MipaCompilerTests.SymbolTests
             ProcedureSymbol functionSymbol = new ProcedureSymbol("CustomProcedure", args);
 
             Assert.AreEqual("CustomProcedure", functionSymbol.GetIdentifier());
-            Assert.AreEqual("integer", functionSymbol.GetArgumentTypes()[0]);
-            Assert.AreEqual("real", functionSymbol.GetArgumentTypes()[3]);
+            Assert.AreEqual("integer", functionSymbol.GetParameterTypes()[0]);
+            Assert.AreEqual("real", functionSymbol.GetParameterTypes()[3]);
         }
 
         [TestMethod]

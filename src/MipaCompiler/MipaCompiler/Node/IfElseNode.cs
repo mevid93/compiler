@@ -5,13 +5,13 @@ namespace MipaCompiler.Node
     /// <summary>
     /// Class <c>IfElseNode</c> represents if-else statement in AST.
     /// </summary>
-    public class IfElseNode : INode
+    public class IfElseNode : ISymbol
     {
         private readonly int row;               // row in source code
         private readonly int col;               // column in source code
-        private readonly INode condition;       // condition of if statement
-        private readonly INode thenStatement;   // statement if condition is true
-        private readonly INode elseStatement;   // statement if condition is false (optional)
+        private readonly ISymbol condition;       // condition of if statement
+        private readonly ISymbol thenStatement;   // statement if condition is true
+        private readonly ISymbol elseStatement;   // statement if condition is false (optional)
 
         /// <summary>
         /// Constructor <c>IfElseNode</c> creates new IfElseNode-object.
@@ -21,7 +21,7 @@ namespace MipaCompiler.Node
         /// <param name="condition">condition of then statement</param>
         /// <param name="thenStatement">statement to execute if condition is true</param>
         /// <param name="elseStatement">statement to execute if condition if false (optional)</param>
-        public IfElseNode(int row, int col, INode condition, INode thenStatement, INode elseStatement)
+        public IfElseNode(int row, int col, ISymbol condition, ISymbol thenStatement, ISymbol elseStatement)
         {
             this.row = row;
             this.col = col;
@@ -34,7 +34,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetCondition</c> returns the condition expression for then statement.
         /// </summary>
         /// <returns>condition expression</returns>
-        public INode GetCondition()
+        public ISymbol GetCondition()
         {
             return condition;
         }
@@ -43,7 +43,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetThenStatement</c> returns the "then" statement.
         /// </summary>
         /// <returns>then statement</returns>
-        public INode GetThenStatement()
+        public ISymbol GetThenStatement()
         {
             return thenStatement;
         }
@@ -52,7 +52,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetElseStatement</c> returns the "else" statement.
         /// </summary>
         /// <returns>else statement</returns>
-        public INode GetElseStatement()
+        public ISymbol GetElseStatement()
         {
             return elseStatement;
         }

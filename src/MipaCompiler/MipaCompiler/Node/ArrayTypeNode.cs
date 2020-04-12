@@ -5,12 +5,12 @@ namespace MipaCompiler.Node
     /// <summary>
     /// Class <c>ArrayTypeNode</c> represents array type in AST.
     /// </summary>
-    public class ArrayTypeNode : INode
+    public class ArrayTypeNode : ISymbol
     {
         private readonly int row;           // row in source code
         private readonly int col;           // column in source code
-        private readonly INode size;        // size expression (optional)
-        private readonly INode simpleType;  // type of values in array
+        private readonly ISymbol size;        // size expression (optional)
+        private readonly ISymbol simpleType;  // type of values in array
 
         /// <summary>
         /// Constructror <c>ArrayTypeNode</c> creates new ArrayTypeNode-object.
@@ -19,7 +19,7 @@ namespace MipaCompiler.Node
         /// <param name="col">column in source code</param>
         /// <param name="size">size expression optional</param>
         /// <param name="simpleType">type of values in array</param>
-        public ArrayTypeNode(int row, int col, INode size, INode simpleType)
+        public ArrayTypeNode(int row, int col, ISymbol size, ISymbol simpleType)
         {
             this.row = row;
             this.col = col;
@@ -31,7 +31,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetSizeExpression</c> returns the size of array.
         /// </summary>
         /// <returns>array size expression</returns>
-        public INode GetSizeExpression()
+        public ISymbol GetSizeExpression()
         {
             return size;
         }
@@ -40,7 +40,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetVariableType</c> returns the type of values stored in array.
         /// </summary>
         /// <returns>type of values in array</returns>
-        public INode GetSimpleType()
+        public ISymbol GetSimpleType()
         {
             return simpleType;
         }

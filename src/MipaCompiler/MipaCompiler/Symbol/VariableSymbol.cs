@@ -6,7 +6,7 @@ namespace MipaCompiler.Symbol
     /// <summary>
     /// Class <c>Symbol</c> represents single symbol in the symbol table.
     /// </summary>
-    public class VariableSymbol
+    public class VariableSymbol : ISymbol
     {
         private readonly string identifier;         // variable symbol  (identifier)
         private readonly string type;               // variable type  (string representation)
@@ -27,15 +27,6 @@ namespace MipaCompiler.Symbol
             this.currentValue = currentValue;
             scopes = new Stack<int>();
             scopes.Push(scope);
-        }
-
-        /// <summary>
-        /// Method <c>GetIdentifier</c> returns identifier of symbol.
-        /// </summary>
-        /// <returns>symbol identifier</returns>
-        public string GetIdentifier()
-        {
-            return identifier;
         }
 
         /// <summary>
@@ -94,6 +85,23 @@ namespace MipaCompiler.Symbol
             scopes.Pop();
             if (scopes.Count == 0) return -1;
             return scopes.Peek();
+        }
+
+        public string[] GetParameterTypes()
+        {
+            string[] array = { type };
+            return array;
+        }
+
+        public bool HasSameDefinition(ISymbol symbol)
+        {
+            // not needed
+            throw new System.NotImplementedException();
+        }
+
+        public string GetIdentifier()
+        {
+            return identifier;
         }
     }
 }

@@ -5,12 +5,12 @@ namespace MipaCompiler.Node
     /// <summary>
     /// Class <c>WhileNode</c> represents while statement in AST.
     /// </summary>
-    public class WhileNode : INode
+    public class WhileNode : ISymbol
     {
         private readonly int row;                   // row in source code
         private readonly int col;                   // column in source code
-        private readonly INode boolExpression;      // boolean epression (condition for loop)
-        private readonly INode statement;           // looped statement
+        private readonly ISymbol boolExpression;      // boolean epression (condition for loop)
+        private readonly ISymbol statement;           // looped statement
 
         /// <summary>
         /// Constructor <c>WhileNode</c> creates new WhileNode-object.
@@ -19,7 +19,7 @@ namespace MipaCompiler.Node
         /// <param name="col">column in source code</param>
         /// <param name="boolExpression">boolean expression</param>
         /// <param name="statement">looped statement</param>
-        public WhileNode(int row, int col, INode boolExpression, INode statement)
+        public WhileNode(int row, int col, ISymbol boolExpression, ISymbol statement)
         {
             this.row = row;
             this.col = col;
@@ -31,7 +31,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetBooleanExpression</c> returns the condition expression of while loop.
         /// </summary>
         /// <returns>boolean expression</returns>
-        public INode GetBooleanExpression()
+        public ISymbol GetBooleanExpression()
         {
             return boolExpression;
         }
@@ -40,7 +40,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetStatement</c> returns the looped statement.
         /// </summary>
         /// <returns>statement</returns>
-        public INode GetStatement()
+        public ISymbol GetStatement()
         {
             return statement;
         }
