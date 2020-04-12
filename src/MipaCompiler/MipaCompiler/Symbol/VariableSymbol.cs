@@ -1,12 +1,12 @@
 ﻿
 using System.Collections.Generic;
 
-namespace MipaCompiler
+namespace MipaCompiler.Symbol
 {
     /// <summary>
     /// Class <c>Symbol</c> represents single symbol in the symbol table.
     /// </summary>
-    public class Symbol
+    public class VariableSymbol
     {
         private readonly string identifier;         // variable symbol  (identifier)
         private readonly string type;               // variable type  (string representation)
@@ -20,7 +20,7 @@ namespace MipaCompiler
         /// <param name="type">type os symbol (string representation)</param>
         /// <param name="currentValue">value of symbol</param>
         /// <param name="scope">scope of symbol</param>
-        public Symbol(string identifier, string type, string currentValue, int scope)
+        public VariableSymbol(string identifier, string type, string currentValue, int scope)
         {
             this.identifier = identifier;
             this.type = type;

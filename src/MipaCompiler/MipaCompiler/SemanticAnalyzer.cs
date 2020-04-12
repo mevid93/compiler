@@ -1,5 +1,6 @@
 ﻿
 using MipaCompiler.Node;
+using MipaCompiler.Symbol;
 using System.Collections.Generic;
 
 namespace MipaCompiler
@@ -11,10 +12,11 @@ namespace MipaCompiler
     /// </summary>
     public class SemanticAnalyzer
     {
-        private readonly INode ast;                 // AST representation of the source code
-        private bool errorsDetected;                // flag telling about status of semantic analysis
-        private readonly List<string> errors;       // list of all detected errors
-        private readonly SymbolTable symbolTable;   // symbol table to store variables
+        private readonly INode ast;                     // AST representation of the source code
+        private bool errorsDetected;                    // flag telling about status of semantic analysis
+        private readonly List<string> errors;           // list of all detected errors
+        private readonly SymbolTable symbolTable;       // symbol table to store variables
+        private readonly List<string> funcprods;        // list of names for functions and procedures    
 
         /// <summary>
         /// Constructor <c>SemanticAnalyzer</c> creates new SemanticAnalyzer-object.

@@ -22,7 +22,7 @@ namespace MipaCompilerTests
             Assert.IsNotNull(ast);
             Assert.AreEqual(NodeType.PROGRAM, ast.GetNodeType());
             ProgramNode pdn = (ProgramNode)ast;
-            Assert.AreEqual("GCD", pdn.GetProgramName());
+            Assert.AreEqual("GCD".ToLower(), pdn.GetProgramName());
             Assert.IsTrue(pdn.GetFunctions().Count == 0);
             Assert.IsTrue(pdn.GetProcedures().Count == 0);
             Assert.IsFalse(pdn.GetMainBlock() == null);
@@ -50,7 +50,7 @@ namespace MipaCompilerTests
             Assert.IsNotNull(ast);
             Assert.AreEqual(NodeType.PROGRAM, ast.GetNodeType());
             ProgramNode pdn = (ProgramNode)ast;
-            Assert.AreEqual("MutualRecursion", pdn.GetProgramName());
+            Assert.AreEqual("MutualRecursion".ToLower(), pdn.GetProgramName());
             Assert.IsTrue(pdn.GetFunctions().Count == 2);
             Assert.IsTrue(pdn.GetProcedures().Count == 0);
             Assert.IsFalse(pdn.GetMainBlock() == null);
@@ -88,14 +88,14 @@ namespace MipaCompilerTests
             Assert.IsNotNull(ast);
             Assert.AreEqual(NodeType.PROGRAM, ast.GetNodeType());
             ProgramNode pdn = (ProgramNode)ast;
-            Assert.AreEqual("SwapAndSumThem", pdn.GetProgramName());
+            Assert.AreEqual("SwapAndSumThem".ToLower(), pdn.GetProgramName());
             Assert.IsTrue(pdn.GetFunctions().Count == 1);
             Assert.IsTrue(pdn.GetProcedures().Count == 1);
             Assert.IsFalse(pdn.GetMainBlock() == null);
 
             Assert.AreEqual(pdn.GetProcedures()[0].GetNodeType(), NodeType.PROCEDURE);
             ProcedureNode pro = (ProcedureNode)pdn.GetProcedures()[0];
-            Assert.AreEqual("Swap", pro.GetName());
+            Assert.AreEqual("Swap".ToLower(), pro.GetName());
             List<INode> pars = pro.GetParameters();
             Assert.AreEqual(2, pars.Count);
 
@@ -115,7 +115,7 @@ namespace MipaCompilerTests
             Assert.IsNotNull(ast);
             Assert.AreEqual(NodeType.PROGRAM, ast.GetNodeType());
             ProgramNode pdn = (ProgramNode)ast;
-            Assert.AreEqual("Types", pdn.GetProgramName());
+            Assert.AreEqual("Types".ToLower(), pdn.GetProgramName());
             Assert.IsTrue(pdn.GetFunctions().Count == 0);
             Assert.IsTrue(pdn.GetProcedures().Count == 0);
             Assert.IsFalse(pdn.GetMainBlock() == null);

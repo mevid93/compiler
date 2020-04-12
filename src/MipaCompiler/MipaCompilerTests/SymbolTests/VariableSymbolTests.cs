@@ -1,16 +1,16 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using MipaCompiler;
+using MipaCompiler.Symbol;
 
-namespace MipaCompilerTests
+namespace MipaCompilerTests.SymbolTests
 {
     [TestClass]
-    public class SymbolTests
+    public class VariableSymbolTests
     {
 
         [TestMethod]
         public void SymbolWorks()
         {
-            Symbol symbol = new Symbol("mySymbol", "integer", "23", 1);
+            VariableSymbol symbol = new VariableSymbol("mySymbol", "integer", "23", 1);
 
             Assert.AreEqual("mySymbol", symbol.GetIdentifier());
             Assert.AreEqual("integer", symbol.GetSymbolType());
