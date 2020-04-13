@@ -13,7 +13,7 @@ namespace MipaCompiler
     public class Parser
     {
         private Scanner scanner;            // scanner object
-        private ISymbol ast;                  // AST root node, aka program declaration node
+        private INode ast;                  // AST root node, aka program declaration node
         private Token inputToken;           // current token in input
         private bool errorsDetected;        // flag telling if errors were detected during parsing
         private string lastError;           // variable to hold last reported error message
@@ -35,7 +35,7 @@ namespace MipaCompiler
         /// errors were detected.
         /// </summary>
         /// <returns>AST</returns>
-        public ISymbol Parse()
+        public INode Parse()
         {
             ParseProgram();
             return ast;
@@ -150,9 +150,9 @@ namespace MipaCompiler
             Match(TokenType.STATEMENT_END);
             if (errorInStatement) return;
 
-            List<ISymbol> procedures = new List<ISymbol>();
-            List<ISymbol> functions = new List<ISymbol>();
-            ISymbol block = null;
+            List<INode> procedures = new List<INode>();
+            List<INode> functions = new List<INode>();
+            INode block = null;
 
             // parse functions, procedures and main block
             while (inputToken.GetTokenType() != TokenType.EOF && inputToken.GetTokenType() != TokenType.ERROR)
@@ -163,12 +163,12 @@ namespace MipaCompiler
                 switch (inputToken.GetTokenType())
                 {
                     case TokenType.KEYWORD_PROCEDURE:
-                        ISymbol procedure = ParseProcedure();
+                        INode procedure = ParseProcedure();
                         if (!errorInStatement) procedures.Add(procedure);
                         break;
 
                     case TokenType.KEYWORD_FUNCTION:
-                        ISymbol function = ParseFunction();
+                        INode function = ParseFunction();
                         if (!errorInStatement) functions.Add(function);
                         break;
 
@@ -195,7 +195,7 @@ namespace MipaCompiler
         /// <summary>
         /// Method <c>ParseProcedure</c> handles the parsing of single procedure.
         /// </summary>
-        private ISymbol ParseProcedure()
+        private INode ParseProcedure()
         {
             // if error has been detected already --> return
             if (errorInStatement) return null;
@@ -219,7 +219,7 @@ namespace MipaCompiler
             Match(TokenType.PARENTHIS_LEFT);
 
             // parse parameters (optional)
-            List<ISymbol> parameters = new List<ISymbol>();
+            List<INode> parameters = new List<INode>();
             if (inputToken.GetTokenType() != TokenType.PARENTHIS_RIGHT) parameters = ParseParameters();
 
             // parse right parenthis
@@ -230,7 +230,7 @@ namespace MipaCompiler
             if (errorInStatement) return null;
 
             // parse code block
-            ISymbol block = ParseBlock();
+            INode block = ParseBlock();
 
             // parse end of statement
             Match(TokenType.STATEMENT_END);
@@ -242,7 +242,7 @@ namespace MipaCompiler
         /// <summary>
         /// Method <c>ParseFunction</c> handles the parsing of single function.
         /// </summary>
-        private ISymbol ParseFunction()
+        private INode ParseFunction()
         {
             // if errors have been detected already --> return
             if (errorInStatement) return null;
@@ -266,7 +266,7 @@ namespace MipaCompiler
             Match(TokenType.PARENTHIS_LEFT);
 
             // parse parameters
-            List<ISymbol> parameters = new List<ISymbol>();
+            List<INode> parameters = new List<INode>();
             if (inputToken.GetTokenType() != TokenType.PARENTHIS_RIGHT) parameters = ParseParameters();
 
             // parse right parenthis
@@ -276,14 +276,14 @@ namespace MipaCompiler
             Match(TokenType.SEPARATOR);
 
             // parse function return type
-            ISymbol returnType = ParseType();
+            INode returnType = ParseType();
 
             // parse end of statement
             Match(TokenType.STATEMENT_END);
             if (errorInStatement) return null;
 
             // parse code block
-            ISymbol block = ParseBlock();
+            INode block = ParseBlock();
 
             // parse end of statement
             Match(TokenType.STATEMENT_END);
@@ -296,17 +296,17 @@ namespace MipaCompiler
         /// Method <c>ParseBlock</c> handles the parsing of a single block. 
         /// Block starts with keyword "begin" and ends with keyword "end".
         /// </summary>
-        private ISymbol ParseBlock()
+        private INode ParseBlock()
         {
             // parse begin keyword
             int row = inputToken.GetRow();
             int col = inputToken.GetColumn();
             Match(TokenType.KEYWORD_BEGIN);
 
-            List<ISymbol> statements = new List<ISymbol>();
+            List<INode> statements = new List<INode>();
 
             // each block must have one statement
-            ISymbol statement = ParseStatement();
+            INode statement = ParseStatement();
             if (statement == null) errorInStatement = false;
             if (statement != null) statements.Add(statement);
 
@@ -340,7 +340,7 @@ namespace MipaCompiler
         /// <summary>
         /// Method <c>ParseStatement</c> handles the parsing of a single statement.
         /// </summary>
-        private ISymbol ParseStatement()
+        private INode ParseStatement()
         {
             // if errors have been detected already --> return
             if (errorInStatement) return null;
@@ -389,7 +389,7 @@ namespace MipaCompiler
         /// <summary>
         /// Method <c>ParseAssert</c> handles the parsing of assert statement.
         /// </summary>
-        private ISymbol ParseAssert()
+        private INode ParseAssert()
         {
             // if errors already detected --> return
             if (errorInStatement) return null;
@@ -397,12 +397,14 @@ namespace MipaCompiler
             // parse assert keyword
             int row = inputToken.GetRow();
             int col = inputToken.GetColumn();
+            Match(TokenType.KEYWORD_ASSERT);
             Match(TokenType.PARENTHIS_LEFT);
             if (errorInStatement) return null;
 
             // parse boolean expression
-            ISymbol expression = ParseExpression();
+            INode expression = ParseExpression();
             expression = ParseExpressionTail(expression);
+            Match(TokenType.PARENTHIS_RIGHT);
             if (errorInStatement) return null;
 
             return new AssertNode(row, col, expression);
@@ -411,7 +413,7 @@ namespace MipaCompiler
         /// <summary>
         /// Method <c>ParseType</c> handles the parsing of type.
         /// </summary>
-        private ISymbol ParseType()
+        private INode ParseType()
         {
             // if error already detected --> return
             if (errorInStatement) return null;
@@ -435,7 +437,7 @@ namespace MipaCompiler
         /// <summary>
         /// Method <c>ParseSimpleType</c> handles the parsing of simple type.
         /// </summary>
-        private ISymbol ParseSimpleType()
+        private INode ParseSimpleType()
         {
             // if error already detected --> return
             if (errorInStatement) return null;
@@ -465,7 +467,7 @@ namespace MipaCompiler
         /// <summary>
         /// Method <c>ParseArrayType</c> handles the parsing of an array type.
         /// </summary>
-        private ISymbol ParseArrayType()
+        private INode ParseArrayType()
         {
             // if error already detected --> return
             if (errorInStatement) return null;
@@ -480,7 +482,7 @@ namespace MipaCompiler
             if (errorInStatement) return null;
 
             // parse optional expression
-            ISymbol expression = null;
+            INode expression = null;
             if (inputToken.GetTokenType() != TokenType.BRACKET_RIGHT)
             {
                 expression = ParseExpression();
@@ -495,7 +497,7 @@ namespace MipaCompiler
             if (errorInStatement) return null;
 
             // parse simple type
-            ISymbol simpleType = ParseSimpleType();
+            INode simpleType = ParseSimpleType();
             if (errorInStatement) return null;
 
             return new ArrayTypeNode(row, column, expression, simpleType);
@@ -505,12 +507,12 @@ namespace MipaCompiler
         /// Method <c>ParseParameters</c> handles the parsing of parameters in procedure
         /// or function definition.
         /// </summary>
-        private List<ISymbol> ParseParameters()
+        private List<INode> ParseParameters()
         {
             // if errors already detected --> return null
             if (errorInStatement) return null;
 
-            List<ISymbol> parameters = new List<ISymbol>();
+            List<INode> parameters = new List<INode>();
 
             // parse all parameters
             while (!errorInStatement)
@@ -533,7 +535,7 @@ namespace MipaCompiler
                 Match(TokenType.SEPARATOR);
 
                 // parse type
-                ISymbol type = ParseType();
+                INode type = ParseType();
                 if (errorInStatement) return null;
 
                 parameters.Add(new VariableNode(rowP, colP, identifier, type));
@@ -558,7 +560,7 @@ namespace MipaCompiler
         /// <summary>
         /// Method <c>ParseReturnStatement</c> handles the parsing of return statement.
         /// </summary>
-        private ISymbol ParseReturnStatement()
+        private INode ParseReturnStatement()
         {
             // if errors already detected
             if (errorInStatement) return null;
@@ -570,7 +572,7 @@ namespace MipaCompiler
             if (errorInStatement) return null;
 
             // parse optional expression
-            ISymbol expr = null;
+            INode expr = null;
             if (inputToken.GetTokenType() != TokenType.STATEMENT_END 
                 && inputToken.GetTokenType() != TokenType.KEYWORD_END
                 && inputToken.GetTokenType() != TokenType.KEYWORD_ELSE)
@@ -586,7 +588,7 @@ namespace MipaCompiler
         /// <summary>
         /// Method <c>ParseAssignment</c> handles the parsing of assignment.
         /// </summary>
-        private ISymbol ParseAssignment()
+        private INode ParseAssignment()
         {
             // if error already detected --> return null
             if (errorInStatement) return null;
@@ -607,7 +609,7 @@ namespace MipaCompiler
             if (errorInStatement) return null;
 
             // parse expression
-            ISymbol expression = ParseExpression();
+            INode expression = ParseExpression();
             expression = ParseExpressionTail(expression);
             if (errorInStatement) return null;
 
@@ -617,7 +619,7 @@ namespace MipaCompiler
         /// <summary>
         /// Method <c>ParseIfStatement</c> handles the parsing of if statement.
         /// </summary>
-        private ISymbol ParseIfStatement()
+        private INode ParseIfStatement()
         {
             // if error already detected --> return
             if (errorInStatement) return null;
@@ -629,7 +631,7 @@ namespace MipaCompiler
             if (errorInStatement) return null;
 
             // parse condition expression
-            ISymbol condition = ParseExpression();
+            INode condition = ParseExpression();
             condition = ParseExpressionTail(condition);
             if (errorInStatement) return null;
 
@@ -638,12 +640,12 @@ namespace MipaCompiler
             if (errorInStatement) return null;
 
             // parse the true condition statement
-            ISymbol thenStatement = ParseStatement();
+            INode thenStatement = ParseStatement();
             if (errorInStatement) return null;
 
             // parse the false condition statement (optional)
             // statement can have ';' or it can be without it
-            ISymbol elseStatement = null;
+            INode elseStatement = null;
             if (inputToken.GetTokenType() == TokenType.KEYWORD_ELSE
                 || scanner.PeekNthToken(1).GetTokenType() == TokenType.KEYWORD_ELSE)
             {
@@ -663,7 +665,7 @@ namespace MipaCompiler
         /// <summary>
         /// Method <c>ParseWhileStatement</c> handles the parsing of while statement.
         /// </summary>
-        private ISymbol ParseWhileStatement()
+        private INode ParseWhileStatement()
         {
             // if errors already detected --> return null
             if (errorInStatement) return null;
@@ -675,7 +677,7 @@ namespace MipaCompiler
             if (errorInStatement) return null;
 
             // parse expression
-            ISymbol expr = ParseExpression();
+            INode expr = ParseExpression();
             expr = ParseExpressionTail(expr);
             if (errorInStatement) return null;
 
@@ -684,7 +686,7 @@ namespace MipaCompiler
             if (errorInStatement) return null;
 
             // parse statement
-            ISymbol statement = ParseStatement();
+            INode statement = ParseStatement();
             if (errorInStatement) return null;
 
             return new WhileNode(row, column, expr, statement);
@@ -693,7 +695,7 @@ namespace MipaCompiler
         /// <summary>
         /// Method <c>ParseCall</c> handles the parsing of a call assignment.
         /// </summary>
-        private ISymbol ParseCall()
+        private INode ParseCall()
         {
             // if errors already detected --> return 
             if (errorInStatement) return null;
@@ -714,7 +716,7 @@ namespace MipaCompiler
             if (errorInStatement) return null;
 
             // parse arguments (optional)
-            List<ISymbol> args = ParseArguments();
+            List<INode> args = ParseArguments();
             if (errorInStatement) return null;
 
             // parse right parentis
@@ -728,18 +730,18 @@ namespace MipaCompiler
         /// Method <c>ParseArguments</c> handles the parsing of arguments
         /// for function or procedure call.
         /// </summary>
-        private List<ISymbol> ParseArguments()
+        private List<INode> ParseArguments()
         {
             // if errors already detected --> return
             if (errorInStatement) return null;
 
-            List<ISymbol> args = new List<ISymbol>();
+            List<INode> args = new List<INode>();
 
             // while can be argument --> parse it
             while (!errorInStatement && inputToken.GetTokenType() != TokenType.PARENTHIS_RIGHT)
             {
                 // parse expression
-                ISymbol expression = ParseExpression();
+                INode expression = ParseExpression();
                 expression = ParseExpressionTail(expression);
                 if (errorInStatement) return null;
 
@@ -757,7 +759,7 @@ namespace MipaCompiler
         /// <summary>
         /// Method <c>ParseVariableDeclaration</c> handles the parsing of a variable declaration.
         /// </summary>
-        private ISymbol ParseVariableDeclaration()
+        private INode ParseVariableDeclaration()
         {
             // if errors already detected --> return
             if (errorInStatement) return null;
@@ -767,7 +769,7 @@ namespace MipaCompiler
             int col = inputToken.GetColumn();
             Match(TokenType.KEYWORD_VAR);
 
-            List<ISymbol> variables = new List<ISymbol>();
+            List<INode> variables = new List<INode>();
 
             // parse all variable names
             while (!errorInStatement)
@@ -806,7 +808,7 @@ namespace MipaCompiler
             if (errorInStatement) return null;
 
             // parse type
-            ISymbol type = ParseType();
+            INode type = ParseType();
             if (errorInStatement) return null;
 
             return new VariableDclNode(row, col, variables, type);
@@ -815,13 +817,13 @@ namespace MipaCompiler
         /// <summary>
         /// Method <c>ParseExpression</c> handles the parsing of expression (front).
         /// </summary>
-        private ISymbol ParseExpression()
+        private INode ParseExpression()
         {
             // if errors already detected --> return null
             if (errorInStatement) return null;
 
             // parse simple expression
-            ISymbol node = ParseSimpleExpression();
+            INode node = ParseSimpleExpression();
             node = ParseSimpleExpressionTail(node);
             if (errorInStatement) return null;
 
@@ -831,7 +833,7 @@ namespace MipaCompiler
         /// <summary>
         /// Method <c>ParseExpressionTail</c> handles the parsing of expression tail.
         /// </summary>
-        private ISymbol ParseExpressionTail(ISymbol rhs)
+        private INode ParseExpressionTail(INode rhs)
         {
             // if errors already detected --> return
             if (errorInStatement) return null;
@@ -852,7 +854,7 @@ namespace MipaCompiler
                     inputToken = scanner.ScanNextToken();
 
                     // parse right hand side expression
-                    ISymbol lhs = ParseSimpleExpression();
+                    INode lhs = ParseSimpleExpression();
                     lhs = ParseSimpleExpressionTail(lhs);
                     if (errorInStatement) return null;
 
@@ -865,7 +867,7 @@ namespace MipaCompiler
         /// <summary>
         /// Method <c>ParseSimpleExpression</c> handles the parsing of simple expression (front).
         /// </summary>
-        private ISymbol ParseSimpleExpression()
+        private INode ParseSimpleExpression()
         {
             // if errors already detected --> return
             if (errorInStatement) return null;
@@ -891,7 +893,7 @@ namespace MipaCompiler
             }
 
             // parse term
-            ISymbol term = ParseTerm();
+            INode term = ParseTerm();
             term = ParseTermTail(term);
             if (errorInStatement) return null;
 
@@ -902,7 +904,7 @@ namespace MipaCompiler
         /// <summary>
         /// Method <c>ParseSimpleExpressionTail</c> handles the parsing of simple expression tail.
         /// </summary>
-        private ISymbol ParseSimpleExpressionTail(ISymbol node)
+        private INode ParseSimpleExpressionTail(INode node)
         {
             // if errors already detected --> return
             if (errorInStatement) return null;
@@ -920,7 +922,7 @@ namespace MipaCompiler
                     inputToken = scanner.ScanNextToken();
 
                     // parse right hand side of expression
-                    ISymbol term = ParseTerm();
+                    INode term = ParseTerm();
                     term = ParseTermTail(term);
                     if (errorInStatement) return null;
 
@@ -933,13 +935,13 @@ namespace MipaCompiler
         /// <summary>
         /// Method <c>ParseTerm</c> handles the parsing of single term (front).
         /// </summary>
-        private ISymbol ParseTerm()
+        private INode ParseTerm()
         {
             // if errors already detected --> return
             if (errorInStatement) return null;
 
             // parse factor
-            ISymbol factor = ParseFactor();
+            INode factor = ParseFactor();
             factor = ParseFactorTail(factor);
             if (errorInStatement) return null;
 
@@ -949,7 +951,7 @@ namespace MipaCompiler
         /// <summary>
         ///  Method <c>ParseTermTail</c> handles the parsing of a term tail.
         /// </summary>
-        private ISymbol ParseTermTail(ISymbol node)
+        private INode ParseTermTail(INode node)
         {
             // if errors already detected --> return
             if (errorInStatement) return null;
@@ -968,7 +970,7 @@ namespace MipaCompiler
                     inputToken = scanner.ScanNextToken();
 
                     // parse factor
-                    ISymbol factor = ParseFactor();
+                    INode factor = ParseFactor();
                     factor = ParseFactorTail(factor);
                     if (errorInStatement) return null;
 
@@ -981,7 +983,7 @@ namespace MipaCompiler
         /// <summary>
         /// Method <c>ParseFactor</c> handles the parsing of factor (front).
         /// </summary>
-        private ISymbol ParseFactor()
+        private INode ParseFactor()
         {
             // if errors already detected --> return null
             if (errorInStatement) return null;
@@ -1008,7 +1010,7 @@ namespace MipaCompiler
                             int row = inputToken.GetRow();
                             int col = inputToken.GetColumn();
                             string name = inputToken.GetTokenValue();
-                            ISymbol variable = new VariableNode(row, col, name, null);
+                            INode variable = new VariableNode(row, col, name, null);
 
                             // parse peeked left bracket
                             inputToken = scanner.ScanNextToken();
@@ -1017,7 +1019,7 @@ namespace MipaCompiler
                             Match(TokenType.BRACKET_LEFT);
 
                             // parse expression
-                            ISymbol expr = ParseExpression();
+                            INode expr = ParseExpression();
                             expr = ParseExpressionTail(expr);
 
                             // parse bracket right
@@ -1038,7 +1040,7 @@ namespace MipaCompiler
                     return ParseLiteral();
                 case TokenType.PARENTHIS_LEFT:
                     Match(TokenType.PARENTHIS_LEFT);
-                    ISymbol expression = ParseExpression();
+                    INode expression = ParseExpression();
                     expression = ParseExpressionTail(expression);
                     Match(TokenType.PARENTHIS_RIGHT);
                     if (errorInStatement) return null;
@@ -1050,7 +1052,7 @@ namespace MipaCompiler
                     string oper = Match(TokenType.LOGICAL_NOT);
 
                     // parse expression
-                    ISymbol factor = ParseFactor();
+                    INode factor = ParseFactor();
                     factor = ParseFactorTail(factor);
                     if (errorInStatement) return null;
 
@@ -1064,7 +1066,7 @@ namespace MipaCompiler
         /// <summary>
         /// Method <c>ParseFactorTail</c> handles the parsing of factor tail.
         /// </summary>
-        private ISymbol ParseFactorTail(ISymbol node)
+        private INode ParseFactorTail(INode node)
         {
             // if errors already detected --> return
             if (errorInStatement) return null;
@@ -1087,7 +1089,7 @@ namespace MipaCompiler
         /// <summary>
         /// Method <c>ParseLiteral</c> handles the parsing of literal.
         /// </summary>
-        private ISymbol ParseLiteral()
+        private INode ParseLiteral()
         {
             // if errors already detected --> return null
             if (errorInStatement) return null;

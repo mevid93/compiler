@@ -5,7 +5,7 @@ namespace MipaCompiler.Node
     /// <summary>
     /// Class <c>IntegerNode</c> represents constant integer in AST.
     /// </summary>
-    public class IntegerNode : ISymbol
+    public class IntegerNode : INode
     {
         private readonly int row;           // row in source code
         private readonly int col;           // column in source code

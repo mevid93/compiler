@@ -9,7 +9,7 @@ namespace MipaCompiler.Symbol
     public class VariableSymbol : ISymbol
     {
         private readonly string identifier;         // variable symbol  (identifier)
-        private readonly string type;               // variable type  (string representation)
+        private Stack<string> types;                // variable type  (string representation)
         private string currentValue;                // value that symbols is currently holding
         private Stack<int> scopes;                  // scope of variable (lower means wider scope)
 
@@ -23,7 +23,8 @@ namespace MipaCompiler.Symbol
         public VariableSymbol(string identifier, string type, string currentValue, int scope)
         {
             this.identifier = identifier;
-            this.type = type;
+            types = new Stack<string>();
+            types.Push(type);
             this.currentValue = currentValue;
             scopes = new Stack<int>();
             scopes.Push(scope);
@@ -35,7 +36,8 @@ namespace MipaCompiler.Symbol
         /// <returns>type of symbol</returns>
         public string GetSymbolType()
         {
-            return type;
+            if (types.Count == 0) return null;
+            return types.Peek();
         }
 
         /// <summary>
@@ -87,10 +89,31 @@ namespace MipaCompiler.Symbol
             return scopes.Peek();
         }
 
+        /// <summary>
+        /// Method <c>PopType</c> pops type from the types stack and
+        /// returns the value of next type. If no more types are
+        /// available, -1 is returned.
+        /// </summary>
+        /// <returns>type after pop</returns>
+        public string PopType()
+        {
+            if (types.Count == 0) return null;
+            types.Pop();
+            if (types.Count == 0) return null;
+            return types.Peek();
+        }
+
+        /// <summary>
+        /// Method <c>PushScope</c> pushes new scope to scope stack.
+        /// </summary>
+        public void PushType(string type)
+        {
+            types.Push(type);
+        }
+
         public string[] GetParameterTypes()
         {
-            string[] array = { type };
-            return array;
+            return types.ToArray();
         }
 
         public bool HasSameDefinition(ISymbol symbol)

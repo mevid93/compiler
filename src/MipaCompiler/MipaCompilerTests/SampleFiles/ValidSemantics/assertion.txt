@@ -1,0 +1,4 @@
+program Assertion;
+begin
+    assert(1=1);  
+end.

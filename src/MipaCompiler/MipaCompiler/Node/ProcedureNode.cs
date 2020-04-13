@@ -6,13 +6,13 @@ namespace MipaCompiler.Node
     /// <summary>
     /// Class <c>ProcedureNode</c> represents procedure definition in AST.
     /// </summary>
-    public class ProcedureNode : ISymbol
+    public class ProcedureNode : INode
     {
         private readonly int row;                   // row in source code   
         private readonly int col;                   // column in source code
         private readonly string name;               // name of the procedure
-        private readonly List<ISymbol> parameters;    // list of parameters (optional)
-        private readonly ISymbol block;               // code block
+        private readonly List<INode> parameters;    // list of parameters (optional)
+        private readonly INode block;               // code block
 
         /// <summary>
         /// Constructor <c>ProcedureNode</c> creates new ProcedureNode-object.
@@ -22,12 +22,12 @@ namespace MipaCompiler.Node
         /// <param name="name">name of the procedure</param>
         /// <param name="parameters">list of parameters (optional)</param>
         /// <param name="block">block of code</param>
-        public ProcedureNode(int row, int col, string name, List<ISymbol> parameters, ISymbol block)
+        public ProcedureNode(int row, int col, string name, List<INode> parameters, INode block)
         {
             this.row = row;
             this.col = col;
             this.name = name;
-            this.parameters = new List<ISymbol>();
+            this.parameters = new List<INode>();
             if (parameters != null) this.parameters = parameters;
             this.block = block;
         }
@@ -45,7 +45,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetParameters</c> returns the list of parameters.
         /// </summary>
         /// <returns>parameters</returns>
-        public List<ISymbol> GetParameters()
+        public List<INode> GetParameters()
         {
             return parameters;
         }
@@ -54,7 +54,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetBlock</c> returns the procedure code block.
         /// </summary>
         /// <returns>code block</returns>
-        public ISymbol GetBlock()
+        public INode GetBlock()
         {
             return block;
         }
@@ -80,7 +80,7 @@ namespace MipaCompiler.Node
             Console.WriteLine($"Row: {row}, Column: {col}");
             Console.WriteLine($"Name: {name}");
             Console.WriteLine("Parameters:");
-            foreach (ISymbol node in parameters)
+            foreach (INode node in parameters)
             {
                 node.PrettyPrint();
             }

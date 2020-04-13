@@ -5,12 +5,12 @@ namespace MipaCompiler.Node
     /// <summary>
     /// Class <c>UnaryExpressionNode</c> represents unary expression in AST.
     /// </summary>
-    public class UnaryExpressionNode : ISymbol
+    public class UnaryExpressionNode : INode
     {
         private readonly int row;           // row in source code
         private readonly int col;           // column in source code
         private readonly string oper;       // operator symbol
-        private readonly ISymbol expression;  // terget expression of unary operation
+        private readonly INode expression;  // terget expression of unary operation
 
         /// <summary>
         /// Constructor <c>UnaryExpressionNode</c> creates new UnaryExpressionNode-object.
@@ -19,7 +19,7 @@ namespace MipaCompiler.Node
         /// <param name="col">column in source code</param>
         /// <param name="oper">unary operator symbol</param>
         /// <param name="expression">target expression</param>
-        public UnaryExpressionNode(int row, int col, string oper, ISymbol expression)
+        public UnaryExpressionNode(int row, int col, string oper, INode expression)
         {
             this.row = row;
             this.col = col;
@@ -40,7 +40,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetExpression</c> returns the unary target expression.
         /// </summary>
         /// <returns>target expression</returns>
-        public ISymbol GetExpression()
+        public INode GetExpression()
         {
             return expression;
         }

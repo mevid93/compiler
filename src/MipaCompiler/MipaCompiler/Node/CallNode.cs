@@ -7,12 +7,12 @@ namespace MipaCompiler.Node
     /// class <c>CallNode</c> represents function, procedure or
     /// predefined function (read, writeln) call in AST.
     /// </summary>
-    public class CallNode : ISymbol
+    public class CallNode : INode
     {
         private readonly int row;           // row in source code
         private readonly int col;           // column in source code
         private readonly string id;         // identifier for fucntion or procedure
-        private readonly List<ISymbol> args;  // parameters for function or procedure
+        private readonly List<INode> args;  // parameters for function or procedure
 
         /// <summary>
         /// Constructor <c>CallNode</c> creates new CallNode-object.
@@ -21,7 +21,7 @@ namespace MipaCompiler.Node
         /// <param name="col">column in source code</param>
         /// <param name="id">identifier of function or procedure</param>
         /// <param name="args">arguments</param>
-        public CallNode(int row, int col, string id, List<ISymbol> args)
+        public CallNode(int row, int col, string id, List<INode> args)
         {
             this.row = row;
             this.col = col;
@@ -43,7 +43,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetArguments</c> returns the parameters of the call operation.
         /// </summary>
         /// <returns>arguments</returns>
-        public List<ISymbol> GetArguments()
+        public List<INode> GetArguments()
         {
             return args;
         }
@@ -69,7 +69,7 @@ namespace MipaCompiler.Node
             Console.WriteLine($"Row: {row}, Column: {col}");
             Console.WriteLine($"Id: {id}");
             Console.WriteLine("Arguments:");
-            foreach(ISymbol arg in args)
+            foreach(INode arg in args)
             {
                 arg.PrettyPrint();
             }

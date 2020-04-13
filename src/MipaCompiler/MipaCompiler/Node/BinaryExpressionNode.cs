@@ -5,13 +5,13 @@ namespace MipaCompiler.Node
     /// <summary>
     /// Class <c>BinaryExpressionNode</c> represents binary expression in AST.
     /// </summary>
-    public class BinaryExpressionNode : ISymbol
+    public class BinaryExpressionNode : INode
     {
         private readonly int row;           // row in source code
         private readonly int col;           // column in source code
         private readonly string value;      // value of operation
-        private readonly ISymbol lhs;         // left hand side of expression
-        private readonly ISymbol rhs;         // right hand side of expression
+        private readonly INode lhs;         // left hand side of expression
+        private readonly INode rhs;         // right hand side of expression
 
         /// <summary>
         /// Constructor <c>BinaryExpressionNode</c> creates new BinaryExpressionNode-object.
@@ -21,7 +21,7 @@ namespace MipaCompiler.Node
         /// <param name="operation">operator symbol</param>
         /// <param name="lhs">left hand side of operation</param>
         /// <param name="rhs">right hand side of operation</param>
-        public BinaryExpressionNode(int row, int col, string operation, ISymbol lhs, ISymbol rhs)
+        public BinaryExpressionNode(int row, int col, string operation, INode lhs, INode rhs)
         {
             this.row = row;
             this.col = col;
@@ -43,7 +43,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetLhs</c> returns the left hand side of operation.
         /// </summary>
         /// <returns>lhs</returns>
-        public ISymbol GetLhs()
+        public INode GetLhs()
         {
             return lhs;
         }
@@ -52,7 +52,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetRhs</c> returns the right hand side of operation.
         /// </summary>
         /// <returns>rhs</returns>
-        public ISymbol GetRhs()
+        public INode GetRhs()
         {
             return rhs;
         }

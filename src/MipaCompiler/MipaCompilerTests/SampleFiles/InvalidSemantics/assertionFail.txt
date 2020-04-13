@@ -1,0 +1,4 @@
+program AssertionFail;
+begin
+    assert("not boolean" + "jotain");  
+end.

@@ -69,5 +69,17 @@ namespace MipaCompilerTests.SymbolTests
             ProcedureSymbol p = symbolTable.GetProcedureSymbolByIdentifierAndArguments("procedure1", args);
             Assert.IsTrue(p.GetIdentifier().Equals("procedure1"));
         }
+
+        [TestMethod]
+        public void CheckingIfVariableExistsInCurrentScopeWorks()
+        {
+            SymbolTable symbolTable = new SymbolTable();
+
+            symbolTable.DeclareVariableSymbol(new VariableSymbol("var1", "integer", "23", 1));
+
+            Assert.IsFalse(symbolTable.IsVariableSymbolInTableWithCurrentScope("var1"));
+            symbolTable.AddScope();
+            Assert.IsTrue(symbolTable.IsVariableSymbolInTableWithCurrentScope("var1"));
+        }
     }
 }

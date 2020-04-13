@@ -81,7 +81,7 @@ namespace MipaCompiler
         public Token(string tokenValue, TokenType tokenType, int row, int col)
         {
             type = tokenType;
-            value = tokenValue.ToLower();
+            value = tokenValue;
             this.row = row;
             this.col = col;
         }

@@ -5,7 +5,7 @@ namespace MipaCompiler.Node
     /// <summary>
     /// Class <c>SimpleTypeNode</c> represents simple type in AST.
     /// </summary>
-    public class SimpleTypeNode : ISymbol
+    public class SimpleTypeNode : INode
     {
         private readonly int row;       // row in source code
         private readonly int col;       // column in source code

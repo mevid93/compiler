@@ -5,7 +5,7 @@ namespace MipaCompiler.Node
     /// <summary>
     /// Class <c>StringNode</c> represents constant string in AST.
     /// </summary>
-    public class StringNode : ISymbol
+    public class StringNode : INode
     {
         private readonly int row;           // row in source code
         private readonly int col;           // column in source code

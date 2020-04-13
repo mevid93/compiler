@@ -218,9 +218,9 @@ namespace MipaCompiler
                                 }
                             }
                             colNum = c;
-                            return new Token(number, TokenType.VAL_REAL, r + 1, startCol);
+                            return new Token(number.ToLower(), TokenType.VAL_REAL, r + 1, startCol);
                         }
-                        return new Token(number, TokenType.VAL_INTEGER, r + 1, startCol);
+                        return new Token(number.ToLower(), TokenType.VAL_INTEGER, r + 1, startCol);
                     }
 
 
@@ -235,6 +235,7 @@ namespace MipaCompiler
                             c++;
                         }
                         colNum = c + 1;
+                        letters = letters.ToLower();
                         if (Token.IsKeyword(letters)) return new Token(letters, Token.FindTokenType(letters), r + 1, startCol);
                         if (Token.IsPredefinedIdentifier(letters)) return new Token(letters, Token.FindTokenType(letters), r + 1, startCol);
                         return new Token(letters, TokenType.IDENTIFIER, r + 1, startCol);

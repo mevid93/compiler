@@ -45,6 +45,7 @@ namespace MipaCompiler.Symbol
                 if(tmp.GetCurrentScope() == currentScope)
                 {
                     int next = tmp.PopScope();
+                    tmp.PopType();
                     if (next == -1) variables.Remove(tmp);
                 }
             }
@@ -122,6 +123,24 @@ namespace MipaCompiler.Symbol
         public void DeclareVariableSymbol(VariableSymbol newSymbol)
         {
             variables.Add(newSymbol);
+        }
+
+        /// <summary>
+        /// Method <c>ReDeclareVariableSymbol</c> declares variable with new scope and type.
+        /// </summary>
+        public void ReDeclareVariableSymbol(VariableSymbol updateSymbol)
+        {
+            foreach(VariableSymbol varSym in variables)
+            {
+                if (varSym.GetIdentifier().Equals(updateSymbol.GetIdentifier()))
+                {
+                    // push new scope
+                    varSym.PushScope(updateSymbol.GetCurrentScope());
+
+                    // push new type
+                    varSym.PushType(updateSymbol.GetSymbolType());
+                }
+            }
         }
 
         /// <summary>
@@ -248,5 +267,20 @@ namespace MipaCompiler.Symbol
             symbol.SetValue(value);
         }
 
+        /// <summary>
+        /// Method <c>IsVariableSymbolInTableWithCurrentScope</c> checks if variable symbol
+        /// is in table and it has current scope as its scope.
+        /// </summary>
+        public bool IsVariableSymbolInTableWithCurrentScope(string identifier)
+        {
+            foreach (VariableSymbol s in variables)
+            {
+                if (s.GetIdentifier().Equals(identifier) && s.GetCurrentScope() == currentScope)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     }
 }

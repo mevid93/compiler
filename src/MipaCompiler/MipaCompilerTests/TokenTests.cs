@@ -10,7 +10,7 @@ namespace MipaCompilerTests
         public void ConstructorWorks()
         {
             Token token = new Token("myValue", TokenType.VAL_STRING, 23, 11);
-            Assert.AreEqual("myValue".ToLower(), token.GetTokenValue());
+            Assert.AreEqual("myValue", token.GetTokenValue());
             Assert.AreEqual(TokenType.VAL_STRING, token.GetTokenType());
             Assert.AreEqual(23, token.GetRow());
             Assert.AreEqual(11, token.GetColumn());
@@ -20,7 +20,7 @@ namespace MipaCompilerTests
         public void ToStringWorks()
         {
             Token token = new Token("Hello, World!", TokenType.VAL_STRING, 10, 10);
-            string value = $"{TokenType.VAL_STRING}, hello, world!, Row: 10, Col: 10";
+            string value = $"{TokenType.VAL_STRING}, Hello, World!, Row: 10, Col: 10";
             Assert.AreEqual(value, token.ToString());
         }
 

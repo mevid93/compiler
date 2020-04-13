@@ -34,7 +34,7 @@ namespace MipaCompiler.Node
     /// Interface <c>INode</c> is node interface that defines all the methods that are 
     /// required of different nodes in AST.
     /// </summary>
-    public interface ISymbol
+    public interface INode
     {
         /// <summary>
         /// Method <c>GetNodeType</c> returns the type of node.

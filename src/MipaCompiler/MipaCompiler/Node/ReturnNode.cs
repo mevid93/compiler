@@ -5,11 +5,11 @@ namespace MipaCompiler.Node
     /// <summary>
     /// Class <c>ReturnNode</c> represents return statement in AST.
     /// </summary>
-    public class ReturnNode : ISymbol
+    public class ReturnNode : INode
     {
         private readonly int row;               // row in source code
         private readonly int col;               // column in source code
-        private readonly ISymbol expression;      // returned value expression (optional)
+        private readonly INode expression;      // returned value expression (optional)
 
         /// <summary>
         /// Constructor <c>ReturnNode</c> creates new ReturnNode-object.
@@ -17,7 +17,7 @@ namespace MipaCompiler.Node
         /// <param name="row">row in source code</param>
         /// <param name="col">column in source code</param>
         /// <param name="expression">expression for return value (optional)</param>
-        public ReturnNode(int row, int col, ISymbol expression)
+        public ReturnNode(int row, int col, INode expression)
         {
             this.row = row;
             this.col = col;
@@ -28,7 +28,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetExpression</c> returns the return value expression.
         /// </summary>
         /// <returns>return value expression</returns>
-        public ISymbol GetExpression()
+        public INode GetExpression()
         {
             return expression;
         }
