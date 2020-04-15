@@ -1025,7 +1025,7 @@ namespace MipaCompiler
                             // parse bracket right
                             Match(TokenType.BRACKET_RIGHT);
                             if (errorInStatement) return null;
-                            return new ArrayIndexNode(row, col, variable, expr);
+                            return new BinaryExpressionNode(row, col, "[]", variable, expr);
                         default:
                             // parse variable node
                             row = inputToken.GetRow();
@@ -1080,7 +1080,7 @@ namespace MipaCompiler
                     Match(TokenType.DOT);
                     Match(TokenType.PREDEFINED_SIZE);
                     if (errorInStatement) return null;
-                    return new ArraySizeNode(row, col, node);
+                    return new UnaryExpressionNode(row, col, "size", node);
                 default:
                     return node;
             }

@@ -120,6 +120,8 @@ namespace MipaCompiler
         {
             if (node == null) return;
 
+            symbolTable.AddScope();
+
             // convert node to function node
             FunctionNode func = (FunctionNode)node;
 
@@ -128,13 +130,17 @@ namespace MipaCompiler
 
             // for each function parameter --> find parameter type
             // should be integer, string, boolean or array
-            List<Node.INode> parameters = func.GetParameters();
+            List<INode> parameters = func.GetParameters();
             string[] paramTypes = new string[parameters.Count];
 
             for(int i = 0; i < parameters.Count; i++)
             {
                 VariableNode varNode = (VariableNode)parameters[i];
                 paramTypes[i] = EvaluateTypeOfTypeNode(varNode.GetVariableType());
+
+                // declare variable to symbol table
+                VariableSymbol sym = new VariableSymbol(varNode.GetName(), paramTypes[i], null, symbolTable.GetCurrentScope());
+                symbolTable.DeclareVariableSymbol(sym);
             }
             
             // find return type
@@ -152,6 +158,7 @@ namespace MipaCompiler
                 string errorMsg = $"SemanticError::Row {func.GetRow()}::Column {func.GetCol()}::";
                 errorMsg += $"Procedure/Function {functionStr} already defined!";
                 ReportError(errorMsg);
+                symbolTable.RemoveScope();
                 return; 
             }
 
@@ -160,6 +167,8 @@ namespace MipaCompiler
 
             // check the function code
             CheckBlock(func.GetBlock());
+
+            symbolTable.RemoveScope();
         }
 
         /// <summary>
@@ -168,6 +177,8 @@ namespace MipaCompiler
         private void CheckProcedure(INode node)
         {
             if (node == null) return;
+
+            symbolTable.AddScope();
 
             // convert node to procedure node
             ProcedureNode proc = (ProcedureNode)node;
@@ -184,6 +195,10 @@ namespace MipaCompiler
             {
                 VariableNode varNode = (VariableNode)parameters[i];
                 paramTypes[i] = EvaluateTypeOfTypeNode(varNode.GetVariableType());
+
+                // declare variable to symbol table
+                VariableSymbol sym = new VariableSymbol(varNode.GetName(), paramTypes[i], null, symbolTable.GetCurrentScope());
+                symbolTable.DeclareVariableSymbol(sym);
             }
 
             // create new function symbol
@@ -197,6 +212,7 @@ namespace MipaCompiler
                 string errorMsg = $"SemanticError::Row {proc.GetRow()}::Column {proc.GetCol()}::";
                 errorMsg += $"Procedure /Function {procedureStr} already defined!";
                 ReportError(errorMsg);
+                symbolTable.RemoveScope();
                 return;
             }
 
@@ -205,6 +221,8 @@ namespace MipaCompiler
 
             // check the function code
             CheckBlock(proc.GetBlock());
+
+            symbolTable.RemoveScope();
 
         }
 
@@ -227,40 +245,50 @@ namespace MipaCompiler
             // check semantics for each statement
             foreach(INode stmnt in statements)
             {
-                switch (stmnt.GetNodeType())
-                {
-                    case NodeType.ASSERT:
-                        CheckAssert(stmnt);
-                        break;
-                    case NodeType.ASSIGNMENT:
-                        CheckAssignment(stmnt);
-                        break;
-                    case NodeType.BLOCK:
-                        CheckBlock(stmnt);
-                        break;
-                    case NodeType.CALL:
-                        CheckCall(stmnt);
-                        break;
-                    case NodeType.IF_ELSE:
-                        CheckIfElse(stmnt);
-                        break;
-                    case NodeType.RETURN:
-                        CheckReturn(stmnt);
-                        break;
-                    case NodeType.VARIABLE_DCL:
-                        CheckVariableDcl(stmnt);
-                        break;
-                    case NodeType.WHILE:
-                        CheckWhile(stmnt);
-                        break;
-                    default:
-                        // something wrong with the AST
-                        throw new InvalidOperationException($"Unexpected NodeType {stmnt.GetNodeType()} as block statement!");
-                }
+                CheckStatement(stmnt);
             }
 
             // remove scope
             symbolTable.RemoveScope();
+        }
+
+        /// <summary>
+        /// Method <c>CheckStatement</c> checks semantic constraints for statement.
+        /// </summary>
+        private void CheckStatement(INode stmnt)
+        {
+            if (stmnt == null) return;
+
+            switch (stmnt.GetNodeType())
+            {
+                case NodeType.ASSERT:
+                    CheckAssert(stmnt);
+                    break;
+                case NodeType.ASSIGNMENT:
+                    CheckAssignment(stmnt);
+                    break;
+                case NodeType.BLOCK:
+                    CheckBlock(stmnt);
+                    break;
+                case NodeType.CALL:
+                    EvaluateTypeOfCallNode(stmnt);
+                    break;
+                case NodeType.IF_ELSE:
+                    CheckIfElse(stmnt);
+                    break;
+                case NodeType.RETURN:
+                    CheckReturn(stmnt);
+                    break;
+                case NodeType.VARIABLE_DCL:
+                    CheckVariableDcl(stmnt);
+                    break;
+                case NodeType.WHILE:
+                    CheckWhile(stmnt);
+                    break;
+                default:
+                    // something wrong with the AST
+                    throw new InvalidOperationException($"Unexpected NodeType {stmnt.GetNodeType()} as block statement!");
+            }
         }
 
         /// <summary>
@@ -295,22 +323,89 @@ namespace MipaCompiler
         {
             if (node == null) return;
 
-            // TODO
+            // convert assignment node
+            AssignmentNode assign = (AssignmentNode)node;
+
+            string identifier = assign.GetIdentifier();
+
+            INode expr = assign.GetValueExpression();
+            string type = EvaluateTypeOfExpressionNode(expr);
+
+            // check that variable has been declared
+            if (!symbolTable.IsVariableSymbolInTable(identifier))
+            {
+                // variable is not in table --> report error
+                string errorMsg = $"SemanticError::Row {assign.GetRow()}::Column {assign.GetCol()}::";
+                errorMsg += $"Variable {identifier} not declared in this scope!";
+                ReportError(errorMsg);
+                return;
+            }
+
+            // check that the type of assignment expression matches the variable
+            VariableSymbol symbol = symbolTable.GetVariableSymbolByIdentifier(identifier);
+            string symtype = symbol.GetSymbolType();
+
+            if(type == null || !symtype.Equals(type))
+            {
+                // was not correct --> report error
+                string errorMsg = $"SemanticError::Row {expr.GetRow()}::Column {expr.GetCol()}::";
+                errorMsg += $"Cannot implicitly convert type {type} to {symtype}!";
+                ReportError(errorMsg);
+            }
         }
 
-        private void CheckCall(INode node)
-        {
-            // TODO
-        }
-
+        /// <summary>
+        /// Method <c>CheckIfElse</c> checks semantic constraints for if-else structure.
+        /// </summary>
         private void CheckIfElse(INode node)
         {
-            // TODO
+            if (node == null) return;
+
+            // convert to if-else node
+            IfElseNode ifNode = (IfElseNode)node;
+
+            INode condition = ifNode.GetCondition();
+
+            string type = EvaluateTypeOfExpressionNode(condition);
+
+            if (type != null && !type.Equals(STR_BOOLEAN)){
+                // condition not boolean expression
+                string errorMsg = $"SemanticError::Row {condition.GetRow()}::Column {condition.GetCol()}::";
+                errorMsg += $"Cannot implicitly convert type {type} to boolean!";
+                ReportError(errorMsg);
+            }
+
+            INode thenStatement = ifNode.GetThenStatement();
+            INode elseStatement = ifNode.GetElseStatement();
+
+            CheckStatement(thenStatement);
+            CheckStatement(elseStatement);
         }
 
+        /// <summary>
+        /// Method <c>CheckReturn</c> checks the semantic constrains of return statement.
+        /// </summary>
         private void CheckReturn(INode node)
         {
-            // TODO
+            if (node == null) return;
+
+            // convert to return node
+            ReturnNode retNode = (ReturnNode)node;
+
+            if (returnStmntType == null || returnStmntType == "") return;
+
+            // check that the return value corresponds to the return type
+            // of current function
+            INode expr = retNode.GetExpression();
+
+            string type = EvaluateTypeOfExpressionNode(expr);
+
+            if(type != null && !type.Equals(returnStmntType))
+            {
+                string errorMsg = $"SemanticError::Row {expr.GetRow()}::Column {expr.GetCol()}::";
+                errorMsg += $"Cannot implicitly convert type {type} to {returnStmntType}!";
+                ReportError(errorMsg);
+            }
         }
 
         /// <summary>
@@ -328,7 +423,7 @@ namespace MipaCompiler
 
             // get type of variables
             INode typeNode = varDcl.GetVariableType();
-            string type = EvaluateTypeOfTypeNode(typeNode);
+            string type = EvaluateTypeOfTypeNode(typeNode, true);
 
             // for each variable --> check that they have not been declared in current scope
             // if not --> then declare it
@@ -365,16 +460,37 @@ namespace MipaCompiler
             }
         }
 
+        /// <summary>
+        /// Method <c>CheckWhile</c> checks semantic constraints for while loop.
+        /// </summary>
         private void CheckWhile(INode node)
         {
-            // TODO
+            if (node == null) return;
+
+            // conver to while loop node
+            WhileNode whileNode = (WhileNode)node;
+
+            INode expr = whileNode.GetBooleanExpression();
+            INode stmnt = whileNode.GetStatement();
+
+            string type = EvaluateTypeOfExpressionNode(expr);
+
+            if(type == null || !type.Equals(STR_BOOLEAN))
+            {
+                // report error
+                string errorMsg = $"SemanticError::Row {expr.GetRow()}::Column {expr.GetCol()}::";
+                errorMsg += $"Cannot implicitly convert type {type} to boolean!";
+                ReportError(errorMsg);
+            }
+
+            CheckStatement(stmnt);
         }
 
         /// <summary>
         /// Method <c>EvaluateTypeOfTypeNode</c> returns the parameter type
         /// of given typenode. Inputnode should be either SimpleTypeNode or ArrayTypeNode.
         /// </summary>
-        private string EvaluateTypeOfTypeNode(INode node)
+        private string EvaluateTypeOfTypeNode(INode node, bool isInit = false)
         {
             if (node == null) return null;
 
@@ -382,6 +498,20 @@ namespace MipaCompiler
             {
                 case NodeType.ARRAY_TYPE:
                     ArrayTypeNode at = (ArrayTypeNode)node;
+                    if (isInit)
+                    {
+                        // array should have integer as size argument
+                        INode expr = at.GetSizeExpression();
+                        string type = EvaluateTypeOfExpressionNode(expr);
+
+                        if (type == null || !type.Equals(STR_INTEGER))
+                        {
+                            // report error
+                            string errorMsg = $"SemanticError::Row {at.GetRow()}::Column {at.GetCol()}::";
+                            errorMsg += $"Array must have integer as size argument!";
+                            ReportError(errorMsg);
+                        } 
+                    }
                     string tmp = $"array[] of ";
                     SimpleTypeNode stn = (SimpleTypeNode)at.GetSimpleType();
                     tmp += stn.GetTypeValue();
@@ -411,10 +541,6 @@ namespace MipaCompiler
                     return EvaluateTypeOfUnaryExpressionNode(node);
                 case NodeType.BINARY_EXPRESSION:
                     return EvaluateTypeOfBinaryExpressionNode(node);
-                case NodeType.ARRAY_INDEX:
-                    return EvaluateTypeOfArrayIndexNode(node);
-                case NodeType.ARRAY_SIZE:
-                    return EvaluateTypeOfArraySizeNode(node);
                 case NodeType.VARIABLE:
                     return EvaluateTypeOfVariableNode(node);
                 case NodeType.INTEGER:
@@ -423,6 +549,8 @@ namespace MipaCompiler
                     return STR_STRING;
                 case NodeType.REAL:
                     return STR_REAL;
+                case NodeType.CALL:
+                    return EvaluateTypeOfCallNode(node);
                 default:
                     // something wrong with the AST
                     throw new InvalidOperationException($"Unexpected NodeType {node.GetNodeType()} as expression!");
@@ -484,6 +612,15 @@ namespace MipaCompiler
                     errorMsg += $"Cannot implicitly convert type {type} to boolean!";
                     ReportError(errorMsg);
                     return null;
+                case "size":
+                    // check that type is integer "array[] of integer"
+                    if (type.Equals("array[] of " + STR_INTEGER)) return STR_INTEGER;
+
+                    // was not correct type --> report error
+                    errorMsg = $"SemanticError::Row {node.GetRow()}::Column {node.GetCol()}::";
+                    errorMsg += $"Cannot implicitly convert type {type} to integer!";
+                    ReportError(errorMsg);
+                    return null;
                 default:
                     // something wrong with the AST
                     throw new InvalidOperationException($"Unsupported unary operation {unary.GetOperator()}!");
@@ -529,6 +666,8 @@ namespace MipaCompiler
                 case ">":
                     string[] supportedTypes5 = { STR_INTEGER, STR_REAL, STR_STRING, STR_BOOLEAN };
                     return EvaluateTypeOfBinaryOperationForSupportedTypes(node, supportedTypes5, STR_BOOLEAN);
+                case "[]":
+                    return EvaluateTypeOfArrayIndexNode(node);
                 default:
                     // something wrong with the AST
                     throw new InvalidOperationException($"Unsupported binary operator {op}!");
@@ -555,7 +694,7 @@ namespace MipaCompiler
             // if correct 
             foreach(string type in supportedTypes)
             {
-                if (left.Equals(type) && right.Equals(type))
+                if (left != null && left.Equals(type) && right != null && right.Equals(type))
                 {
                     if (overrideReturnType != null) return overrideReturnType;
                     return type;
@@ -579,10 +718,10 @@ namespace MipaCompiler
             if (node == null) return null;
 
             // convert to arrayindex node
-            ArrayIndexNode arrayIndex = (ArrayIndexNode)node;
+            BinaryExpressionNode arrayIndex = (BinaryExpressionNode)node;
 
             // get expression that defines index of array
-            INode expression = arrayIndex.GetIndex();
+            INode expression = arrayIndex.GetRhs();
 
             // evaluate type of index expression
             string type = EvaluateTypeOfExpressionNode(expression);
@@ -597,30 +736,78 @@ namespace MipaCompiler
             }
 
             // get array
-            VariableNode array = (VariableNode) arrayIndex.GetArray();
+            VariableNode array = (VariableNode) arrayIndex.GetLhs();
 
-            // get array type node
-            INode vartype = array.GetVariableType();
-            string arrayType = EvaluateTypeOfTypeNode(vartype);
+            string arrayType = EvaluateTypeOfVariableNode(array);
 
-            return arrayType;
-        }
-
-        private string EvaluateTypeOfArraySizeNode(INode node)
-        {
-            // TODO
+            if(arrayType != null && arrayType.Equals("array[] of " + STR_INTEGER)) return STR_INTEGER;
+            if (arrayType != null && arrayType.Equals("array[] of " + STR_REAL)) return STR_REAL;
+            if (arrayType != null && arrayType.Equals("array[] of " + STR_STRING)) return STR_STRING;
+            if (arrayType != null && arrayType.Equals("array[] of " + STR_BOOLEAN)) return STR_BOOLEAN;
             return null;
         }
 
+        /// <summary>
+        /// Method <c>EvaluateTypeOfVariableNode</c> checks the type of varaible node.
+        /// Returns null in case of errors. if variable name is "true" or "false" and they
+        /// do not exist in current scope, then it is assumed variable is actually 
+        /// a boolean type (true or false).
+        /// </summary>
         private string EvaluateTypeOfVariableNode(INode node)
         {
-            // can be array, simple types
-            // if variable name is false or true
-            // and there exists no variable with name false and true in current scope
-            // then return type is boolean --> it is not actually a variable but a boolea value
-            // it has not been possible to distinguish two of them before
-            
-            // TODO
+            if (node == null) return null;
+
+            // convert to variable node
+            VariableNode varNode = (VariableNode)node;
+            string identifier = varNode.GetName();
+
+            if (symbolTable.IsVariableSymbolInTable(identifier))
+            {
+                VariableSymbol varSym = symbolTable.GetVariableSymbolByIdentifier(identifier);
+                return varSym.GetSymbolType();
+            }
+
+            // identifier is not in table --> check if true or false
+            if (identifier.Equals("true") || identifier.Equals("false"))
+            {
+                return STR_BOOLEAN;
+            }
+
+            // variable is not in table --> report error
+            string errorMsg = $"SemanticError::Row {node.GetRow()}::Column {node.GetCol()}::";
+            errorMsg += $"Variable {identifier} not declared in this scope!";
+            ReportError(errorMsg);
+            return null;
+        }
+
+        /// <summary>
+        /// Method <c>EvaluateTypeOfCallNode</c> peforms semantic analysis on call node
+        /// and returns the returns the type of return value.
+        /// </summary>
+        private string EvaluateTypeOfCallNode(INode node)
+        {
+            if (node == null) return null;
+
+            // conver to call node
+            CallNode callNode = (CallNode)node;
+
+            // get name of the function or procedure that is called
+            string identifier = callNode.GetId();
+
+            // if a function call
+
+            // check that at least one function with such a name is defined
+
+            // if at least one function with matching name was found 
+            // check that arguments match with parameters
+
+            // if procedure call
+
+            // check that at least one procedure with such a name is defined
+
+            // if at least one procedure with matching name was found
+            // check that arguments match with parameters
+
             return null;
         }
 

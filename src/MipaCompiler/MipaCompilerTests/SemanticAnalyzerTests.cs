@@ -168,5 +168,69 @@ namespace MipaCompilerTests
             Assert.IsTrue(errors.Any(s => s.Contains("SemanticError::Row 4::Column 5")));
             Assert.IsTrue(errors.Any(s => s.Contains("SemanticError::Row 4::Column 5")));
         }
+
+        [TestMethod]
+        [DeploymentItem("SampleFiles\\InvalidSemantics\\arraySize.txt")]
+        public void CheckConstraintsWorksWithInvalidArraySizeDcl()
+        {
+            string filename = "arraySize.txt";
+            Scanner scanner = new Scanner(filename);
+            Parser parser = new Parser(scanner);
+            INode ast = parser.Parse();
+
+            Assert.IsFalse(parser.ErrorsDetected());
+
+            SemanticAnalyzer analyzer = new SemanticAnalyzer(ast);
+            analyzer.CheckConstraints();
+
+            Assert.IsTrue(analyzer.ErrosDetected());
+            Assert.IsTrue(analyzer.GetDetectedErrors().Count == 1);
+
+            List<string> errors = analyzer.GetDetectedErrors();
+
+            Assert.IsTrue(errors.Any(s => s.Contains("SemanticError::Row 3::Column 13")));
+        }
+
+        [TestMethod]
+        [DeploymentItem("SampleFiles\\InvalidSemantics\\returnType.txt")]
+        public void CheckConstraintsWorksWithInvalidReturnType()
+        {
+            string filename = "returnType.txt";
+            Scanner scanner = new Scanner(filename);
+            Parser parser = new Parser(scanner);
+            INode ast = parser.Parse();
+
+            Assert.IsFalse(parser.ErrorsDetected());
+
+            SemanticAnalyzer analyzer = new SemanticAnalyzer(ast);
+            analyzer.CheckConstraints();
+
+            Assert.IsTrue(analyzer.ErrosDetected());
+            Assert.IsTrue(analyzer.GetDetectedErrors().Count == 1);
+
+            List<string> errors = analyzer.GetDetectedErrors();
+
+            Assert.IsTrue(errors.Any(s => s.Contains("SemanticError::Row 10::Column 12")));
+        }
+
+        [TestMethod]
+        [DeploymentItem("SampleFiles\\ValidSemantics\\expressionWithCall.txt")]
+        public void CheckConstraintsWorksWithFunctionCallInsideExpression()
+        {
+            string filename = "expressionWithCall.txt";
+            Scanner scanner = new Scanner(filename);
+            Parser parser = new Parser(scanner);
+            INode ast = parser.Parse();
+
+            ast.PrettyPrint();
+
+            Assert.IsFalse(parser.ErrorsDetected());
+
+            SemanticAnalyzer analyzer = new SemanticAnalyzer(ast);
+            analyzer.CheckConstraints();
+
+            Assert.IsFalse(analyzer.ErrosDetected());
+            Assert.IsTrue(analyzer.GetDetectedErrors().Count == 0);
+        }
     }
 }
