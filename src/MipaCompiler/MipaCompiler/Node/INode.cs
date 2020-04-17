@@ -1,4 +1,6 @@
 ﻿
+using System.Collections.Generic;
+
 namespace MipaCompiler.Node
 {
     /// <summary>
@@ -56,6 +58,13 @@ namespace MipaCompiler.Node
         /// Method <c>GetCol</c> returns the column in source code that corresponds the node in AST.
         /// </summary>
         int GetCol();
+
+        /// <summary>
+        /// Method <c>GenerateCode</c> generated code corresponding to the node and
+        /// stores it to the list of code lines.
+        /// </summary>
+        /// <param name="codeLines">generated code lines</param>
+        void GenerateCode(List<string> codeLines);
     }
 
 }
