@@ -105,5 +105,47 @@ namespace MipaCompiler.Node
             Console.WriteLine("Main block:");
             if (mainBlock != null) mainBlock.PrettyPrint();
         }
+
+        public string GenerateCode(List<string> codeLines)
+        {
+            // add standard input output libraries
+            codeLines.Add("#include <stdio.h>\n");
+
+            // TODO
+            // do function and procedure forward declaration (for mutual recursion)
+            codeLines.Add("// here are forward declarations for functions and procedures (if any exists)");
+            if (functions != null && functions.Count > 0)
+            {
+
+            }
+            if (procedures != null && procedures.Count > 0)
+            {
+
+            }
+
+            // TODO
+            // do actual function and procedure code
+            if (functions != null && functions.Count > 0)
+            {
+
+            }
+            if (procedures != null && procedures.Count > 0)
+            {
+
+            }
+
+            // main block
+            codeLines.Add("");
+            codeLines.Add("int main()");
+            codeLines.Add("{");
+
+            mainBlock.GenerateCode(codeLines);
+
+            codeLines.Add("\n");
+            codeLines.Add("return 0;");
+            codeLines.Add("}");
+
+            return null;
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace MipaCompiler.Node
 {
@@ -82,6 +83,11 @@ namespace MipaCompiler.Node
             if (thenStatement != null) thenStatement.PrettyPrint();
             Console.WriteLine("Else statement:");
             if (elseStatement != null) elseStatement.PrettyPrint();
+        }
+
+        public string GenerateCode(List<string> codeLines)
+        {
+            throw new NotImplementedException();
         }
     }
 }

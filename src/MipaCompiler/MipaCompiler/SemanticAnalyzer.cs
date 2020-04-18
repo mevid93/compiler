@@ -90,21 +90,20 @@ namespace MipaCompiler
             // convert ast root node to program node
             ProgramNode prog = (ProgramNode)ast;
 
+            // before the actual checking, get all function
+            // and procedure declarations to symbol table
+            foreach (INode f in prog.GetFunctions()) InitFunctionToSymbolTable(f);
+            foreach (INode p in prog.GetProcedures()) InitProceduresToSymbolTable(p);
+
             // do semantic analysis for the functions
-            foreach (INode f in prog.GetFunctions())
-            {
-                CheckFunction(f);
-            }
+            foreach (INode f in prog.GetFunctions()) CheckFunction(f);
 
             // from here on --> no values should be returned in return statements
             // only functions should return values
             returnStmntType = "";
 
             // do semantic analysis for the procedures
-            foreach (INode p in prog.GetProcedures())
-            {
-                CheckProcedure(p);
-            }
+            foreach (INode p in prog.GetProcedures()) CheckProcedure(p);
 
             // do semantic analysis for the main block,
             // can be null if parsing failed
@@ -114,13 +113,13 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>CheckFunction</c> checks semantic constraints for function.
+        /// Method <c>InitFunctionToSymbolTable</c> checks function definition
+        /// and adds it to the symbolt table.
         /// </summary>
-        private void CheckFunction(INode node)
+        /// <param name="node">function node</param>
+        private void InitFunctionToSymbolTable(INode node)
         {
             if (node == null) return;
-
-            symbolTable.AddScope();
 
             // convert node to function node
             FunctionNode func = (FunctionNode)node;
@@ -133,7 +132,7 @@ namespace MipaCompiler
             List<INode> parameters = func.GetParameters();
             string[] paramTypes = new string[parameters.Count];
 
-            for(int i = 0; i < parameters.Count; i++)
+            for (int i = 0; i < parameters.Count; i++)
             {
                 VariableNode varNode = (VariableNode)parameters[i];
                 paramTypes[i] = EvaluateTypeOfTypeNode(varNode.GetVariableType());
@@ -142,43 +141,40 @@ namespace MipaCompiler
                 VariableSymbol sym = new VariableSymbol(varNode.GetName(), paramTypes[i], null, symbolTable.GetCurrentScope());
                 symbolTable.DeclareVariableSymbol(sym);
             }
-            
+
             // find return type
             string returnType = EvaluateTypeOfTypeNode(func.GetReturnType());
             returnStmntType = returnType;
 
             // create new function symbol
             FunctionSymbol symbol = new FunctionSymbol(functionName, paramTypes, returnType);
+            // create similar procedure symbol
+            ProcedureSymbol psymbol = new ProcedureSymbol(functionName, paramTypes);
 
             // check that function symbol does not exist in the symbol table already
             // if it does exist --> report error
-            if (symbolTable.IsFunctionSymbolInTable(symbol))
+            if (symbolTable.IsFunctionSymbolInTable(symbol) || symbolTable.IsProcedureSymbolInTable(psymbol))
             {
                 string functionStr = $"{functionName}({string.Join(", ", paramTypes)})";
                 string errorMsg = $"SemanticError::Row {func.GetRow()}::Column {func.GetCol()}::";
-                errorMsg += $"Procedure/Function {functionStr} already defined!";
+                errorMsg += $"Name {functionStr} already defined in this scope!";
                 ReportError(errorMsg);
-                symbolTable.RemoveScope();
-                return; 
             }
-
-            // no problems detected --> add function symbol to table
-            symbolTable.DeclareFunctionSymbol(symbol);
-
-            // check the function code
-            CheckBlock(func.GetBlock());
-
-            symbolTable.RemoveScope();
+            else
+            {
+                // no problems detected --> add function symbol to table
+                symbolTable.DeclareFunctionSymbol(symbol);
+            }
         }
 
         /// <summary>
-        /// Method <c>CheckProcedure</c> checks semantic constraints for procedure.
+        /// Method <c>InitProceduresToSymbolTable</c> checks procedure definition and
+        /// adds it to the symbol table.
         /// </summary>
-        private void CheckProcedure(INode node)
+        /// <param name="node">procedure node</param>
+        private void InitProceduresToSymbolTable(INode node)
         {
             if (node == null) return;
-
-            symbolTable.AddScope();
 
             // convert node to procedure node
             ProcedureNode proc = (ProcedureNode)node;
@@ -201,23 +197,56 @@ namespace MipaCompiler
                 symbolTable.DeclareVariableSymbol(sym);
             }
 
-            // create new function symbol
+            // create new procedure symbol
             ProcedureSymbol symbol = new ProcedureSymbol(procedureName, paramTypes);
+            // create similar function symbol
+            FunctionSymbol fsymbol = new FunctionSymbol(procedureName, paramTypes, null);
 
             // check that porcedure symbol does not exist in the symbol table already
             // if it does exist --> report error
-            if (symbolTable.IsProcedureSymbolInTable(symbol))
+            if (symbolTable.IsProcedureSymbolInTable(symbol) || symbolTable.IsFunctionSymbolInTable(fsymbol))
             {
                 string procedureStr = $"{procedureName}({string.Join(", ", paramTypes)})";
                 string errorMsg = $"SemanticError::Row {proc.GetRow()}::Column {proc.GetCol()}::";
                 errorMsg += $"Procedure /Function {procedureStr} already defined!";
                 ReportError(errorMsg);
-                symbolTable.RemoveScope();
-                return;
             }
+            else
+            {
+                // no problems detected --> add function symbol to table
+                symbolTable.DeclareProcedureSymbol(symbol);
+            }
+        }
 
-            // no problems detected --> add function symbol to table
-            symbolTable.DeclareProcedureSymbol(symbol);
+        /// <summary>
+        /// Method <c>CheckFunction</c> checks semantic constraints for function code block.
+        /// </summary>
+        private void CheckFunction(INode node)
+        {
+            if (node == null) return;
+
+            symbolTable.AddScope();
+
+            // convert node to function node
+            FunctionNode func = (FunctionNode)node;
+
+            // check the function code
+            CheckBlock(func.GetBlock());
+
+            symbolTable.RemoveScope();
+        }
+
+        /// <summary>
+        /// Method <c>CheckProcedure</c> checks semantic constraints for procedure code block.
+        /// </summary>
+        private void CheckProcedure(INode node)
+        {
+            if (node == null) return;
+
+            symbolTable.AddScope();
+
+            // convert node to procedure node
+            ProcedureNode proc = (ProcedureNode)node;
 
             // check the function code
             CheckBlock(proc.GetBlock());
@@ -794,20 +823,125 @@ namespace MipaCompiler
             // get name of the function or procedure that is called
             string identifier = callNode.GetId();
 
-            // if a function call
+            List<INode> arguments = callNode.GetArguments();
+            string[] parameters = new string[arguments.Count];
+            for(int i = 0; i < arguments.Count; i++)
+            {
+                string type = EvaluateTypeOfExpressionNode(arguments[i]);
+                if (type != null) parameters[i] = type;
+            }
 
-            // check that at least one function with such a name is defined
+            // check if function with same name exists in table
+            bool functionNameExists = symbolTable.IsFunctionInTable(identifier);
 
-            // if at least one function with matching name was found 
-            // check that arguments match with parameters
+            // check if procedure with same name exists in table
+            bool procedureNameExists = symbolTable.IsProcedureInTable(identifier);
 
-            // if procedure call
+            // could be a function call
+            FunctionSymbol fs = new FunctionSymbol(identifier, parameters, null);
+            bool functionInTable = symbolTable.IsFunctionSymbolInTable(fs);
 
-            // check that at least one procedure with such a name is defined
+            // could be a procedure call
+            ProcedureSymbol ps = new ProcedureSymbol(identifier, parameters);
+            bool procedureInTable = symbolTable.IsProcedureSymbolInTable(ps);
 
-            // if at least one procedure with matching name was found
-            // check that arguments match with parameters
+            // is a function
+            if(functionNameExists && !procedureNameExists) return CheckFunctionCall(node, functionInTable, identifier, parameters);
+            // is a procedure
+            if (!functionNameExists && procedureNameExists) return CheckProcedureCall();
+            // can be both function or procedure call
+            if (functionNameExists && procedureNameExists) return CheckProcedureFunctionCall();
+            // is predefined read procedure call
+            if (identifier.Equals("read")) return CheckReadCall();
+            // is predefined writeln procedure call
+            if (identifier.Equals("writeln")) return CheckWritelnCall();
+            
+            // is not a valid function or procedure name --> report error
+            string errorMsg = $"SemanticError::Row {node.GetRow()}::Column {node.GetCol()}::";
+            errorMsg += $"Procedure/Function {identifier} not declared in this scope!";
+            ReportError(errorMsg);
+            return null;
+        }
 
+        /// <summary>
+        /// Method <c>CheckFunctionCall</c> checks that function call parameters are correct.
+        /// </summary>
+        /// <param name="functionInTable"></param>
+        /// <param name="identifier"></param>
+        /// <param name="parameters"></param>
+        /// <returns>return type of most similar function definition</returns>
+        private string CheckFunctionCall(INode node, bool functionInTable, string identifier, string[] parameters)
+        {
+            if (functionInTable)
+            {
+                FunctionSymbol fsymbol = symbolTable.GetFunctionSymbolByIdentifierAndArguments(identifier, parameters);
+                return fsymbol.GetReturnType();
+            }
+            else
+            {
+                // incorrect arguments --> report error
+                FunctionSymbol similar = symbolTable.GetMostSimilarFunctionSymbol(identifier, parameters);
+
+                string errorMsg = $"SemanticError::Row {node.GetRow()}::Column {node.GetCol()}::";
+                errorMsg += $"Procedure/Function arguments are invalid!";
+                ReportError(errorMsg);
+
+                return similar.GetReturnType();
+            }
+        }
+
+        private string CheckProcedureCall()
+        {
+            /*
+            if (procedureInTable)
+            {
+                // correct call --> return type
+
+                return null;
+            }
+            else
+            {
+                // incorrect arguments --> report error
+
+                return null;
+            }*/
+            return null;
+        }
+
+        private string CheckReadCall()
+        {
+            // TODO
+            return null;
+        }
+
+        private string CheckWritelnCall()
+        {
+            // TODO
+            return null;
+        }
+
+        private string CheckProcedureFunctionCall()
+        {
+            /*
+            if (functionInTable)
+            {
+                // correct arguments for function call
+
+                return null;
+            }
+            else if (procedureInTable)
+            {
+                // incorrect arguments for function call
+
+                return null;
+            }
+            else
+            {
+                // wrong arguments --> report error
+
+                return null;
+            }
+            */
             return null;
         }
 

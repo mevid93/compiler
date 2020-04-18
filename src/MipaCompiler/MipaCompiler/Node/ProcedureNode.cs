@@ -87,5 +87,10 @@ namespace MipaCompiler.Node
             Console.WriteLine($"Block:");
             if (block != null) block.PrettyPrint();
         }
+
+        public string GenerateCode(List<string> codeLines)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

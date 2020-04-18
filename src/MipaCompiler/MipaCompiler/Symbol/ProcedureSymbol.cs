@@ -37,6 +37,7 @@ namespace MipaCompiler.Symbol
 
             for (int i = 0; i < types1.Length; i++)
             {
+                if (types1[i] == null || parameters[i] == null) return false;
                 if (!types1[i].Equals(parameters[i])) return false;
             }
 

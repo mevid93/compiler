@@ -64,7 +64,7 @@ namespace MipaCompiler.Node
         /// stores it to the list of code lines.
         /// </summary>
         /// <param name="codeLines">generated code lines</param>
-        void GenerateCode(List<string> codeLines);
+        string GenerateCode(List<string> codeLines);
     }
 
 }

@@ -74,5 +74,10 @@ namespace MipaCompiler.Node
                 arg.PrettyPrint();
             }
         }
+
+        public string GenerateCode(List<string> codeLines)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace MipaCompiler.Node
 {
@@ -54,6 +55,11 @@ namespace MipaCompiler.Node
             Console.WriteLine($"Row: {row}, Column: {col}");
             Console.WriteLine($"Expression:");
             if (expression != null) expression.PrettyPrint();
+        }
+
+        public string GenerateCode(List<string> codeLines)
+        {
+            throw new NotImplementedException();
         }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace MipaCompiler.Node
 {
@@ -68,6 +69,11 @@ namespace MipaCompiler.Node
             Console.WriteLine($"Name: {name}");
             Console.WriteLine($"Type:");
             if (type != null) type.PrettyPrint();
+        }
+
+        public string GenerateCode(List<string> codeLines)
+        {
+            throw new NotImplementedException();
         }
     }
 }

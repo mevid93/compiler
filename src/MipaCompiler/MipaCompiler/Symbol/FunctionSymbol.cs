@@ -7,7 +7,7 @@ namespace MipaCompiler.Symbol
     public class FunctionSymbol : ISymbol
     {
         private readonly string identifier;     // function name
-        private readonly string[] parameters;   // array of parameters types
+        private readonly string[] parameters;   // array of parameter types
         private readonly string returnType;     // return value type
 
         /// <summary>
@@ -34,8 +34,6 @@ namespace MipaCompiler.Symbol
 
         public bool HasSameDefinition(ISymbol symbol)
         {
-            if (symbol.GetType() == typeof(VariableSymbol)) return false;
-
             if (!symbol.GetIdentifier().Equals(identifier)) return false;
 
             string[] types1 = symbol.GetParameterTypes();
@@ -44,6 +42,7 @@ namespace MipaCompiler.Symbol
 
             for (int i = 0; i < types1.Length; i++)
             {
+                if (types1[i] == null || parameters[i] == null) return false;
                 if (!types1[i].Equals(parameters[i])) return false;
             }
 

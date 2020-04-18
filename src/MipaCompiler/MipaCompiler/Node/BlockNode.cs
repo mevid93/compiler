@@ -60,5 +60,13 @@ namespace MipaCompiler.Node
                 node.PrettyPrint();
             }
         }
+
+        public string GenerateCode(List<string> codeLines)
+        {
+            // will generate code of the statements inside the block
+
+
+            return null;
+        }
     }
 }

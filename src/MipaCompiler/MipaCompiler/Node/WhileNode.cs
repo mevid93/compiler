@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace MipaCompiler.Node
 {
@@ -68,6 +69,11 @@ namespace MipaCompiler.Node
             if (boolExpression != null) boolExpression.PrettyPrint();
             Console.WriteLine($"Statement:");
             if (statement != null) statement.PrettyPrint();
+        }
+
+        public string GenerateCode(List<string> codeLines)
+        {
+            throw new NotImplementedException();
         }
     }
 }

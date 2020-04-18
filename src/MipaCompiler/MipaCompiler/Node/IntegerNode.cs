@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace MipaCompiler.Node
 {
@@ -53,6 +54,11 @@ namespace MipaCompiler.Node
             Console.WriteLine($"NodeType: {NodeType.INTEGER}");
             Console.WriteLine($"Row: {row}, Column: {col}");
             Console.WriteLine($"Value: {value}");
+        }
+
+        public string GenerateCode(List<string> codeLines)
+        {
+            throw new NotImplementedException();
         }
     }
 }

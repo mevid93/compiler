@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace MipaCompiler.Node
 {
@@ -67,6 +68,11 @@ namespace MipaCompiler.Node
             Console.WriteLine($"Is negative: {isNegative}");
             Console.WriteLine($"Term: ");
             if (term != null) term.PrettyPrint();
+        }
+
+        public string GenerateCode(List<string> codeLines)
+        {
+            throw new NotImplementedException();
         }
     }
 }

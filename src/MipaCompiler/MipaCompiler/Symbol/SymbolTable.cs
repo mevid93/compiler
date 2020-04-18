@@ -79,19 +79,15 @@ namespace MipaCompiler.Symbol
 
         /// <summary>
         /// Method <c>IsFunctionSymbolInTable</c> checks if given function is
-        /// already in table. It also checks that procedure with samen information
-        /// does not exist.
+        /// already in table.
         /// </summary>
+        /// <param name="symbol">function symbol</param>
         /// <returns>true if function in table</returns>
         public bool IsFunctionSymbolInTable(FunctionSymbol symbol)
         {
             foreach(FunctionSymbol f in functions)
             {
                 if (f.HasSameDefinition(symbol)) return true;
-            }
-            foreach(ProcedureSymbol p in procedures)
-            {
-                if (p.HasSameDefinition(symbol)) return true;
             }
 
             return false;
@@ -108,9 +104,37 @@ namespace MipaCompiler.Symbol
             {
                 if (p.HasSameDefinition(symbol)) return true;
             }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Method <c>IsFunctionInTable</c> checks if there exists a function with 
+        /// given identifier in table.
+        /// </summary>
+        /// <param name="identifier"></param>
+        /// <returns>true if at least one function exists</returns>
+        public bool IsFunctionInTable(string identifier)
+        {
             foreach (FunctionSymbol f in functions)
             {
-                if (f.HasSameDefinition(symbol)) return true;
+                if (f.GetIdentifier().Equals(identifier)) return true;
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Method <c>IsProcedureInTable</c> checks if there exists a procedure with 
+        /// given identifier in table.
+        /// </summary>
+        /// <param name="identifier"></param>
+        /// <returns>true if at least one procedure exists</returns>
+        public bool IsProcedureInTable(string identifier)
+        {
+            foreach (ProcedureSymbol p in procedures)
+            {
+                if (p.GetIdentifier().Equals(identifier)) return true;
             }
 
             return false;
@@ -281,6 +305,40 @@ namespace MipaCompiler.Symbol
                 }
             }
             return false;
+        }
+
+        /// <summary>
+        /// Method <c>GetMostSimilarFunctionSymbol</c> returns the function symvbol which has
+        /// highest number of correct parameters.
+        /// </summary>
+        /// <param name="identifier"></param>
+        /// <param name="parameters"></param>
+        /// <returns>most similar function symbol</returns>
+        public FunctionSymbol GetMostSimilarFunctionSymbol(string identifier, string[] parameters)
+        {
+            int max = -1;
+            FunctionSymbol mostSimilar = null;
+
+            foreach(FunctionSymbol f in functions)
+            {
+                int matches = 0;
+                string[] parameters1 = f.GetParameterTypes();
+
+                for(int i = 0; i < parameters1.Length; i++)
+                {
+                    if (parameters[0] == null || parameters1[0] == null) continue;
+
+                    if (parameters[0].Equals(parameters1[0])) matches++;
+                }
+
+                if (matches > max)
+                {
+                    mostSimilar = f;
+                    max = matches;
+                }
+            }
+
+            return mostSimilar;
         }
     }
 }

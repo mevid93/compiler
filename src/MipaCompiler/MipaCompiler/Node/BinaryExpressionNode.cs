@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace MipaCompiler.Node
 {
@@ -81,6 +82,11 @@ namespace MipaCompiler.Node
             if (lhs != null) lhs.PrettyPrint();
             Console.WriteLine($"Right hand side:");
             if (rhs != null) rhs.PrettyPrint();
+        }
+
+        public string GenerateCode(List<string> codeLines)
+        {
+            throw new NotImplementedException();
         }
     }
 }
