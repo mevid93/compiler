@@ -69,7 +69,7 @@ namespace MipaCompiler.Symbol
         {
             foreach (VariableSymbol s in variables)
             {
-                if (s.GetIdentifier().Equals(identifier))
+                if (s.GetIdentifier().Equals(identifier) && s.GetCurrentScope() <= currentScope)
                 {
                     return true;
                 }
@@ -334,6 +334,40 @@ namespace MipaCompiler.Symbol
                 if (matches > max)
                 {
                     mostSimilar = f;
+                    max = matches;
+                }
+            }
+
+            return mostSimilar;
+        }
+
+        /// <summary>
+        /// Method <c>GetMostSimilarProcedureSymbol</c> returns the function symbol which has
+        /// highest number of correct parameters.
+        /// </summary>
+        /// <param name="identifier"></param>
+        /// <param name="parameters"></param>
+        /// <returns>most similar procedure symbol</returns>
+        public ProcedureSymbol GetMostSimilarProcedureSymbol(string identifier, string[] parameters)
+        {
+            int max = -1;
+            ProcedureSymbol mostSimilar = null;
+
+            foreach (ProcedureSymbol p in procedures)
+            {
+                int matches = 0;
+                string[] parameters1 = p.GetParameterTypes();
+
+                for (int i = 0; i < parameters1.Length; i++)
+                {
+                    if (parameters[0] == null || parameters1[0] == null) continue;
+
+                    if (parameters[0].Equals(parameters1[0])) matches++;
+                }
+
+                if (matches > max)
+                {
+                    mostSimilar = p;
                     max = matches;
                 }
             }

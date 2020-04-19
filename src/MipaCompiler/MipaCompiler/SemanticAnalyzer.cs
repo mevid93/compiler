@@ -848,13 +848,13 @@ namespace MipaCompiler
             // is a function
             if(functionNameExists && !procedureNameExists) return CheckFunctionCall(node, functionInTable, identifier, parameters);
             // is a procedure
-            if (!functionNameExists && procedureNameExists) return CheckProcedureCall();
+            if (!functionNameExists && procedureNameExists) return CheckProcedureCall(node, procedureInTable, identifier, parameters);
             // can be both function or procedure call
-            if (functionNameExists && procedureNameExists) return CheckProcedureFunctionCall();
+            if (functionNameExists && procedureNameExists) return CheckProcedureFunctionCall(node, functionInTable, procedureInTable, identifier, parameters);
             // is predefined read procedure call
-            if (identifier.Equals("read")) return CheckReadCall();
+            if (identifier.Equals("read")) return CheckReadCall(node);
             // is predefined writeln procedure call
-            if (identifier.Equals("writeln")) return CheckWritelnCall();
+            if (identifier.Equals("writeln")) return CheckWritelnCall(node);
             
             // is not a valid function or procedure name --> report error
             string errorMsg = $"SemanticError::Row {node.GetRow()}::Column {node.GetCol()}::";
@@ -890,59 +890,183 @@ namespace MipaCompiler
             }
         }
 
-        private string CheckProcedureCall()
+        /// <summary>
+        /// Method <c>CheckProcedureCall</c> checks that the procedure call parameters are correct.
+        /// </summary>
+        /// <param name="node"></param>
+        /// <param name="procedureInTable"></param>
+        /// <param name="identifier"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        private string CheckProcedureCall(INode node, bool procedureInTable, string identifier, string[] parameters)
         {
-            /*
             if (procedureInTable)
             {
-                // correct call --> return type
-
-                return null;
+                ProcedureSymbol psymbol = symbolTable.GetProcedureSymbolByIdentifierAndArguments(identifier, parameters);
             }
             else
             {
                 // incorrect arguments --> report error
+                ProcedureSymbol similar = symbolTable.GetMostSimilarProcedureSymbol(identifier, parameters);
 
-                return null;
-            }*/
+                string errorMsg = $"SemanticError::Row {node.GetRow()}::Column {node.GetCol()}::";
+                errorMsg += $"Procedure/Function arguments are invalid!";
+                ReportError(errorMsg);
+            }
             return null;
         }
 
-        private string CheckReadCall()
+        /// <summary>
+        /// Method <c>CheckReadCall</c> checks that the parameters of read call are correct type.
+        /// </summary>
+        private string CheckReadCall(INode node)
         {
-            // TODO
+            if (node == null) return null;
+
+            CallNode callNode = (CallNode)node;
+
+            // check that all paramateres are correct type and declared in scope
+            foreach(INode p in callNode.GetArguments())
+            {
+                VariableNode varNode = null;
+                if (p.GetNodeType() != NodeType.VARIABLE && p.GetNodeType() != NodeType.BINARY_EXPRESSION)
+                {
+                    // error
+                    string notVariable = $"SemanticError::Row {p.GetRow()}::Column {p.GetCol()}::";
+                    notVariable += $"Argument must be a variable!";
+                    ReportError(notVariable);
+                    continue;
+                }
+                else if(p.GetNodeType() == NodeType.BINARY_EXPRESSION)
+                {
+                    BinaryExpressionNode bin = (BinaryExpressionNode)p;
+                    INode lhs = bin.GetLhs();
+                    if (lhs.GetNodeType() != NodeType.VARIABLE)
+                    {
+                        string notVariable = $"SemanticError::Row {p.GetRow()}::Column {p.GetCol()}::";
+                        notVariable += $"Argument must be a variable!";
+                        ReportError(notVariable);
+                        continue;
+                    }
+                    varNode = (VariableNode)lhs;
+                }else if(p.GetNodeType() == NodeType.VARIABLE)
+                {
+                    varNode = (VariableNode)p;
+                }
+
+                string identifier = varNode.GetName();
+                if (!symbolTable.IsVariableSymbolInTable(identifier))
+                {
+                    string notDcl = $"SemanticError::Row {p.GetRow()}::Column {p.GetCol()}::";
+                    notDcl += $"Variable {identifier} does not exist in this scope!";
+                    ReportError(notDcl);
+                    continue;
+                }
+
+                INode nodeType = varNode.GetVariableType();
+                string type = EvaluateTypeOfTypeNode(nodeType);
+
+                if (type != null && type == STR_BOOLEAN)
+                {
+                    string wrongtype = $"SemanticError::Row {p.GetRow()}::Column {p.GetCol()}::";
+                    wrongtype += $"Argument type cannot be boolean!";
+                    ReportError(wrongtype);
+                    continue;
+                }
+
+            }
+
             return null;
         }
 
-        private string CheckWritelnCall()
+        /// <summary>
+        /// Method <c>CheckWritelnCall</c> checks that the parameters are correct type and declared.
+        /// </summary>
+        private string CheckWritelnCall(INode node)
         {
-            // TODO
+            if (node == null) return null;
+
+            CallNode callNode = (CallNode)node;
+
+            // check that all paramateres are correct type and declared in scope
+            foreach (INode p in callNode.GetArguments())
+            {
+                switch (p.GetNodeType())
+                {
+                    case NodeType.VARIABLE:
+                        string varType = EvaluateTypeOfVariableNode(p);
+                        if(varType != null && varType.Equals(STR_BOOLEAN))
+                        {
+                            string errorVar = $"SemanticError::Row {p.GetRow()}::Column {p.GetCol()}::";
+                            errorVar += $"Argument must be numeric or string!";
+                            ReportError(errorVar);
+                        }
+                        break;
+                    case NodeType.STRING:
+                    case NodeType.INTEGER:
+                    case NodeType.REAL:
+                        break;
+                    case NodeType.BINARY_EXPRESSION:
+                        string binaryType = EvaluateTypeOfBinaryExpressionNode(p);
+                        if (binaryType != null && binaryType.Equals(STR_BOOLEAN))
+                        {
+                            string errorBin = $"SemanticError::Row {p.GetRow()}::Column {p.GetCol()}::";
+                            errorBin += $"Argument must be numeric or string!";
+                            ReportError(errorBin);
+                        }
+                        break;
+                    case NodeType.CALL:
+                        CallNode c = (CallNode)p;
+                        string rettype = EvaluateTypeOfCallNode(c);
+                        if (rettype != null && rettype.Equals(STR_BOOLEAN))
+                        {
+                            string errorCall = $"SemanticError::Row {p.GetRow()}::Column {p.GetCol()}::";
+                            errorCall += $"Argument must be numeric or string!";
+                            ReportError(errorCall);
+                        }
+                        break;
+                    case NodeType.UNARY_EXPRESSION:
+                        string typeUnary = EvaluateTypeOfUnaryExpressionNode(p);
+                        if (typeUnary != null && !typeUnary.Equals(STR_INTEGER))
+                        {
+                            string errorUnary = $"SemanticError::Row {p.GetRow()}::Column {p.GetCol()}::";
+                            errorUnary += $"Argument must be numeric or string!";
+                            ReportError(errorUnary);
+                        }
+                        break;
+                    default:
+                        string errorDefault = $"SemanticError::Row {p.GetRow()}::Column {p.GetCol()}::";
+                        errorDefault += $"Argument must be numeric or string!";
+                        ReportError(errorDefault);
+                        break;
+                }
+
+            }
+
             return null;
         }
 
-        private string CheckProcedureFunctionCall()
+        private string CheckProcedureFunctionCall(INode node, bool functionInTable, bool procedureInTable, string identifier, string[] parameters)
         {
-            /*
             if (functionInTable)
             {
-                // correct arguments for function call
-
-                return null;
+                FunctionSymbol f = symbolTable.GetFunctionSymbolByIdentifierAndArguments(identifier, parameters);
+                return f.GetReturnType();
             }
             else if (procedureInTable)
             {
-                // incorrect arguments for function call
-
                 return null;
             }
             else
             {
-                // wrong arguments --> report error
+                string errorMsg = $"SemanticError::Row {node.GetRow()}::Column {node.GetCol()}::";
+                errorMsg += $"Procedure/Function arguments are invalid!";
+                ReportError(errorMsg);
 
-                return null;
+                FunctionSymbol f = symbolTable.GetMostSimilarFunctionSymbol(identifier, parameters);
+                return f.GetReturnType();
             }
-            */
-            return null;
+            
         }
 
     }

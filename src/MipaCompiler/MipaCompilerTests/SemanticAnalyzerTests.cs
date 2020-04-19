@@ -222,7 +222,7 @@ namespace MipaCompilerTests
             Parser parser = new Parser(scanner);
             INode ast = parser.Parse();
 
-            ast.PrettyPrint();
+            //ast.PrettyPrint();
 
             Assert.IsFalse(parser.ErrorsDetected());
 
