@@ -56,7 +56,7 @@ namespace MipaCompiler.Node
             Console.WriteLine($"Type: {type}");
         }
 
-        public string GenerateCode(List<string> codeLines)
+        public void GenerateCode(Visitor visitor)
         {
             throw new NotImplementedException();
         }

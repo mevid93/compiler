@@ -102,10 +102,71 @@ namespace MipaCompiler.Node
             if (block != null) block.PrettyPrint();
         }
 
-        public string GenerateCode(List<string> codeLines)
+        public void GenerateCode(Visitor visitor)
         {
-            throw new NotImplementedException();
+            string dcl = "";
+
+            // get return type --> no need to give symbol table
+            string resultType = SemanticAnalyzer.EvaluateTypeOfTypeNode(type, new List<string>(), null);
+
+            // convert return type into c-code
+            dcl += CodeGenerator.ConvertParameterTypeToTargetLanguage(resultType) + " ";
+
+            // name of the function
+            dcl += "function_" + name;
+
+            // add parameters
+            dcl += "(";
+            for (int i = 0; i < parameters.Count; i++)
+            {
+                INode node = parameters[i];
+                VariableNode variableNode = (VariableNode)node;
+                string varType = SemanticAnalyzer.EvaluateTypeOfTypeNode(variableNode.GetVariableType(), new List<string>(), null);
+                varType = CodeGenerator.ConvertParameterTypeToTargetLanguage(varType);
+                dcl += varType + " ";
+                string varName = "var_" + variableNode.GetName();
+                dcl += varName;
+                if (i < parameters.Count - 1) dcl += ", ";
+            }
+            dcl += ");";
+            
         }
         
+        /// <summary>
+        /// Method <c>GenerateForwardDeclaration</c> returns code line of function
+        /// forward declaration.
+        /// </summary>
+        /// <returns>function forward declaration</returns>
+        public string GenerateForwardDeclaration()
+        {
+            string dcl = "";
+
+            // get return type --> no need to give symbol table
+            string resultType = SemanticAnalyzer.EvaluateTypeOfTypeNode(type, new List<string>(), null);
+
+            // convert return type into c-code
+            dcl += CodeGenerator.ConvertParameterTypeToTargetLanguage(resultType) + " ";
+
+            // name of the function
+            dcl += "function_" + name;
+
+            // add parameters
+            dcl += "(";
+            for (int i = 0; i < parameters.Count; i++)
+            {
+                INode node = parameters[i];
+                VariableNode variableNode = (VariableNode)node;
+                string varType = SemanticAnalyzer.EvaluateTypeOfTypeNode(variableNode.GetVariableType(), new List<string>(), null);
+                varType = CodeGenerator.ConvertParameterTypeToTargetLanguage(varType);
+                dcl += varType + " ";
+                string varName = "var_" + variableNode.GetName();
+                dcl += varName;
+                if (i < parameters.Count - 1) dcl += ", ";
+            }
+            dcl += ");";
+
+            return dcl;
+        }
+
     }
 }

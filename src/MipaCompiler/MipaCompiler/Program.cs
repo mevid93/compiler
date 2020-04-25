@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MipaCompiler.Node;
+using System;
 using System.IO;
 
 namespace MipaCompiler
@@ -57,18 +58,18 @@ namespace MipaCompiler
             Parser parser = new Parser(scanner);
 
             // syntax analysis and create AST intermediate representation
-            // List<INode> ast = parser.Parse();
+            INode ast = parser.Parse();
 
             // semantic analysis
-            // Semantix semalys = new Semantix(ast);
-            // semalys.CheckConstraints();
+            SemanticAnalyzer semalys = new SemanticAnalyzer(ast);
+            semalys.CheckConstraints();
 
             // check that no errors were detected in source code
-            // if (parser.NoErrorsDetected() && semalys.NoErrorsDetected())
-            // {
-                // code generation ...
-                // TODO!
-            // }
+            if (!parser.ErrorsDetected() && !semalys.ErrosDetected())
+            {
+                CodeGenerator generator = new CodeGenerator(outputFilePath, ast);
+                generator.Generate();
+            }
 
             return 0;
         }

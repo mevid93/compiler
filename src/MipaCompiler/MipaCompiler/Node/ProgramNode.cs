@@ -106,25 +106,41 @@ namespace MipaCompiler.Node
             if (mainBlock != null) mainBlock.PrettyPrint();
         }
 
-        public string GenerateCode(List<string> codeLines)
+        public void GenerateCode(Visitor visitor)
         {
             // add standard input output libraries
-            codeLines.Add("#include <stdio.h>\n");
+            visitor.AddCodeLine("#include <stdio.h>\n");
 
-            // TODO
+            // add typedef for boolean
+            visitor.AddCodeLine("typedef int bool;");
+            visitor.AddCodeLine("#define true 1");
+            visitor.AddCodeLine("#define false 0\n");
+
             // do function and procedure forward declaration (for mutual recursion)
-            codeLines.Add("// here are forward declarations for functions and procedures (if any exists)");
+            visitor.AddCodeLine("// here are forward declarations for functions and procedures (if any exists)");
             if (functions != null && functions.Count > 0)
             {
-
+                foreach(INode function in functions)
+                {
+                    FunctionNode fNode = (FunctionNode)function;
+                    string line = fNode.GenerateForwardDeclaration();
+                    visitor.AddCodeLine(line);
+                }
             }
             if (procedures != null && procedures.Count > 0)
             {
-
+                foreach (INode procedure in procedures)
+                {
+                    ProcedureNode pNode = (ProcedureNode)procedure;
+                    string line = pNode.GenerateForwardDeclaration();
+                    visitor.AddCodeLine(line);
+                }
             }
 
-            // TODO
+
             // do actual function and procedure code
+            visitor.AddCodeLine("");
+            visitor.AddCodeLine("// here are the definitions of functions and procedures (if any exists)");
             if (functions != null && functions.Count > 0)
             {
 
@@ -135,17 +151,16 @@ namespace MipaCompiler.Node
             }
 
             // main block
-            codeLines.Add("");
-            codeLines.Add("int main()");
-            codeLines.Add("{");
+            visitor.AddCodeLine("");
+            visitor.AddCodeLine("// here is the main function");
+            visitor.AddCodeLine("int main()");
+            visitor.AddCodeLine("{");
 
-            mainBlock.GenerateCode(codeLines);
+            mainBlock.GenerateCode(visitor);
 
-            codeLines.Add("\n");
-            codeLines.Add("return 0;");
-            codeLines.Add("}");
-
-            return null;
+            visitor.AddCodeLine("\n");
+            visitor.AddCodeLine("return 0;");
+            visitor.AddCodeLine("}");
         }
     }
 }

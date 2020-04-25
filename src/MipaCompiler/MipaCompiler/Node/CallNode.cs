@@ -75,7 +75,7 @@ namespace MipaCompiler.Node
             }
         }
 
-        public string GenerateCode(List<string> codeLines)
+        public void GenerateCode(Visitor visitor)
         {
             throw new NotImplementedException();
         }

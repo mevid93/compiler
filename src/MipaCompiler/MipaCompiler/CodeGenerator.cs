@@ -11,7 +11,7 @@ namespace MipaCompiler
     {
         private readonly string outputFilePath;             // output file path
         private readonly INode ast;                         // abstract syntax tree
-        private readonly List<string> codeLines;            // lines of code
+        private readonly Visitor visitor;                   // visitor for processing ast
 
         /// <summary>
         /// Constructor <c>CodeGenerator</c>
@@ -20,7 +20,7 @@ namespace MipaCompiler
         /// <param name="ast">abstract syntax tree</param>
         public CodeGenerator(string outputFilePath, INode ast)
         {
-            codeLines = new List<string>();
+            visitor = new Visitor();
             this.outputFilePath = outputFilePath;
             this.ast = null;
             if (ast != null || ast.GetNodeType() == NodeType.PROGRAM) this.ast = ast;
@@ -56,7 +56,7 @@ namespace MipaCompiler
         /// <returns>C-code lines</returns>
         public List<string> GetCodeLines()
         {
-            return codeLines;
+            return visitor.GetCodeLines();
         }
 
         /// <summary>
@@ -66,7 +66,7 @@ namespace MipaCompiler
         {
             if (ast == null) return;
 
-            ast.GenerateCode(codeLines);
+            ast.GenerateCode(visitor);
         }
 
         /// <summary>
@@ -80,5 +80,37 @@ namespace MipaCompiler
             // write code lines to ouput file
         }
 
+        ///////////////////////// STATIC GENERAL CODE GENERATION METHODS /////////////////////////
+
+        /// <summary>
+        /// Static method <c>ConvertTypeToTargetLanguage</c> convertos Mini-Pascal type
+        /// to C-language type.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns>C-language type</returns>
+        public static string ConvertParameterTypeToTargetLanguage(string type)
+        {
+            switch (type)
+            {
+                case "string":
+                    return "const char *";
+                case "real":
+                    return "double *";
+                case "integer":
+                    return "int *";
+                case "boolean":
+                    return "bool *";
+                case "array[] of string":
+                    return "char **";
+                case "array[] of real":
+                    return "double *";
+                case "array[] of integer":
+                    return "integer *";
+                case "array[] of boolean":
+                    return "bool *";
+                default:
+                    throw new Exception("Unexpected error... Function without return type!");
+            }
+        }
     }
 }

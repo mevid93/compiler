@@ -1,6 +1,4 @@
 ﻿
-using System.Collections.Generic;
-
 namespace MipaCompiler.Node
 {
     /// <summary>
@@ -63,8 +61,8 @@ namespace MipaCompiler.Node
         /// Method <c>GenerateCode</c> generated code corresponding to the node and
         /// stores it to the list of code lines.
         /// </summary>
-        /// <param name="codeLines">generated code lines</param>
-        string GenerateCode(List<string> codeLines);
+        /// <param name="visitor">code genreration visitor</param>
+        void GenerateCode(Visitor visitor);
     }
 
 }

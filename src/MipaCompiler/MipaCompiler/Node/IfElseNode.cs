@@ -85,7 +85,7 @@ namespace MipaCompiler.Node
             if (elseStatement != null) elseStatement.PrettyPrint();
         }
 
-        public string GenerateCode(List<string> codeLines)
+        public void GenerateCode(Visitor visitor)
         {
             throw new NotImplementedException();
         }

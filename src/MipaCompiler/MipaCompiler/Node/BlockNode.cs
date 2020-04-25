@@ -61,12 +61,11 @@ namespace MipaCompiler.Node
             }
         }
 
-        public string GenerateCode(List<string> codeLines)
+        public void GenerateCode(Visitor visitor)
         {
             // will generate code of the statements inside the block
 
-
-            return null;
+            
         }
     }
 }

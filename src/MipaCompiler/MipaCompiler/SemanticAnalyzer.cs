@@ -7,23 +7,21 @@ using System.Collections.Generic;
 namespace MipaCompiler
 {
     /// <summary>
-    /// Class <c>Semantix</c> holds functionality to do semantic analysis for
+    /// Class <c>Semantix</c> holds functionality to perform semantic analysis for
     /// intermediate representation of source code. In other words, it takes
     /// AST as input, checks semantic constraints and reports any errors it finds.
     /// </summary>
     public class SemanticAnalyzer
     {
         private readonly INode ast;                     // AST representation of the source code
-        private bool errorsDetected;                    // flag telling about status of semantic analysis
         private readonly List<string> errors;           // list of all detected errors
         private readonly SymbolTable symbolTable;       // symbol table to store variables
-
-        private string returnStmntType;
+        private string returnStmntType;                 // type of return value expected
 
         /// <summary>
         /// Constructor <c>SemanticAnalyzer</c> creates new SemanticAnalyzer-object.
         /// </summary>
-        /// <param name="ast"></param>
+        /// <param name="ast">abstract syntax tree</param>
         public SemanticAnalyzer(INode ast)
         {
             this.ast = ast;
@@ -37,7 +35,7 @@ namespace MipaCompiler
         /// <returns>true if errors were detected</returns>
         public bool ErrosDetected()
         {
-            return errorsDetected;
+            return errors.Count > 0;
         }
 
         /// <summary>
@@ -57,22 +55,10 @@ namespace MipaCompiler
             // check that code actually exists
             if (ast == null)
             {
-                errorsDetected = true;
                 errors.Add($"SemanticError::Row ?::Column ?::No code to analyze!");
                 return;
             }
             CheckProgram();
-        }
-
-        /// <summary>
-        /// Method <c>ReportError</c> print error message to user and adds it to
-        /// the list of reported errors.
-        /// </summary>
-        private void ReportError(string errorMsg)
-        {
-            Console.WriteLine(errorMsg);
-            errors.Add(errorMsg);
-            errorsDetected = true;
         }
 
         ///////////////////////////////// ACTUAL SEMANTIC CHECKS /////////////////////////////////
@@ -135,7 +121,7 @@ namespace MipaCompiler
             for (int i = 0; i < parameters.Count; i++)
             {
                 VariableNode varNode = (VariableNode)parameters[i];
-                paramTypes[i] = EvaluateTypeOfTypeNode(varNode.GetVariableType());
+                paramTypes[i] = EvaluateTypeOfTypeNode(varNode.GetVariableType(), errors, symbolTable);
 
                 // declare variable to symbol table
                 VariableSymbol sym = new VariableSymbol(varNode.GetName(), paramTypes[i], null, symbolTable.GetCurrentScope());
@@ -143,7 +129,7 @@ namespace MipaCompiler
             }
 
             // find return type
-            string returnType = EvaluateTypeOfTypeNode(func.GetReturnType());
+            string returnType = EvaluateTypeOfTypeNode(func.GetReturnType(), errors, symbolTable);
             returnStmntType = returnType;
 
             // create new function symbol
@@ -156,9 +142,8 @@ namespace MipaCompiler
             if (symbolTable.IsFunctionSymbolInTable(symbol) || symbolTable.IsProcedureSymbolInTable(psymbol))
             {
                 string functionStr = $"{functionName}({string.Join(", ", paramTypes)})";
-                string errorMsg = $"SemanticError::Row {func.GetRow()}::Column {func.GetCol()}::";
-                errorMsg += $"Name {functionStr} already defined in this scope!";
-                ReportError(errorMsg);
+                string errorMsg = $"Name {functionStr} already defined in this scope!";
+                ReportError(func.GetRow(), func.GetCol(), errors, errorMsg);
             }
             else
             {
@@ -190,7 +175,7 @@ namespace MipaCompiler
             for (int i = 0; i < parameters.Count; i++)
             {
                 VariableNode varNode = (VariableNode)parameters[i];
-                paramTypes[i] = EvaluateTypeOfTypeNode(varNode.GetVariableType());
+                paramTypes[i] = EvaluateTypeOfTypeNode(varNode.GetVariableType(), errors, symbolTable);
 
                 // declare variable to symbol table
                 VariableSymbol sym = new VariableSymbol(varNode.GetName(), paramTypes[i], null, symbolTable.GetCurrentScope());
@@ -207,9 +192,8 @@ namespace MipaCompiler
             if (symbolTable.IsProcedureSymbolInTable(symbol) || symbolTable.IsFunctionSymbolInTable(fsymbol))
             {
                 string procedureStr = $"{procedureName}({string.Join(", ", paramTypes)})";
-                string errorMsg = $"SemanticError::Row {proc.GetRow()}::Column {proc.GetCol()}::";
-                errorMsg += $"Procedure /Function {procedureStr} already defined!";
-                ReportError(errorMsg);
+                string errorMsg = $"Procedure /Function {procedureStr} already defined!";
+                ReportError(proc.GetRow(), proc.GetCol(), errors, errorMsg);
             }
             else
             {
@@ -300,7 +284,7 @@ namespace MipaCompiler
                     CheckBlock(stmnt);
                     break;
                 case NodeType.CALL:
-                    EvaluateTypeOfCallNode(stmnt);
+                    EvaluateTypeOfCallNode(stmnt, errors, symbolTable);
                     break;
                 case NodeType.IF_ELSE:
                     CheckIfElse(stmnt);
@@ -334,14 +318,13 @@ namespace MipaCompiler
             INode expr = assert.GetExpression();
 
             // evaluate the result type of expression
-            string returnType = EvaluateTypeOfExpressionNode(expr);
+            string returnType = EvaluateTypeOfExpressionNode(expr, errors, symbolTable);
 
             // check that type is boolean, if not --> report
             if (returnType == null || !returnType.Equals(STR_BOOLEAN))
             {
-                string errorMsg = $"SemanticError::Row {expr.GetRow()}::Column {expr.GetCol()}::";
-                errorMsg += "Expected assertion expression to be type of boolean!";
-                ReportError(errorMsg);
+                string errorMsg = "Expected assertion expression to be type of boolean!";
+                ReportError(expr.GetRow(), expr.GetCol(), errors, errorMsg);
             }
         }
 
@@ -358,15 +341,14 @@ namespace MipaCompiler
             string identifier = assign.GetIdentifier();
 
             INode expr = assign.GetValueExpression();
-            string type = EvaluateTypeOfExpressionNode(expr);
+            string type = EvaluateTypeOfExpressionNode(expr, errors, symbolTable);
 
             // check that variable has been declared
             if (!symbolTable.IsVariableSymbolInTable(identifier))
             {
                 // variable is not in table --> report error
-                string errorMsg = $"SemanticError::Row {assign.GetRow()}::Column {assign.GetCol()}::";
-                errorMsg += $"Variable {identifier} not declared in this scope!";
-                ReportError(errorMsg);
+                string errorMsg = $"Variable {identifier} not declared in this scope!";
+                ReportError(assign.GetRow(), assign.GetCol(), errors, errorMsg);
                 return;
             }
 
@@ -377,9 +359,8 @@ namespace MipaCompiler
             if(type == null || !symtype.Equals(type))
             {
                 // was not correct --> report error
-                string errorMsg = $"SemanticError::Row {expr.GetRow()}::Column {expr.GetCol()}::";
-                errorMsg += $"Cannot implicitly convert type {type} to {symtype}!";
-                ReportError(errorMsg);
+                string errorMsg = $"Cannot implicitly convert type {type} to {symtype}!";
+                ReportError(expr.GetRow(), expr.GetCol(), errors, errorMsg);
             }
         }
 
@@ -395,13 +376,12 @@ namespace MipaCompiler
 
             INode condition = ifNode.GetCondition();
 
-            string type = EvaluateTypeOfExpressionNode(condition);
+            string type = EvaluateTypeOfExpressionNode(condition, errors, symbolTable);
 
             if (type != null && !type.Equals(STR_BOOLEAN)){
                 // condition not boolean expression
-                string errorMsg = $"SemanticError::Row {condition.GetRow()}::Column {condition.GetCol()}::";
-                errorMsg += $"Cannot implicitly convert type {type} to boolean!";
-                ReportError(errorMsg);
+                string errorMsg = $"Cannot implicitly convert type {type} to boolean!";
+                ReportError(condition.GetRow(), condition.GetCol(), errors, errorMsg);
             }
 
             INode thenStatement = ifNode.GetThenStatement();
@@ -427,13 +407,12 @@ namespace MipaCompiler
             // of current function
             INode expr = retNode.GetExpression();
 
-            string type = EvaluateTypeOfExpressionNode(expr);
+            string type = EvaluateTypeOfExpressionNode(expr, errors, symbolTable);
 
             if(type != null && !type.Equals(returnStmntType))
             {
-                string errorMsg = $"SemanticError::Row {expr.GetRow()}::Column {expr.GetCol()}::";
-                errorMsg += $"Cannot implicitly convert type {type} to {returnStmntType}!";
-                ReportError(errorMsg);
+                string errorMsg = $"Cannot implicitly convert type {type} to {returnStmntType}!";
+                ReportError(expr.GetRow(), expr.GetCol(), errors, errorMsg);
             }
         }
 
@@ -452,7 +431,7 @@ namespace MipaCompiler
 
             // get type of variables
             INode typeNode = varDcl.GetVariableType();
-            string type = EvaluateTypeOfTypeNode(typeNode, true);
+            string type = EvaluateTypeOfTypeNode(typeNode, errors, symbolTable, true);
 
             // for each variable --> check that they have not been declared in current scope
             // if not --> then declare it
@@ -466,9 +445,8 @@ namespace MipaCompiler
                 if (symbolTable.IsVariableSymbolInTableWithCurrentScope(varName))
                 {
                     // already exist --> report error
-                    string errorMsg = $"SemanticError::Row {varDcl.GetRow()}::Column {varDcl.GetCol()}::";
-                    errorMsg += $"Variable {varName} already declared in this scope!";
-                    ReportError(errorMsg);
+                    string errorMsg = $"Variable {varName} already declared in this scope!";
+                    ReportError(varDcl.GetRow(), varDcl.GetCol(), errors, errorMsg);
                 }
                 else
                 {
@@ -502,24 +480,42 @@ namespace MipaCompiler
             INode expr = whileNode.GetBooleanExpression();
             INode stmnt = whileNode.GetStatement();
 
-            string type = EvaluateTypeOfExpressionNode(expr);
+            string type = EvaluateTypeOfExpressionNode(expr, errors, symbolTable);
 
             if(type == null || !type.Equals(STR_BOOLEAN))
             {
                 // report error
-                string errorMsg = $"SemanticError::Row {expr.GetRow()}::Column {expr.GetCol()}::";
-                errorMsg += $"Cannot implicitly convert type {type} to boolean!";
-                ReportError(errorMsg);
+                string errorMsg = $"Cannot implicitly convert type {type} to boolean!";
+                ReportError(expr.GetRow(), expr.GetCol(), errors, errorMsg);
             }
 
             CheckStatement(stmnt);
         }
 
+        ///////////////////////////////// STATIC TYPE EVALUATION METHODS  /////////////////////////////////
+
         /// <summary>
-        /// Method <c>EvaluateTypeOfTypeNode</c> returns the parameter type
-        /// of given typenode. Inputnode should be either SimpleTypeNode or ArrayTypeNode.
+        /// Static method <c>ReportError</c> prints error message to user and adds it to
+        /// the list of reported errors.
         /// </summary>
-        private string EvaluateTypeOfTypeNode(INode node, bool isInit = false)
+        private static void ReportError(int row, int col, List<string> errors, string errorMsg)
+        {
+            string message = $"SemanticError::Row {row}::Column {col}::" + errorMsg;
+            Console.WriteLine(message);
+            errors.Add(message);
+        }
+
+        /// <summary>
+        /// Static method <c>EvaluateTypeOfTypeNode</c> returns the type of given typenode. 
+        /// Inputnode should be either SimpleTypeNode or ArrayTypeNode. Returns null in case
+        /// errors are detected.
+        /// </summary>
+        /// <param name="node">typenode</param>
+        /// <param name="errors">list of detected errors</param>
+        /// <param name="symbolTable">symbol table</param>
+        /// <param name="isInit">if array initialization type</param>
+        /// <returns>type</returns>
+        public static string EvaluateTypeOfTypeNode(INode node, List<string> errors, SymbolTable symbolTable, bool isInit = false)
         {
             if (node == null) return null;
 
@@ -531,14 +527,13 @@ namespace MipaCompiler
                     {
                         // array should have integer as size argument
                         INode expr = at.GetSizeExpression();
-                        string type = EvaluateTypeOfExpressionNode(expr);
+                        string type = EvaluateTypeOfExpressionNode(expr, errors, symbolTable);
 
                         if (type == null || !type.Equals(STR_INTEGER))
                         {
                             // report error
-                            string errorMsg = $"SemanticError::Row {at.GetRow()}::Column {at.GetCol()}::";
-                            errorMsg += $"Array must have integer as size argument!";
-                            ReportError(errorMsg);
+                            string errorMsg = "Array must have integer as size argument!";
+                            ReportError(at.GetRow(), at.GetCol(), errors, errorMsg);
                         } 
                     }
                     string tmp = $"array[] of ";
@@ -555,23 +550,27 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>EvaluateTypeOfExpressionNode</c> returns the type 
-        /// of given expression node.
+        /// Static method <c>EvaluateTypeOfExpressionNode</c> returns the type 
+        /// of result from given expression node. Returns null if type if errors are detected.
         /// </summary>
-        private string EvaluateTypeOfExpressionNode(INode node)
+        /// <param name="node">expression node</param>
+        /// <param name="errors">list of detected errors</param>
+        /// <param name="symbolTable">symbol table</param>
+        /// <returns>type of expression result</returns>
+        public static string EvaluateTypeOfExpressionNode(INode node, List<string> errors, SymbolTable symbolTable)
         {
             if (node == null) return null;
 
             switch (node.GetNodeType())
             {
                 case NodeType.SIGN:
-                    return EvaluateTypeOfSignNode(node);
+                    return EvaluateTypeOfSignNode(node, errors, symbolTable);
                 case NodeType.UNARY_EXPRESSION:
-                    return EvaluateTypeOfUnaryExpressionNode(node);
+                    return EvaluateTypeOfUnaryExpressionNode(node, errors, symbolTable);
                 case NodeType.BINARY_EXPRESSION:
-                    return EvaluateTypeOfBinaryExpressionNode(node);
+                    return EvaluateTypeOfBinaryExpressionNode(node, errors, symbolTable);
                 case NodeType.VARIABLE:
-                    return EvaluateTypeOfVariableNode(node);
+                    return EvaluateTypeOfVariableNode(node, errors, symbolTable);
                 case NodeType.INTEGER:
                     return STR_INTEGER;
                 case NodeType.STRING:
@@ -579,7 +578,7 @@ namespace MipaCompiler
                 case NodeType.REAL:
                     return STR_REAL;
                 case NodeType.CALL:
-                    return EvaluateTypeOfCallNode(node);
+                    return EvaluateTypeOfCallNode(node, errors, symbolTable);
                 default:
                     // something wrong with the AST
                     throw new InvalidOperationException($"Unexpected NodeType {node.GetNodeType()} as expression!");
@@ -587,11 +586,14 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>EvaluateTypeOfSignNode</c> returns the type of given sign node.
-        /// If type is valid, "integer" or "real" is returned. If type is invalid,
-        /// null is returned.
+        /// Static method <c>EvaluateTypeOfSignNode</c> returns the result type of given sign node.
+        /// If type is valid, "integer" or "real" is returned. If errors are detected, null is returned.
         /// </summary>
-        private string EvaluateTypeOfSignNode(INode node)
+        /// <param name="node">sign node</param>
+        /// <param name="errors">list of detected errors</param>
+        /// <param name="symbolTable">symbol table</param>
+        /// <returns>result type</returns>
+        public static string EvaluateTypeOfSignNode(INode node, List<string> errors, SymbolTable symbolTable)
         {
             if (node == null) return null;
 
@@ -602,22 +604,26 @@ namespace MipaCompiler
             INode term = signNode.GetTerm();
 
             // get type of term
-            string type = EvaluateTypeOfExpressionNode(term);
+            string type = EvaluateTypeOfExpressionNode(term, errors, symbolTable);
 
             // check if valid type
             if (type.Equals(STR_INTEGER) || type.Equals(STR_REAL)) return type;
 
             // was not valid type --> report
-            string errorMsg = $"SemanticError::Row {term.GetRow()}::Column {term.GetCol()}::";
-            errorMsg += $"Cannot implicitly convert type {type} to integer or real!";
-            ReportError(errorMsg);
+            string errorMsg = $"Cannot implicitly convert type {type} to integer or real!";
+            ReportError(term.GetRow(), term.GetCol(), errors, errorMsg);
             return null;
         }
 
         /// <summary>
-        /// Method <c>EvaluateTypeOfUnaryExpressionNode</c> returns the type of unary expression node.
+        /// Static method <c>EvaluateTypeOfUnaryExpressionNode</c> returns the result type 
+        /// of unary expression node. If errors are detected, returns null.
         /// </summary>
-        private string EvaluateTypeOfUnaryExpressionNode(INode node)
+        /// <param name="node">unary expression node</param>
+        /// <param name="errors">list of errors detected</param>
+        /// <param name="symbolTable">symbol table</param>
+        /// <returns>result type</returns>
+        public static string EvaluateTypeOfUnaryExpressionNode(INode node, List<string> errors, SymbolTable symbolTable)
         {
             if (node == null) return null;
 
@@ -628,7 +634,7 @@ namespace MipaCompiler
             INode expr = unary.GetExpression();
 
             // get type of expression
-            string type = EvaluateTypeOfExpressionNode(expr);
+            string type = EvaluateTypeOfExpressionNode(expr, errors, symbolTable);
 
             switch (unary.GetOperator())
             {
@@ -637,18 +643,16 @@ namespace MipaCompiler
                     if (type.Equals(STR_BOOLEAN)) return type;
                     
                     // was not correct type --> report error
-                    string errorMsg = $"SemanticError::Row {node.GetRow()}::Column {node.GetCol()}::";
-                    errorMsg += $"Cannot implicitly convert type {type} to boolean!";
-                    ReportError(errorMsg);
+                    string errorMsg = $"Cannot implicitly convert type {type} to boolean!";
+                    ReportError(node.GetRow(), node.GetCol(), errors, errorMsg);
                     return null;
                 case "size":
                     // check that type is integer "array[] of integer"
                     if (type.Equals("array[] of " + STR_INTEGER)) return STR_INTEGER;
 
                     // was not correct type --> report error
-                    errorMsg = $"SemanticError::Row {node.GetRow()}::Column {node.GetCol()}::";
-                    errorMsg += $"Cannot implicitly convert type {type} to integer!";
-                    ReportError(errorMsg);
+                    errorMsg = $"Cannot implicitly convert type {type} to integer!";
+                    ReportError(node.GetRow(), node.GetCol(), errors, errorMsg);
                     return null;
                 default:
                     // something wrong with the AST
@@ -657,10 +661,14 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>EvaluateTypeOfBinaryExpressionNode</c> returns the type of 
-        /// binaery expression node.
+        /// Static method <c>EvaluateTypeOfBinaryExpressionNode</c> returns the result type 
+        /// of binaery expression node. If errors are detected, null is returned.
         /// </summary>
-        private string EvaluateTypeOfBinaryExpressionNode(INode node)
+        /// <param name="node">binary expression node</param>
+        /// <param name="errors">list of detected errors</param>
+        /// <param name="symbolTable">symbol table</param>
+        /// <returns>result type</returns>
+        public static string EvaluateTypeOfBinaryExpressionNode(INode node, List<string> errors, SymbolTable symbolTable)
         {
             if (node == null) return null;
 
@@ -675,18 +683,18 @@ namespace MipaCompiler
                 case "and":
                 case "or":
                     string[] supportedTypes1 = { STR_BOOLEAN };
-                    return EvaluateTypeOfBinaryOperationForSupportedTypes(node, supportedTypes1, null);
+                    return EvaluateTypeOfBinaryOperationForSupportedTypes(node, supportedTypes1, null, errors, symbolTable);
                 case "%":
                     string[] supportedTypes2 = { STR_INTEGER };
-                    return EvaluateTypeOfBinaryOperationForSupportedTypes(node, supportedTypes2, null);
+                    return EvaluateTypeOfBinaryOperationForSupportedTypes(node, supportedTypes2, null, errors, symbolTable);
                 case "+":
                     string[] supportedTypes3 = { STR_INTEGER, STR_REAL, STR_STRING };
-                    return EvaluateTypeOfBinaryOperationForSupportedTypes(node, supportedTypes3, null);
+                    return EvaluateTypeOfBinaryOperationForSupportedTypes(node, supportedTypes3, null, errors, symbolTable);
                 case "-":
                 case "*":
                 case "/":
                     string[] supportedTypes4 = { STR_INTEGER, STR_REAL };
-                    return EvaluateTypeOfBinaryOperationForSupportedTypes(node, supportedTypes4, null);
+                    return EvaluateTypeOfBinaryOperationForSupportedTypes(node, supportedTypes4, null, errors, symbolTable);
                 case "=":
                 case "<>":
                 case "<":
@@ -694,9 +702,9 @@ namespace MipaCompiler
                 case ">=":
                 case ">":
                     string[] supportedTypes5 = { STR_INTEGER, STR_REAL, STR_STRING, STR_BOOLEAN };
-                    return EvaluateTypeOfBinaryOperationForSupportedTypes(node, supportedTypes5, STR_BOOLEAN);
+                    return EvaluateTypeOfBinaryOperationForSupportedTypes(node, supportedTypes5, STR_BOOLEAN, errors, symbolTable);
                 case "[]":
-                    return EvaluateTypeOfArrayIndexNode(node);
+                    return EvaluateTypeOfArrayIndexNode(node, errors, symbolTable);
                 default:
                     // something wrong with the AST
                     throw new InvalidOperationException($"Unsupported binary operator {op}!");
@@ -704,10 +712,17 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>EvaluateTypeOfBinaryOperationForSupportedTypes</c> performs type check
-        /// for binary operation. Returns type if it is in supported types list.
+        /// Static method <c>EvaluateTypeOfBinaryOperationForSupportedTypes</c> performs type check
+        /// for binary operation. Returns result type if it is in supported types list.
         /// Otherwise null is returned.
-        private string EvaluateTypeOfBinaryOperationForSupportedTypes(INode node, string[] supportedTypes, string overrideReturnType)
+        /// </summary>
+        /// <param name="node">binary expression node</param>
+        /// <param name="supportedTypes">list of supported result types</param>
+        /// <param name="overrideReturnType">override return type</param>
+        /// <param name="errors">list of detected errors</param>
+        /// <param name="symbolTable">symbol table</param>
+        /// <returns></returns>
+        public static string EvaluateTypeOfBinaryOperationForSupportedTypes(INode node, string[] supportedTypes, string overrideReturnType, List<string> errors, SymbolTable symbolTable)
         {
             if (node == null) return null;
 
@@ -717,8 +732,8 @@ namespace MipaCompiler
             INode lhs = bin.GetLhs();
             INode rhs = bin.GetRhs();
 
-            string left = EvaluateTypeOfExpressionNode(lhs);
-            string right = EvaluateTypeOfExpressionNode(rhs);
+            string left = EvaluateTypeOfExpressionNode(lhs, errors, symbolTable);
+            string right = EvaluateTypeOfExpressionNode(rhs, errors, symbolTable);
 
             // if correct 
             foreach(string type in supportedTypes)
@@ -731,18 +746,21 @@ namespace MipaCompiler
             }
 
             // was not correct --> report error
-            string errorMsg = $"SemanticError::Row {bin.GetRow()}::Column {bin.GetCol()}::";
-            errorMsg += $"Operation {bin.GetOperation()} not supported between types {left} and {right}";
-            ReportError(errorMsg);
+            string errorMsg = $"Operation {bin.GetOperation()} not supported between types {left} and {right}";
+            ReportError(bin.GetRow(), bin.GetCol(), errors, errorMsg);
             return null;
         }
 
         /// <summary>
-        /// Method <c>EvaluateTypeOfArrayIndexNode</c> check the type of array index node.
-        /// It will return the simple type of array, and check that index expression
-        /// evaluates as integer.
+        /// Static method <c>EvaluateTypeOfArrayIndexNode</c> checks the result type 
+        /// of array index node. It will return the simple type of array, and check that 
+        /// index expression evaluates as integer. If errors are detected, null is returned.
         /// </summary>
-        private string EvaluateTypeOfArrayIndexNode(INode node)
+        /// <param name="node">binary expression node</param>
+        /// <param name="errors">list of detected errors</param>
+        /// <param name="symbolTable">symbol table</param>
+        /// <returns></returns>
+        public static string EvaluateTypeOfArrayIndexNode(INode node, List<string> errors, SymbolTable symbolTable)
         {
             if (node == null) return null;
 
@@ -753,21 +771,20 @@ namespace MipaCompiler
             INode expression = arrayIndex.GetRhs();
 
             // evaluate type of index expression
-            string type = EvaluateTypeOfExpressionNode(expression);
+            string type = EvaluateTypeOfExpressionNode(expression, errors, symbolTable);
 
             // check if type was not integer
             if (!type.Equals(STR_INTEGER))
             {
                 // was not correct --> report error
-                string errorMsg = $"SemanticError::Row {expression.GetRow()}::Column {expression.GetCol()}::";
-                errorMsg += $"Cannot implicitly convert type {type} to integer!";
-                ReportError(errorMsg);
+                string errorMsg = $"Cannot implicitly convert type {type} to integer!";
+                ReportError(expression.GetRow(), expression.GetCol(), errors, errorMsg);
             }
 
             // get array
             VariableNode array = (VariableNode) arrayIndex.GetLhs();
 
-            string arrayType = EvaluateTypeOfVariableNode(array);
+            string arrayType = EvaluateTypeOfVariableNode(array, errors, symbolTable);
 
             if(arrayType != null && arrayType.Equals("array[] of " + STR_INTEGER)) return STR_INTEGER;
             if (arrayType != null && arrayType.Equals("array[] of " + STR_REAL)) return STR_REAL;
@@ -777,12 +794,16 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>EvaluateTypeOfVariableNode</c> checks the type of varaible node.
-        /// Returns null in case of errors. if variable name is "true" or "false" and they
+        /// Static method <c>EvaluateTypeOfVariableNode</c> checks the result type of variable node.
+        /// Returns null in case of errors. If variable name is "true" or "false" and they
         /// do not exist in current scope, then it is assumed variable is actually 
         /// a boolean type (true or false).
         /// </summary>
-        private string EvaluateTypeOfVariableNode(INode node)
+        /// <param name="node">variable node</param>
+        /// <param name="errors">list of detected errors</param>
+        /// <param name="symbolTable">symbol table</param>
+        /// <returns>result type</returns>
+        public static string EvaluateTypeOfVariableNode(INode node, List<string> errors, SymbolTable symbolTable)
         {
             if (node == null) return null;
 
@@ -803,17 +824,20 @@ namespace MipaCompiler
             }
 
             // variable is not in table --> report error
-            string errorMsg = $"SemanticError::Row {node.GetRow()}::Column {node.GetCol()}::";
-            errorMsg += $"Variable {identifier} not declared in this scope!";
-            ReportError(errorMsg);
+            string errorMsg = $"Variable {identifier} not declared in this scope!";
+            ReportError(node.GetRow(), node.GetCol(), errors, errorMsg);
             return null;
         }
 
         /// <summary>
-        /// Method <c>EvaluateTypeOfCallNode</c> peforms semantic analysis on call node
-        /// and returns the returns the type of return value.
+        /// Static method <c>EvaluateTypeOfCallNode</c> peforms semantic analysis on call node
+        /// and returns the returns the type of return value. If errors are detected, null is returned.
         /// </summary>
-        private string EvaluateTypeOfCallNode(INode node)
+        /// <param name="node">call node</param>
+        /// <param name="errors">list of detected errors</param>
+        /// <param name="symbolTable">symbol table</param>
+        /// <returns>result type</returns>
+        public static string EvaluateTypeOfCallNode(INode node, List<string> errors, SymbolTable symbolTable)
         {
             if (node == null) return null;
 
@@ -827,7 +851,7 @@ namespace MipaCompiler
             string[] parameters = new string[arguments.Count];
             for(int i = 0; i < arguments.Count; i++)
             {
-                string type = EvaluateTypeOfExpressionNode(arguments[i]);
+                string type = EvaluateTypeOfExpressionNode(arguments[i], errors, symbolTable);
                 if (type != null) parameters[i] = type;
             }
 
@@ -846,31 +870,35 @@ namespace MipaCompiler
             bool procedureInTable = symbolTable.IsProcedureSymbolInTable(ps);
 
             // is a function
-            if(functionNameExists && !procedureNameExists) return CheckFunctionCall(node, functionInTable, identifier, parameters);
+            if(functionNameExists && !procedureNameExists) return CheckFunctionCall(node, functionInTable, identifier, parameters, errors, symbolTable);
             // is a procedure
-            if (!functionNameExists && procedureNameExists) return CheckProcedureCall(node, procedureInTable, identifier, parameters);
+            if (!functionNameExists && procedureNameExists) return CheckProcedureCall(node, procedureInTable, identifier, parameters, errors, symbolTable);
             // can be both function or procedure call
-            if (functionNameExists && procedureNameExists) return CheckProcedureFunctionCall(node, functionInTable, procedureInTable, identifier, parameters);
+            if (functionNameExists && procedureNameExists) return CheckProcedureFunctionCall(node, functionInTable, procedureInTable, identifier, parameters, errors, symbolTable);
             // is predefined read procedure call
-            if (identifier.Equals("read")) return CheckReadCall(node);
+            if (identifier.Equals("read")) return CheckReadCall(node, errors, symbolTable);
             // is predefined writeln procedure call
-            if (identifier.Equals("writeln")) return CheckWritelnCall(node);
+            if (identifier.Equals("writeln")) return CheckWritelnCall(node, errors, symbolTable);
             
             // is not a valid function or procedure name --> report error
             string errorMsg = $"SemanticError::Row {node.GetRow()}::Column {node.GetCol()}::";
             errorMsg += $"Procedure/Function {identifier} not declared in this scope!";
-            ReportError(errorMsg);
+            ReportError(node.GetRow(), node.GetCol(), errors, errorMsg);
             return null;
         }
 
         /// <summary>
-        /// Method <c>CheckFunctionCall</c> checks that function call parameters are correct.
+        /// Static method <c>CheckFunctionCall</c> checks that function call parameters are correct.
+        /// Returns function return type.
         /// </summary>
-        /// <param name="functionInTable"></param>
-        /// <param name="identifier"></param>
-        /// <param name="parameters"></param>
+        /// <param name="node">function call node</param>
+        /// <param name="functionInTable">does function exist in table</param>
+        /// <param name="identifier">function name</param>
+        /// <param name="parameters">parameter list</param>
+        /// <param name="errors">list of detected errors</param>
+        /// <param name="symbolTable">symbol table</param>
         /// <returns>return type of most similar function definition</returns>
-        private string CheckFunctionCall(INode node, bool functionInTable, string identifier, string[] parameters)
+        public static string CheckFunctionCall(INode node, bool functionInTable, string identifier, string[] parameters, List<string> errors, SymbolTable symbolTable)
         {
             if (functionInTable)
             {
@@ -882,23 +910,24 @@ namespace MipaCompiler
                 // incorrect arguments --> report error
                 FunctionSymbol similar = symbolTable.GetMostSimilarFunctionSymbol(identifier, parameters);
 
-                string errorMsg = $"SemanticError::Row {node.GetRow()}::Column {node.GetCol()}::";
-                errorMsg += $"Procedure/Function arguments are invalid!";
-                ReportError(errorMsg);
+                string errorMsg = $"Procedure/Function arguments are invalid!";
+                ReportError(node.GetRow(), node.GetCol(), errors, errorMsg);
 
                 return similar.GetReturnType();
             }
         }
 
         /// <summary>
-        /// Method <c>CheckProcedureCall</c> checks that the procedure call parameters are correct.
+        /// Static method <c>CheckProcedureCall</c> checks that the procedure call parameters are correct.
         /// </summary>
-        /// <param name="node"></param>
-        /// <param name="procedureInTable"></param>
-        /// <param name="identifier"></param>
-        /// <param name="parameters"></param>
-        /// <returns></returns>
-        private string CheckProcedureCall(INode node, bool procedureInTable, string identifier, string[] parameters)
+        /// <param name="node">procedure call node</param>
+        /// <param name="procedureInTable">procedure in table</param>
+        /// <param name="identifier">procedure name</param>
+        /// <param name="parameters">parameters</param>
+        /// <param name="errors">list of detected erros</param>
+        /// <param name="symbolTable">symbol table</param>
+        /// <returns>null</returns>
+        public static string CheckProcedureCall(INode node, bool procedureInTable, string identifier, string[] parameters, List<string> errors, SymbolTable symbolTable)
         {
             if (procedureInTable)
             {
@@ -909,17 +938,21 @@ namespace MipaCompiler
                 // incorrect arguments --> report error
                 ProcedureSymbol similar = symbolTable.GetMostSimilarProcedureSymbol(identifier, parameters);
 
-                string errorMsg = $"SemanticError::Row {node.GetRow()}::Column {node.GetCol()}::";
-                errorMsg += $"Procedure/Function arguments are invalid!";
-                ReportError(errorMsg);
+                string errorMsg = $"Procedure/Function arguments are invalid!";
+                ReportError(node.GetRow(), node.GetCol(), errors, errorMsg);
             }
             return null;
         }
 
         /// <summary>
-        /// Method <c>CheckReadCall</c> checks that the parameters of read call are correct type.
+        /// Static method <c>CheckReadCall</c> checks that the parameters of read call are correct type.
+        /// Returns null.
         /// </summary>
-        private string CheckReadCall(INode node)
+        /// <param name="node">read call node</param>
+        /// <param name="errors">list of detected errors</param>
+        /// <param name="symbolTable">symbol table</param>
+        /// <returns>null</returns>
+        public static string CheckReadCall(INode node, List<string> errors, SymbolTable symbolTable)
         {
             if (node == null) return null;
 
@@ -931,10 +964,8 @@ namespace MipaCompiler
                 VariableNode varNode = null;
                 if (p.GetNodeType() != NodeType.VARIABLE && p.GetNodeType() != NodeType.BINARY_EXPRESSION)
                 {
-                    // error
-                    string notVariable = $"SemanticError::Row {p.GetRow()}::Column {p.GetCol()}::";
-                    notVariable += $"Argument must be a variable!";
-                    ReportError(notVariable);
+                    string notVariable = "Argument must be a variable!";
+                    ReportError(p.GetRow(), p.GetCol(), errors, notVariable);
                     continue;
                 }
                 else if(p.GetNodeType() == NodeType.BINARY_EXPRESSION)
@@ -943,9 +974,8 @@ namespace MipaCompiler
                     INode lhs = bin.GetLhs();
                     if (lhs.GetNodeType() != NodeType.VARIABLE)
                     {
-                        string notVariable = $"SemanticError::Row {p.GetRow()}::Column {p.GetCol()}::";
-                        notVariable += $"Argument must be a variable!";
-                        ReportError(notVariable);
+                        string notVariable = "Argument must be a variable!";
+                        ReportError(p.GetRow(), p.GetCol(), errors, notVariable);
                         continue;
                     }
                     varNode = (VariableNode)lhs;
@@ -957,20 +987,18 @@ namespace MipaCompiler
                 string identifier = varNode.GetName();
                 if (!symbolTable.IsVariableSymbolInTable(identifier))
                 {
-                    string notDcl = $"SemanticError::Row {p.GetRow()}::Column {p.GetCol()}::";
-                    notDcl += $"Variable {identifier} does not exist in this scope!";
-                    ReportError(notDcl);
+                    string notDcl = $"Variable {identifier} does not exist in this scope!";
+                    ReportError(p.GetRow(), p.GetCol(), errors, notDcl);
                     continue;
                 }
 
                 INode nodeType = varNode.GetVariableType();
-                string type = EvaluateTypeOfTypeNode(nodeType);
+                string type = EvaluateTypeOfTypeNode(nodeType, errors, symbolTable);
 
                 if (type != null && type == STR_BOOLEAN)
                 {
-                    string wrongtype = $"SemanticError::Row {p.GetRow()}::Column {p.GetCol()}::";
-                    wrongtype += $"Argument type cannot be boolean!";
-                    ReportError(wrongtype);
+                    string wrongtype = "Argument type cannot be boolean!";
+                    ReportError(p.GetRow(), p.GetCol(), errors, wrongtype);
                     continue;
                 }
 
@@ -980,9 +1008,13 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>CheckWritelnCall</c> checks that the parameters are correct type and declared.
+        /// Static method <c>CheckWritelnCall</c> checks that the parameters are correct type and declared.
         /// </summary>
-        private string CheckWritelnCall(INode node)
+        /// <param name="node">write call node</param>
+        /// <param name="errors">list of detected errors</param>
+        /// <param name="symbolTable">symbol table</param>
+        /// <returns>null</returns>
+        public static string CheckWritelnCall(INode node, List<string> errors, SymbolTable symbolTable)
         {
             if (node == null) return null;
 
@@ -994,12 +1026,11 @@ namespace MipaCompiler
                 switch (p.GetNodeType())
                 {
                     case NodeType.VARIABLE:
-                        string varType = EvaluateTypeOfVariableNode(p);
+                        string varType = EvaluateTypeOfVariableNode(p, errors, symbolTable);
                         if(varType != null && varType.Equals(STR_BOOLEAN))
                         {
-                            string errorVar = $"SemanticError::Row {p.GetRow()}::Column {p.GetCol()}::";
-                            errorVar += $"Argument must be numeric or string!";
-                            ReportError(errorVar);
+                            string errorVar = "Argument must be numeric or string!";
+                            ReportError(p.GetRow(), p.GetCol(), errors, errorVar);
                         }
                         break;
                     case NodeType.STRING:
@@ -1007,37 +1038,33 @@ namespace MipaCompiler
                     case NodeType.REAL:
                         break;
                     case NodeType.BINARY_EXPRESSION:
-                        string binaryType = EvaluateTypeOfBinaryExpressionNode(p);
+                        string binaryType = EvaluateTypeOfBinaryExpressionNode(p, errors, symbolTable);
                         if (binaryType != null && binaryType.Equals(STR_BOOLEAN))
                         {
-                            string errorBin = $"SemanticError::Row {p.GetRow()}::Column {p.GetCol()}::";
-                            errorBin += $"Argument must be numeric or string!";
-                            ReportError(errorBin);
+                            string errorBin = "Argument must be numeric or string!";
+                            ReportError(p.GetRow(), p.GetCol(), errors, errorBin);
                         }
                         break;
                     case NodeType.CALL:
                         CallNode c = (CallNode)p;
-                        string rettype = EvaluateTypeOfCallNode(c);
+                        string rettype = EvaluateTypeOfCallNode(c, errors, symbolTable);
                         if (rettype != null && rettype.Equals(STR_BOOLEAN))
                         {
-                            string errorCall = $"SemanticError::Row {p.GetRow()}::Column {p.GetCol()}::";
-                            errorCall += $"Argument must be numeric or string!";
-                            ReportError(errorCall);
+                            string errorCall = "Argument must be numeric or string!";
+                            ReportError(p.GetRow(), p.GetCol(), errors, errorCall);
                         }
                         break;
                     case NodeType.UNARY_EXPRESSION:
-                        string typeUnary = EvaluateTypeOfUnaryExpressionNode(p);
+                        string typeUnary = EvaluateTypeOfUnaryExpressionNode(p, errors, symbolTable);
                         if (typeUnary != null && !typeUnary.Equals(STR_INTEGER))
                         {
-                            string errorUnary = $"SemanticError::Row {p.GetRow()}::Column {p.GetCol()}::";
-                            errorUnary += $"Argument must be numeric or string!";
-                            ReportError(errorUnary);
+                            string errorUnary = "Argument must be numeric or string!";
+                            ReportError(p.GetRow(), p.GetCol(), errors, errorUnary);
                         }
                         break;
                     default:
-                        string errorDefault = $"SemanticError::Row {p.GetRow()}::Column {p.GetCol()}::";
-                        errorDefault += $"Argument must be numeric or string!";
-                        ReportError(errorDefault);
+                        string errorDefault = "Argument must be numeric or string!";
+                        ReportError(p.GetRow(), p.GetCol(), errors, errorDefault);
                         break;
                 }
 
@@ -1046,7 +1073,19 @@ namespace MipaCompiler
             return null;
         }
 
-        private string CheckProcedureFunctionCall(INode node, bool functionInTable, bool procedureInTable, string identifier, string[] parameters)
+        /// <summary>
+        /// Static method <c>CheckProcedureFunctionCall</c> checks the arguments of
+        /// the function/procedure that is called.
+        /// </summary>
+        /// <param name="node">function call node</param>
+        /// <param name="functionInTable">is function in table</param>
+        /// <param name="procedureInTable">is procedure in table</param>
+        /// <param name="identifier">function/procedure name</param>
+        /// <param name="parameters">parameters</param>
+        /// <param name="errors">list of detected erros</param>
+        /// <param name="symbolTable">symbol table</param>
+        /// <returns>function return type</returns>
+        public static string CheckProcedureFunctionCall(INode node, bool functionInTable, bool procedureInTable, string identifier, string[] parameters, List<string> errors, SymbolTable symbolTable)
         {
             if (functionInTable)
             {
@@ -1059,9 +1098,8 @@ namespace MipaCompiler
             }
             else
             {
-                string errorMsg = $"SemanticError::Row {node.GetRow()}::Column {node.GetCol()}::";
-                errorMsg += $"Procedure/Function arguments are invalid!";
-                ReportError(errorMsg);
+                string errorMsg = "Procedure/Function arguments are invalid!";
+                ReportError(node.GetRow(), node.GetCol(), errors, errorMsg);
 
                 FunctionSymbol f = symbolTable.GetMostSimilarFunctionSymbol(identifier, parameters);
                 return f.GetReturnType();

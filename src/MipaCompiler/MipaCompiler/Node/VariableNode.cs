@@ -71,7 +71,7 @@ namespace MipaCompiler.Node
             if (type != null) type.PrettyPrint();
         }
 
-        public string GenerateCode(List<string> codeLines)
+        public void GenerateCode(Visitor visitor)
         {
             throw new NotImplementedException();
         }

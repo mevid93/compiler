@@ -84,7 +84,7 @@ namespace MipaCompiler.Node
             if (rhs != null) rhs.PrettyPrint();
         }
 
-        public string GenerateCode(List<string> codeLines)
+        public void GenerateCode(Visitor visitor)
         {
             throw new NotImplementedException();
         }
