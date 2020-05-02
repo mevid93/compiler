@@ -141,8 +141,7 @@ namespace MipaCompiler
             // if it does exist --> report error
             if (symbolTable.IsFunctionSymbolInTable(symbol) || symbolTable.IsProcedureSymbolInTable(psymbol))
             {
-                string functionStr = $"{functionName}({string.Join(", ", paramTypes)})";
-                string errorMsg = $"Name {functionStr} already defined in this scope!";
+                string errorMsg = $"Name {functionName} already defined in this scope!";
                 ReportError(func.GetRow(), func.GetCol(), errors, errorMsg);
             }
             else
@@ -191,8 +190,7 @@ namespace MipaCompiler
             // if it does exist --> report error
             if (symbolTable.IsProcedureSymbolInTable(symbol) || symbolTable.IsFunctionSymbolInTable(fsymbol))
             {
-                string procedureStr = $"{procedureName}({string.Join(", ", paramTypes)})";
-                string errorMsg = $"Procedure /Function {procedureStr} already defined!";
+                string errorMsg = $"Name {procedureName} already defined in this scope!";
                 ReportError(proc.GetRow(), proc.GetCol(), errors, errorMsg);
             }
             else

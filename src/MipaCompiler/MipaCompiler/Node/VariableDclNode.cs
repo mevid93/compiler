@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MipaCompiler.Symbol;
+using System;
 using System.Collections.Generic;
 
 namespace MipaCompiler.Node
@@ -76,7 +77,58 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
-            throw new NotImplementedException();
+            // variable to hold new generated code line
+            string line = "";
+
+            // get symbol table
+            SymbolTable symTable = visitor.GetSymbolTable();
+
+            // simple type assignment
+            if (type.GetNodeType() == NodeType.SIMPLE_TYPE)
+            {
+                SimpleTypeNode stn = (SimpleTypeNode)type;
+                string valueType = stn.GetTypeValue();
+                string varType = CodeGenerator.ConvertSimpleTypeToTargetLanguage(valueType);
+
+                line += varType + " ";
+
+                for(int i = 0; i < variables.Count; i++)
+                {
+                    VariableNode varNode = (VariableNode)variables[i];
+                    string name = varNode.GetName();
+
+                    // symbol table update
+                    if (symTable.IsVariableSymbolInTable(name))
+                    {
+                        symTable.ReDeclareVariableSymbol(new VariableSymbol(name, valueType, null, symTable.GetCurrentScope()));
+                    }
+                    else
+                    {
+                        symTable.DeclareVariableSymbol(new VariableSymbol(name, valueType, null, symTable.GetCurrentScope()));
+                    }
+
+                    name = "var_" + name;
+                    line += name;
+
+                    if (i < variables.Count - 1) line += ", ";
+                }
+
+            }
+
+            // array type
+            if (type.GetNodeType() == NodeType.ARRAY_TYPE)
+            {
+                ArrayTypeNode arr = (ArrayTypeNode)type;
+                SimpleTypeNode stn = (SimpleTypeNode)arr.GetSimpleType();
+                string valueType = stn.GetTypeValue();
+                //varType = CodeGenerator.ConvertParameterTypeToTargetLanguage(valueType);
+            }
+
+            // add end of statement 
+            line += ";";
+
+            // add generated code line to list of code lines
+            visitor.AddCodeLine(line);
         }
     }
 }

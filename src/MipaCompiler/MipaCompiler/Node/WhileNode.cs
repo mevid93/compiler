@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using MipaCompiler.Symbol;
+using System;
 
 namespace MipaCompiler.Node
 {
@@ -73,7 +73,34 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
-            throw new NotImplementedException();
+            // get symbol table
+            SymbolTable symTable = visitor.GetSymbolTable();
+
+            // define while loop labels
+            int number = visitor.GetWhileCounter();
+            string whileEntry = $"label_while_{number}_entry: ;";
+            string gotoWhileEntry = $"goto label_while_{number}_entry;";
+            string whileExit = $"label_while_{number}_exit: ;";
+            string gotoWhileExit = $"goto label_while_{number}_exit;";
+            visitor.IncreaseWhileCounter();
+
+            // add entry point
+            visitor.AddCodeLine(whileEntry);
+
+            // process the condition
+            boolExpression.GenerateCode(visitor);
+
+            string tmp = visitor.GetLatestUsedTmpVariable();
+            visitor.AddCodeLine($"if (!{tmp}) goto label_while_{number}_exit;");
+
+            // process the block
+            statement.GenerateCode(visitor);
+
+            // go back to loop start
+            visitor.AddCodeLine(gotoWhileEntry);
+
+            // add exit point
+            visitor.AddCodeLine(whileExit);
         }
     }
 }

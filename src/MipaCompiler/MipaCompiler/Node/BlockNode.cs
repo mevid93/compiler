@@ -64,8 +64,10 @@ namespace MipaCompiler.Node
         public void GenerateCode(Visitor visitor)
         {
             // will generate code of the statements inside the block
-
-            
+            foreach(INode statement in statements)
+            {
+                statement.GenerateCode(visitor);
+            }
         }
     }
 }

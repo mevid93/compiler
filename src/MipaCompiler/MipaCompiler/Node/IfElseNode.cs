@@ -87,7 +87,38 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
-            throw new NotImplementedException();
+            // define if-else structure labels
+            int number = visitor.GetIfStructureCounter();
+            string ifEntry = $"label_if_{number}_entry: ;";
+            string elseEntry = $"label_else_{number}_entry: ;";
+            string ifExit = $"label_if_{number}_exit: ;";
+            string gotoElseEntry = $"goto label_else_{number}_entry;";
+            string gotoIfExit = $"goto label_if_{number}_exit;";
+            visitor.IncreaseWhileCounter();
+
+            // add entry point
+            visitor.AddCodeLine(ifEntry);
+
+            // process the condition
+            condition.GenerateCode(visitor);
+
+            string tmp = visitor.GetLatestUsedTmpVariable();
+            visitor.AddCodeLine($"if (!{tmp}) goto label_else_{number}_entry;");
+
+            // process then statement
+            thenStatement.GenerateCode(visitor);
+            visitor.AddCodeLine(gotoIfExit);
+
+            // add else entry
+            visitor.AddCodeLine(elseEntry);
+
+            // if else statement exists --> process it
+            if (elseStatement != null) elseStatement.GenerateCode(visitor);
+
+            // add exit point
+            visitor.AddCodeLine(ifExit);
+
+
         }
     }
 }

@@ -72,7 +72,7 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
-            throw new NotImplementedException();
+            // TODO
         }
     }
 }

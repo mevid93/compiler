@@ -49,6 +49,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CodeGeneration\Program1Generation.cs" />
     <Compile Include="NodeTests\ProgramNodeTests.cs" />
     <Compile Include="ScannerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

@@ -109,7 +109,30 @@ namespace MipaCompiler
                 case "array[] of boolean":
                     return "bool *";
                 default:
-                    throw new Exception("Unexpected error... Function without return type!");
+                    throw new Exception("Unexpected error... Invalid type!");
+            }
+        }
+
+        /// <summary>
+        /// Static method <c>ConvertSimpleTypeToTargetLanguage</c> converts simple type to 
+        /// C-language equivalent.
+        /// </summary>
+        /// <param name="simpleType">simple type in Mini-Pascal</param>
+        /// <returns>simple type</returns>
+        public static string ConvertSimpleTypeToTargetLanguage(string simpleType)
+        {
+            switch (simpleType)
+            {
+                case "string":
+                    return "const char *";
+                case "real":
+                    return "double";
+                case "integer":
+                    return "int";
+                case "boolean":
+                    return "bool";
+                default:
+                    throw new Exception("Unexpected error... Invalid simple type!");
             }
         }
     }

@@ -72,7 +72,17 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
-            throw new NotImplementedException();
+            // avaluate expression
+            expression.GenerateCode(visitor);
+
+            // get latest temp variable
+            string temp = visitor.GetLatestUsedTmpVariable();
+
+            // define the new code line
+            string line = $"var_{identifier} = {temp};";
+
+            // add new code line to list of generated code lines
+            visitor.AddCodeLine(line);
         }
     }
 }

@@ -109,12 +109,14 @@ namespace MipaCompiler.Node
         public void GenerateCode(Visitor visitor)
         {
             // add standard input output libraries
-            visitor.AddCodeLine("#include <stdio.h>\n");
+            visitor.AddCodeLine("#include <stdio.h>");
+            visitor.AddCodeLine("");
 
             // add typedef for boolean
             visitor.AddCodeLine("typedef int bool;");
             visitor.AddCodeLine("#define true 1");
-            visitor.AddCodeLine("#define false 0\n");
+            visitor.AddCodeLine("#define false 0");
+            visitor.AddCodeLine("");
 
             // do function and procedure forward declaration (for mutual recursion)
             visitor.AddCodeLine("// here are forward declarations for functions and procedures (if any exists)");
@@ -158,7 +160,6 @@ namespace MipaCompiler.Node
 
             mainBlock.GenerateCode(visitor);
 
-            visitor.AddCodeLine("\n");
             visitor.AddCodeLine("return 0;");
             visitor.AddCodeLine("}");
         }

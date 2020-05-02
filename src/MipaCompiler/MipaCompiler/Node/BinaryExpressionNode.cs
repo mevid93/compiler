@@ -86,7 +86,62 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
-            throw new NotImplementedException();
+            string line = "";
+            switch (value)
+            {
+                case "and":
+                case "or":
+                case "%":
+                case "+":
+                    break;
+                case "-":
+                    lhs.GenerateCode(visitor);
+                    string lhsTmp = visitor.GetLatestUsedTmpVariable();
+                    rhs.GenerateCode(visitor);
+                    string rhsTmp = visitor.GetLatestUsedTmpVariable();
+                    int counter = visitor.GetTempVariableCounter();
+                    visitor.IncreaseTempVariableCounter();
+                    string newTmpVariable = "tmp_" + counter;
+                    visitor.SetLatestTmpVariableName(newTmpVariable);
+                    line = $"int {newTmpVariable} = {lhsTmp} - {rhsTmp};";
+                    break;
+                case "*":
+                case "/":
+                case "=":
+                    break;
+                case "<>":
+                    lhs.GenerateCode(visitor);
+                    lhsTmp = visitor.GetLatestUsedTmpVariable();
+                    rhs.GenerateCode(visitor);
+                    rhsTmp = visitor.GetLatestUsedTmpVariable();
+                    counter = visitor.GetTempVariableCounter();
+                    visitor.IncreaseTempVariableCounter();
+                    newTmpVariable = "tmp_" + counter;
+                    visitor.SetLatestTmpVariableName(newTmpVariable);
+                    line = $"bool {newTmpVariable} = {lhsTmp} != {rhsTmp};";
+                    break;
+                case "<":
+                case "<=":
+                    break;
+                case ">":
+                    lhs.GenerateCode(visitor);
+                    lhsTmp = visitor.GetLatestUsedTmpVariable();
+                    rhs.GenerateCode(visitor);
+                    rhsTmp = visitor.GetLatestUsedTmpVariable();
+                    counter = visitor.GetTempVariableCounter();
+                    visitor.IncreaseTempVariableCounter();
+                    newTmpVariable = "tmp_" + counter;
+                    visitor.SetLatestTmpVariableName(newTmpVariable);
+                    line = $"bool {newTmpVariable} = {lhsTmp} > {rhsTmp};";
+                    break;
+                case ">=":
+                case "[]":
+                    break;
+                default:
+                    throw new Exception("Unexpected exception... Invalid binary operation!");
+            }
+
+            visitor.AddCodeLine(line);
         }
     }
 }

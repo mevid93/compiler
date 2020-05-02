@@ -87,7 +87,7 @@ namespace MipaCompiler.Symbol
         {
             foreach(FunctionSymbol f in functions)
             {
-                if (f.HasSameDefinition(symbol)) return true;
+                if (f.GetIdentifier().Equals(symbol.GetIdentifier())) return true;
             }
 
             return false;
@@ -102,7 +102,7 @@ namespace MipaCompiler.Symbol
         {
             foreach (ProcedureSymbol p in procedures)
             {
-                if (p.HasSameDefinition(symbol)) return true;
+                if (p.GetIdentifier().Equals(symbol.GetIdentifier())) return true;
             }
 
             return false;

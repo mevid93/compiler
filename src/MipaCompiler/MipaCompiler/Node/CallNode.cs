@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MipaCompiler.Symbol;
+using System;
 using System.Collections.Generic;
 
 namespace MipaCompiler.Node
@@ -77,7 +78,91 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
-            throw new NotImplementedException();
+            // variable to hold new code line
+            string line = "";
+
+            // get symbol table
+            SymbolTable symTable = visitor.GetSymbolTable();
+
+            // check if predfined read procedure
+            if (id.Equals("read") && !symTable.IsFunctionInTable(id) && !symTable.IsProcedureInTable(id))
+            {
+                line += "scanf(";
+
+                string str = "";
+                string var = ", ";
+
+                bool first = true;
+                foreach(INode argument in args)
+                {
+                    if (first)
+                    {
+                        first = false;
+                    }
+                    else
+                    {
+                        str += " ";
+                        var += ", ";
+                    }
+                    VariableNode varNode = (VariableNode)argument;
+                    string varName = varNode.GetName();
+                    VariableSymbol varSymbol = symTable.GetVariableSymbolByIdentifier(varName);
+                    string varType = varSymbol.GetSymbolType();
+                    
+                    if (varType == "integer")
+                    {
+                        str += "%d";
+                        var += "&var_" + varName;
+                    }
+                }
+
+                line += "\"" + str + "\"" + var;
+
+                line += ");";
+                visitor.AddCodeLine(line);
+                return;
+            }
+
+            // check if predefined writeln procedure
+            if (id.Equals("writeln") && !symTable.IsFunctionInTable(id) && !symTable.IsProcedureInTable(id))
+            {
+                line += "printf(";
+
+                string str = "";
+                string var = ", ";
+
+                bool first = true;
+                foreach (INode argument in args)
+                {
+                    if (first)
+                    {
+                        first = false;
+                    }
+                    else
+                    {
+                        str += " ";
+                        var += ", ";
+                    }
+                    VariableNode varNode = (VariableNode)argument;
+                    string varName = varNode.GetName();
+                    VariableSymbol varSymbol = symTable.GetVariableSymbolByIdentifier(varName);
+                    string varType = varSymbol.GetSymbolType();
+
+                    if (varType == "integer")
+                    {
+                        str += "%d";
+                        var += "var_" + varName;
+                    }
+                }
+
+                line += "\"" + str + "\"" + var;
+
+                line += ");";
+                visitor.AddCodeLine(line);
+                return;
+            }
+
+            // custom procedure or function
         }
     }
 }
