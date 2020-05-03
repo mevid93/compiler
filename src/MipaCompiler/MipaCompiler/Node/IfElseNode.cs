@@ -89,6 +89,7 @@ namespace MipaCompiler.Node
         {
             // define if-else structure labels
             int number = visitor.GetIfStructureCounter();
+            visitor.IncreaseIfStructureCounter();
             string ifEntry = $"label_if_{number}_entry: ;";
             string elseEntry = $"label_else_{number}_entry: ;";
             string ifExit = $"label_if_{number}_exit: ;";

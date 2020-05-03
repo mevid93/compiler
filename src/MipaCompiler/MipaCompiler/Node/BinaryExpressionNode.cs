@@ -107,7 +107,17 @@ namespace MipaCompiler.Node
                     break;
                 case "*":
                 case "/":
+                    break;
                 case "=":
+                    lhs.GenerateCode(visitor);
+                    lhsTmp = visitor.GetLatestUsedTmpVariable();
+                    rhs.GenerateCode(visitor);
+                    rhsTmp = visitor.GetLatestUsedTmpVariable();
+                    counter = visitor.GetTempVariableCounter();
+                    visitor.IncreaseTempVariableCounter();
+                    newTmpVariable = "tmp_" + counter;
+                    visitor.SetLatestTmpVariableName(newTmpVariable);
+                    line = $"bool {newTmpVariable} = {lhsTmp} == {rhsTmp};";
                     break;
                 case "<>":
                     lhs.GenerateCode(visitor);
@@ -121,7 +131,17 @@ namespace MipaCompiler.Node
                     line = $"bool {newTmpVariable} = {lhsTmp} != {rhsTmp};";
                     break;
                 case "<":
+                    break;
                 case "<=":
+                    lhs.GenerateCode(visitor);
+                    lhsTmp = visitor.GetLatestUsedTmpVariable();
+                    rhs.GenerateCode(visitor);
+                    rhsTmp = visitor.GetLatestUsedTmpVariable();
+                    counter = visitor.GetTempVariableCounter();
+                    visitor.IncreaseTempVariableCounter();
+                    newTmpVariable = "tmp_" + counter;
+                    visitor.SetLatestTmpVariableName(newTmpVariable);
+                    line = $"bool {newTmpVariable} = {lhsTmp} <= {rhsTmp};";
                     break;
                 case ">":
                     lhs.GenerateCode(visitor);

@@ -1105,5 +1105,33 @@ namespace MipaCompiler
             
         }
 
+        /// <summary>
+        /// Method <c>EvaluateTypeOfNode</c> evaluates the type of given node.
+        /// </summary>
+        /// <param name="node">node to be evaluated</param>
+        /// <param name="symbolTable">symbol table</param>
+        /// <returns>result type of node</returns>
+        public static string EvaluateTypeOfNode(INode node, SymbolTable symbolTable)
+        {
+            List<string> errors = new List<string>();
+            string evaluatedType = null;
+
+            switch (node.GetNodeType())
+            {
+                case NodeType.BINARY_EXPRESSION:
+                    evaluatedType = EvaluateTypeOfBinaryExpressionNode(node, errors, symbolTable);
+                    break;
+                case NodeType.CALL:
+                    evaluatedType = EvaluateTypeOfCallNode(node, errors, symbolTable);
+                    break;
+                case NodeType.VARIABLE:
+                    evaluatedType = EvaluateTypeOfVariableNode(node, errors, symbolTable);
+                    break;
+                default:
+                    throw new Exception($"Unexpected error... nodetype {node.GetNodeType()} not supported!");
+            }
+
+            return evaluatedType;
+        }
     }
 }

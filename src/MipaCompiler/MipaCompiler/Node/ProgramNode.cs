@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MipaCompiler.Symbol;
+using System;
 using System.Collections.Generic;
 
 namespace MipaCompiler.Node
@@ -139,17 +140,29 @@ namespace MipaCompiler.Node
                 }
             }
 
+            // init function symbols to symbol table
+            InitFunctionSymbols(visitor);
 
             // do actual function and procedure code
             visitor.AddCodeLine("");
             visitor.AddCodeLine("// here are the definitions of functions and procedures (if any exists)");
             if (functions != null && functions.Count > 0)
             {
-
+                foreach (INode function in functions)
+                {
+                    FunctionNode fNode = (FunctionNode)function;
+                    fNode.GenerateCode(visitor);
+                    visitor.AddCodeLine("");
+                }
             }
             if (procedures != null && procedures.Count > 0)
             {
-
+                foreach (INode procedure in procedures)
+                {
+                    ProcedureNode pNode = (ProcedureNode)procedure;
+                    pNode.GenerateCode(visitor);
+                    visitor.AddCodeLine("");
+                }
             }
 
             // main block
@@ -162,6 +175,37 @@ namespace MipaCompiler.Node
 
             visitor.AddCodeLine("return 0;");
             visitor.AddCodeLine("}");
+        }
+
+        /// <summary>
+        /// Method <c>InitFunctionSymbols</c> initialized function symbols to symbol table.
+        /// </summary>
+        private void InitFunctionSymbols(Visitor visitor)
+        {
+            foreach(FunctionNode f in functions)
+            {
+                // get function name
+                string functionName = f.GetName();
+
+                // for each function parameter --> find parameter type
+                // should be integer, string, boolean or array
+                List<INode> parameters = f.GetParameters();
+                string[] paramTypes = new string[parameters.Count];
+
+                for (int i = 0; i < parameters.Count; i++)
+                {
+                    VariableNode varNode = (VariableNode)parameters[i];
+                    paramTypes[i] = SemanticAnalyzer.EvaluateTypeOfTypeNode(varNode.GetVariableType(), new List<string>(), null);
+                }
+
+                // find return type
+                string returnType = SemanticAnalyzer.EvaluateTypeOfTypeNode(f.GetReturnType(), new List<string>(), null);
+
+                // create new function symbol
+                FunctionSymbol symbol = new FunctionSymbol(functionName, paramTypes, returnType);
+
+                visitor.GetSymbolTable().DeclareFunctionSymbol(symbol);
+            }
         }
     }
 }

@@ -121,7 +121,7 @@ namespace MipaCompiler.Node
                 ArrayTypeNode arr = (ArrayTypeNode)type;
                 SimpleTypeNode stn = (SimpleTypeNode)arr.GetSimpleType();
                 string valueType = stn.GetTypeValue();
-                //varType = CodeGenerator.ConvertParameterTypeToTargetLanguage(valueType);
+                //varType = CodeGenerator.ConvertReturnTypeToTargetLanguage(valueType);
             }
 
             // add end of statement 

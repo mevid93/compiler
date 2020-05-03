@@ -374,5 +374,29 @@ namespace MipaCompiler.Symbol
 
             return mostSimilar;
         }
+
+        /// <summary>
+        /// Method <c>ResetScope</c> resets the scope of symbol table.
+        /// </summary>
+        public void ResetScope()
+        {
+            while (currentScope > 0) RemoveScope();
+        }
+
+        /// <summary>
+        /// Method <c>GetFunctionSymbolByIdentifier</c> returns the function that matches the
+        /// given identifier.
+        /// </summary>
+        /// <param name="identifier">function identifier</param>
+        /// <returns>function symbol</returns>
+        public FunctionSymbol GetFunctionSymbolByIdentifier(string identifier)
+        {
+            foreach(FunctionSymbol f in functions)
+            {
+                if (f.GetIdentifier().Equals(identifier)) return f;
+            }
+
+            return null;
+        }
     }
 }

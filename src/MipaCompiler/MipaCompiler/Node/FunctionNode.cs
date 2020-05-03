@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MipaCompiler.Symbol;
+using System;
 using System.Collections.Generic;
 
 namespace MipaCompiler.Node
@@ -102,36 +103,6 @@ namespace MipaCompiler.Node
             if (block != null) block.PrettyPrint();
         }
 
-        public void GenerateCode(Visitor visitor)
-        {
-            string dcl = "";
-
-            // get return type --> no need to give symbol table
-            string resultType = SemanticAnalyzer.EvaluateTypeOfTypeNode(type, new List<string>(), null);
-
-            // convert return type into c-code
-            dcl += CodeGenerator.ConvertParameterTypeToTargetLanguage(resultType) + " ";
-
-            // name of the function
-            dcl += "function_" + name;
-
-            // add parameters
-            dcl += "(";
-            for (int i = 0; i < parameters.Count; i++)
-            {
-                INode node = parameters[i];
-                VariableNode variableNode = (VariableNode)node;
-                string varType = SemanticAnalyzer.EvaluateTypeOfTypeNode(variableNode.GetVariableType(), new List<string>(), null);
-                varType = CodeGenerator.ConvertParameterTypeToTargetLanguage(varType);
-                dcl += varType + " ";
-                string varName = "var_" + variableNode.GetName();
-                dcl += varName;
-                if (i < parameters.Count - 1) dcl += ", ";
-            }
-            dcl += ");";
-            
-        }
-        
         /// <summary>
         /// Method <c>GenerateForwardDeclaration</c> returns code line of function
         /// forward declaration.
@@ -145,7 +116,7 @@ namespace MipaCompiler.Node
             string resultType = SemanticAnalyzer.EvaluateTypeOfTypeNode(type, new List<string>(), null);
 
             // convert return type into c-code
-            dcl += CodeGenerator.ConvertParameterTypeToTargetLanguage(resultType) + " ";
+            dcl += CodeGenerator.ConvertReturnTypeToTargetLanguage(resultType) + " ";
 
             // name of the function
             dcl += "function_" + name;
@@ -166,6 +137,54 @@ namespace MipaCompiler.Node
             dcl += ");";
 
             return dcl;
+        }
+
+        public void GenerateCode(Visitor visitor)
+        {
+            // increase scope when entering function
+            SymbolTable symTable = visitor.GetSymbolTable();
+            symTable.AddScope();
+
+            string dcl = "";
+
+            // get return type --> no need to give symbol table
+            string resultType = SemanticAnalyzer.EvaluateTypeOfTypeNode(type, new List<string>(), null);
+
+            // convert return type into c-code
+            dcl += CodeGenerator.ConvertReturnTypeToTargetLanguage(resultType) + " ";
+
+            // name of the function
+            dcl += "function_" + name;
+
+            // add parameters
+            dcl += "(";
+            for (int i = 0; i < parameters.Count; i++)
+            {
+                INode node = parameters[i];
+                VariableNode variableNode = (VariableNode)node;
+                string varType = SemanticAnalyzer.EvaluateTypeOfTypeNode(variableNode.GetVariableType(), new List<string>(), null);
+                string cVarType = CodeGenerator.ConvertParameterTypeToTargetLanguage(varType);
+
+                // declare variables to symbol table
+                symTable.DeclareVariableSymbol(new VariableSymbol(variableNode.GetName(), varType, null, symTable.GetCurrentScope(), true));
+
+                dcl += cVarType + " ";
+                string varName = "var_" + variableNode.GetName();
+                dcl += varName;
+                if (i < parameters.Count - 1) dcl += ", ";
+            }
+            dcl += ")";
+
+            visitor.AddCodeLine(dcl);
+            visitor.AddCodeLine("{");
+
+            block.GenerateCode(visitor);
+
+            visitor.AddCodeLine("}");
+
+
+            // decrease scope when exiting function
+            symTable.RemoveScope();
         }
 
     }

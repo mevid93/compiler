@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using MipaCompiler.Symbol;
+using System;
 
 namespace MipaCompiler.Node
 {
@@ -59,7 +59,19 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
-            // TODO
+            SymbolTable symTable = visitor.GetSymbolTable();
+
+            if (expression == null)
+            {
+                visitor.AddCodeLine("return;");
+                return;
+            }
+
+            expression.GenerateCode(visitor);
+
+            string lastTmp = visitor.GetLatestUsedTmpVariable();
+
+            visitor.AddCodeLine($"return {lastTmp};");
         }
     }
 }

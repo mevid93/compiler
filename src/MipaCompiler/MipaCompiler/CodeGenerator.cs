@@ -83,11 +83,42 @@ namespace MipaCompiler
         ///////////////////////// STATIC GENERAL CODE GENERATION METHODS /////////////////////////
 
         /// <summary>
-        /// Static method <c>ConvertTypeToTargetLanguage</c> convertos Mini-Pascal type
+        /// Static method <c>ConvertTypeToTargetLanguage</c> converts Mini-Pascal type
         /// to C-language type.
         /// </summary>
         /// <param name="type"></param>
         /// <returns>C-language type</returns>
+        public static string ConvertReturnTypeToTargetLanguage(string type)
+        {
+            switch (type)
+            {
+                case "string":
+                    return "const char *";
+                case "real":
+                    return "double";
+                case "integer":
+                    return "int";
+                case "boolean":
+                    return "bool";
+                case "array[] of string":
+                    return "char **";
+                case "array[] of real":
+                    return "double *";
+                case "array[] of integer":
+                    return "int *";
+                case "array[] of boolean":
+                    return "bool *";
+                default:
+                    throw new Exception("Unexpected error... Invalid return type!");
+            }
+        }
+
+        /// <summary>
+        /// Static method <c>ConvertParameterTypeToTargetLanguage</c> converts parameter
+        /// type to C-language.
+        /// </summary>
+        /// <param name="type"></param>
+        /// <returns>parameter type in C-language</returns>
         public static string ConvertParameterTypeToTargetLanguage(string type)
         {
             switch (type)
@@ -99,17 +130,17 @@ namespace MipaCompiler
                 case "integer":
                     return "int *";
                 case "boolean":
-                    return "bool *";
+                    return "bool";
                 case "array[] of string":
                     return "char **";
                 case "array[] of real":
                     return "double *";
                 case "array[] of integer":
-                    return "integer *";
+                    return "int *";
                 case "array[] of boolean":
                     return "bool *";
                 default:
-                    throw new Exception("Unexpected error... Invalid type!");
+                    throw new Exception("Unexpected error... Invalid parameter type!");
             }
         }
 
@@ -133,6 +164,28 @@ namespace MipaCompiler
                     return "bool";
                 default:
                     throw new Exception("Unexpected error... Invalid simple type!");
+            }
+        }
+
+        /// <summary>
+        /// Static method <c>GetPrefixForArgumentByType</c> returns prefix for given
+        /// argument type.
+        /// </summary>
+        /// <param name="evaluatedType">argument type</param>
+        /// <param name="isParameter">is argument also a parameter</param>
+        /// <returns>argument prefix</returns>
+        public static string GetPrefixForArgumentByType(string evaluatedType, bool isParameter)
+        {
+            if (isParameter) return "";
+
+            switch (evaluatedType)
+            {
+                case "boolean":
+                case "real":
+                case "integer":
+                    return "&";
+                default:
+                    return "";
             }
         }
     }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace MipaCompiler.Node
 {
@@ -58,7 +57,7 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
-            
+            visitor.SetLatestTmpVariableName(value);
         }
     }
 }
