@@ -100,7 +100,6 @@ namespace MipaCompiler.Node
             string dcl = $"void procedure_{name}(";
 
             // add parameters
-            dcl += "(";
             for (int i = 0; i < parameters.Count; i++)
             {
                 INode node = parameters[i];

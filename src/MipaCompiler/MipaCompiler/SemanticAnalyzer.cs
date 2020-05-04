@@ -1127,6 +1127,14 @@ namespace MipaCompiler
                 case NodeType.VARIABLE:
                     evaluatedType = EvaluateTypeOfVariableNode(node, errors, symbolTable);
                     break;
+                case NodeType.STRING:
+                    return STR_STRING;
+                case NodeType.INTEGER:
+                    return STR_INTEGER;
+                case NodeType.REAL:
+                    return STR_REAL;
+                case NodeType.UNARY_EXPRESSION:
+                    return EvaluateTypeOfUnaryExpressionNode(node, errors, symbolTable);
                 default:
                     throw new Exception($"Unexpected error... nodetype {node.GetNodeType()} not supported!");
             }

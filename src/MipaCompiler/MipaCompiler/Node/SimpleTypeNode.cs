@@ -58,7 +58,7 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
-            // TODO
+            // NO NEED TO IMPLEMENT
         }
     }
 }

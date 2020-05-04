@@ -122,6 +122,8 @@ namespace MipaCompiler.Node
             // name of the function
             dcl += "function_" + name;
 
+            int arrayCounter = 0;
+
             // add parameters
             dcl += "(";
             for (int i = 0; i < parameters.Count; i++)
@@ -129,10 +131,18 @@ namespace MipaCompiler.Node
                 INode node = parameters[i];
                 VariableNode variableNode = (VariableNode)node;
                 string varType = SemanticAnalyzer.EvaluateTypeOfTypeNode(variableNode.GetVariableType(), new List<string>(), null);
-                varType = CodeGenerator.ConvertParameterTypeToTargetLanguage(varType);
-                dcl += varType + " ";
+                string cVarType = CodeGenerator.ConvertParameterTypeToTargetLanguage(varType);
+                dcl += cVarType + " ";
                 string varName = "var_" + variableNode.GetName();
                 dcl += varName;
+
+                // if was array, pass the array size as next parameter (always)
+                if (varType.Contains("array"))
+                {
+                    dcl += $", int * size_{arrayCounter}";
+                    arrayCounter++;
+                }
+
                 if (i < parameters.Count - 1) dcl += ", ";
             }
             dcl += ");";

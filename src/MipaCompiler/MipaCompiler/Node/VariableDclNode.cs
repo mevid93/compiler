@@ -77,7 +77,7 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
-            // variable to hold new generated code line
+            // variable to hold new generated code line 
             string line = "";
 
             // get symbol table
@@ -108,6 +108,9 @@ namespace MipaCompiler.Node
                     }
 
                     name = "var_" + name;
+
+                    if (valueType == "string") name += "[256]";
+
                     line += name;
 
                     if (i < variables.Count - 1) line += ", ";
@@ -118,10 +121,46 @@ namespace MipaCompiler.Node
             // array type
             if (type.GetNodeType() == NodeType.ARRAY_TYPE)
             {
+                // first find out the simple type of array
                 ArrayTypeNode arr = (ArrayTypeNode)type;
                 SimpleTypeNode stn = (SimpleTypeNode)arr.GetSimpleType();
-                string valueType = stn.GetTypeValue();
-                //varType = CodeGenerator.ConvertReturnTypeToTargetLanguage(valueType);
+                string simpleType = stn.GetTypeValue();
+                string nodeType = SemanticAnalyzer.EvaluateTypeOfTypeNode(type, new List<string>(), symTable);
+
+                string varType = CodeGenerator.ConvertSimpleTypeToTargetLanguage(simpleType);
+
+                line += varType + " ";
+
+                // next calculate array size
+                arr.GetSizeExpression().GenerateCode(visitor);
+
+                // get tmp variable that holds the size of the array
+                string tmp_size = visitor.GetLatestUsedTmpVariable();
+
+                // declare each variable
+                for (int i = 0; i < variables.Count; i++)
+                {
+                    VariableNode varNode = (VariableNode)variables[i];
+                    string name = varNode.GetName();
+
+                    // symbol table update
+                    if (symTable.IsVariableSymbolInTable(name))
+                    {
+                        symTable.ReDeclareVariableSymbol(new VariableSymbol(name, nodeType, null, symTable.GetCurrentScope()));
+                    }
+                    else
+                    {
+                        symTable.DeclareVariableSymbol(new VariableSymbol(name, nodeType, null, symTable.GetCurrentScope()));
+                    }
+
+                    name = "var_" + name;
+
+                    line += $"var_{name}[{tmp_size}]";
+
+                    if (simpleType == "string") line += "[256]";
+
+                    if (i < variables.Count - 1) line += ", ";
+                }
             }
 
             // add end of statement 

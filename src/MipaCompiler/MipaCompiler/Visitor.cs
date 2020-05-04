@@ -16,6 +16,7 @@ namespace MipaCompiler
         private string latestTmpVariable;           // latest temporary variable name used
         private int tempVariableCounter;            // counter for latest temporary variable
         private bool isMainBlock;                   // is current block main function
+        private int arraySizeCounter;               // counter for latest array size variable
 
         /// <summary>
         /// Constructor <c>Visitor</c>
@@ -138,6 +139,23 @@ namespace MipaCompiler
         public void SetIsBlockMainFunction(bool isMainBlock)
         {
             this.isMainBlock = isMainBlock;
+        }
+
+        /// <summary>
+        /// Method <c>GetArraySizeCounter</c> returns the counter of array size variables.
+        /// </summary>
+        /// <returns>array size counter value</returns>
+        public int GetArraySizeCounter()
+        {
+            return arraySizeCounter;
+        }
+
+        /// <summary>
+        /// Method <c>IncreaseArraySizeCounter</c> increases the array size counter by one.
+        /// </summary>
+        public void IncreaseArraySizeCounter()
+        {
+            arraySizeCounter++;
         }
     }
 }

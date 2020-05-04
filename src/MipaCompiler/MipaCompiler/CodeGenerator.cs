@@ -155,7 +155,7 @@ namespace MipaCompiler
             switch (simpleType)
             {
                 case "string":
-                    return "const char *";
+                    return "char";
                 case "real":
                     return "double";
                 case "integer":
@@ -209,5 +209,6 @@ namespace MipaCompiler
                     return "";
             }
         }
+
     }
 }

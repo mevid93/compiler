@@ -76,6 +76,8 @@ namespace MipaCompiler.Node
             }
         }
 
+        ////////////// EVERYTHING AFTER THIS IS FOR CODE GENERATION ////////////////
+
         public void GenerateCode(Visitor visitor)
         {
             // get symbol table
@@ -98,6 +100,8 @@ namespace MipaCompiler.Node
             // custom procedure or function
             GenerateCodeForCustomFunction(visitor);
         }
+
+        ///////////// METHODS THAT ARE RELATED TO SCANF /////////////////
 
         /// <summary>
         /// Method <c>GenerateCodeForPredefinedRead</c> genereates the code
@@ -122,23 +126,28 @@ namespace MipaCompiler.Node
                     scan_args += ", ";
                 }
 
-                // get variable name and type
-                //string variableName = GetVariableName();
-                //string variableType = GetVariableType();
-
-                // add correct formatting and variable argument for printf-function
-
-                // temp solution
-                VariableNode varNode = (VariableNode)args[i];
-                string varName = varNode.GetName();
-                VariableSymbol varSymbol = symTable.GetVariableSymbolByIdentifier(varName);
-                string varType = varSymbol.GetSymbolType();
-
-                if (varType == "integer")
+                // get variable type
+                string variableType = SemanticAnalyzer.EvaluateTypeOfNode(args[i], symTable);
+                
+                // add correct formatting 
+                switch (variableType)
                 {
-                    format_str += "%d";
-                    scan_args += "&var_" + varName;
+                    case "integer":
+                        format_str += "%d";
+                        break;
+                    case "real":
+                        format_str += "%lf";
+                        break;
+                    case "string":
+                        format_str += "%s";
+                        break;
+                    default:
+                        throw new Exception("Unexpected error... unsupported variable type!");
                 }
+
+                // get the correct scanf argument
+                string argument = GetScanfArgument(args[i], visitor);
+                scan_args += argument;
 
             }
 
@@ -148,71 +157,117 @@ namespace MipaCompiler.Node
         }
 
         /// <summary>
+        /// Method <c>GetScanfArgument</c> will return correct argument
+        /// for scanf corresponding the given node. Node should be variable
+        /// or binary expression (array index).
+        /// </summary>
+        private string GetScanfArgument(INode node, Visitor visitor)
+        {
+            // get symbol table
+            SymbolTable symTable = visitor.GetSymbolTable();
+
+            switch (node.GetNodeType())
+            {
+                case NodeType.VARIABLE:
+                    string type = SemanticAnalyzer.EvaluateTypeOfVariableNode(node, new List<string>(), symTable);
+                    VariableNode varNode = (VariableNode)node;
+                    string name = varNode.GetName();
+                    VariableSymbol varSymbol = symTable.GetVariableSymbolByIdentifier(name);
+                    string prefix = CodeGenerator.GetPrefixForArgumentByType(type, varSymbol.IsParameter());
+                    
+                    switch (type)
+                    {
+                        case "integer":
+                        case "real":
+                        case "string":
+                            return $"{prefix}var_{name}";
+                        default:
+                            return $"var_{name}";
+                    }
+                case NodeType.BINARY_EXPRESSION:
+                    BinaryExpressionNode bin = (BinaryExpressionNode)node;
+                    VariableNode lhs = (VariableNode)bin.GetLhs();
+                    INode rhs = bin.GetRhs();
+                    rhs.GenerateCode(visitor);
+                    string tmp = visitor.GetLatestUsedTmpVariable();
+                    return $"var_{lhs.GetName()}[{tmp}]";
+                default:
+                    throw new Exception("Unexpected error... invalid scanf argument type!");
+            }
+        }
+
+        ///////////// METHODS THAT ARE RELATED TO PRINTF /////////////////
+
+        /// <summary>
         /// Method <c>GenerateCodeForPredefinedWriteln</c> generates the code for predefined
         /// writeln.
         /// </summary>
         private void GenerateCodeForPredefinedWriteln(Visitor visitor)
         {
+            // get symbol table
             SymbolTable symTable = visitor.GetSymbolTable();
 
-            string line = "printf(";
+            string format_str = "";
+            string print_args = ", ";
 
-            string str = "";
-            string var = ", ";
-
-            bool first = true;
-            foreach (INode argument in args)
+            for (int i = 0; i < args.Count; i++)
             {
-                if (first)
+                // arguments must be separated
+                if (i > 0)
                 {
-                    first = false;
-                }
-                else
-                {
-                    str += " ";
-                    var += ", ";
+                    format_str += " ";
+                    print_args += ", ";
                 }
 
-                switch (argument.GetNodeType())
-                {
-                    case NodeType.VARIABLE:
-                        VariableNode varNode = (VariableNode)argument;
-                        string varName = varNode.GetName();
-                        VariableSymbol varSymbol = symTable.GetVariableSymbolByIdentifier(varName);
-                        string varType = varSymbol.GetSymbolType();
+                // get variable type
+                string variableType = SemanticAnalyzer.EvaluateTypeOfNode(args[i], symTable);
 
-                        if (varType == "integer")
-                        {
-                            str += "%d";
-                            var += "var_" + varName;
-                        }
+                // add correct formatting 
+                switch (variableType)
+                {
+                    case "integer":
+                        format_str += "%d";
                         break;
-                    case NodeType.CALL:
-                        CallNode callNode = (CallNode)argument;
-                        string id = callNode.GetId();
-                        FunctionSymbol f = symTable.GetFunctionSymbolByIdentifier(id);
-                        string retType = f.GetReturnType();
-                        callNode.GenerateCode(visitor);
-                        string lastTmp = visitor.GetLatestUsedTmpVariable();
-                       
-                        if(retType == "integer")
-                        {
-                            str += "%d";
-                            var += lastTmp;
-                        }
+                    case "real":
+                        format_str += "%lf";
+                        break;
+                    case "string":
+                        format_str += "%s";
                         break;
                     default:
-                        throw new Exception("Unexpected error... unsupported argument type!");
+                        throw new Exception("Unexpected error... unsupported variable type!");
                 }
 
+                // get the correct scanf argument
+                string argument = GetPrintfArgument(args[i], visitor);
+                print_args += argument;
             }
-
-            line += "\"" + str + "\"" + var;
-
-            line += ");";
+            
+            // add printf to list of generated code lines
+            string line = $"printf(\"{format_str}\"{print_args});";
             visitor.AddCodeLine(line);
-            return;
         }
+
+        /// <summary>
+        /// Method <c>GetPrintfArgument</c> will return correct argument
+        /// for printf corresponding the given node. Node should evaluate
+        /// as numeric or string.
+        /// </summary>
+        private string GetPrintfArgument(INode node, Visitor visitor)
+        {
+            // get symbol table
+            SymbolTable symTable = visitor.GetSymbolTable();
+
+            // generate code
+            node.GenerateCode(visitor);
+
+            // generated code expression result should
+            // be accessible at the last tmp variable
+            string lastTemp = visitor.GetLatestUsedTmpVariable();
+            return lastTemp;
+        }
+
+        ///////////// METHODS THAT ARE RELATED TO CUSTOM FUNCTIONS /////////////////
 
         /// <summary>
         /// Method <c>GenerateCodeForCustomFunction</c> generates the code for custom
@@ -296,5 +351,6 @@ namespace MipaCompiler.Node
 
             return CodeGenerator.ConvertReturnTypeToTargetLanguage(retType);
         }
+
     }
 }
