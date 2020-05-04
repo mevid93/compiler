@@ -57,6 +57,9 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
+            // constant integer value does not need to be assigned
+            // to temporary variable. However, we still has to set
+            // it as the latest tmp variable 
             visitor.SetLatestTmpVariableName(value);
         }
     }

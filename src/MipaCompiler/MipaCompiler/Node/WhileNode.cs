@@ -90,6 +90,7 @@ namespace MipaCompiler.Node
             // process the condition
             boolExpression.GenerateCode(visitor);
 
+            // if condition false --> then exit while loop
             string tmp = visitor.GetLatestUsedTmpVariable();
             visitor.AddCodeLine($"if (!{tmp}) goto label_while_{number}_exit;");
 

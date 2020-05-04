@@ -143,6 +143,9 @@ namespace MipaCompiler.Node
             // init function symbols to symbol table
             InitFunctionSymbols(visitor);
 
+            // init procedure symbols to symbol table
+            InitProcedureSymbols(visitor);
+
             // do actual function and procedure code
             visitor.AddCodeLine("");
             visitor.AddCodeLine("// here are the definitions of functions and procedures (if any exists)");
@@ -169,16 +172,16 @@ namespace MipaCompiler.Node
             visitor.AddCodeLine("");
             visitor.AddCodeLine("// here is the main function");
             visitor.AddCodeLine("int main()");
-            visitor.AddCodeLine("{");
 
+            // update information that current block is main function
+            visitor.SetIsBlockMainFunction(true);
+
+            // generate block code
             mainBlock.GenerateCode(visitor);
-
-            visitor.AddCodeLine("return 0;");
-            visitor.AddCodeLine("}");
         }
 
         /// <summary>
-        /// Method <c>InitFunctionSymbols</c> initialized function symbols to symbol table.
+        /// Method <c>InitFunctionSymbols</c> initializes function symbols to symbol table.
         /// </summary>
         private void InitFunctionSymbols(Visitor visitor)
         {
@@ -204,7 +207,37 @@ namespace MipaCompiler.Node
                 // create new function symbol
                 FunctionSymbol symbol = new FunctionSymbol(functionName, paramTypes, returnType);
 
+                // declare it
                 visitor.GetSymbolTable().DeclareFunctionSymbol(symbol);
+            }
+        }
+
+        /// <summary>
+        /// Method <c>InitProcedureSymbols</c> initialized procedure symbols to symbol table.
+        /// </summary>
+        private void InitProcedureSymbols(Visitor visitor)
+        {
+            foreach (ProcedureNode p in procedures)
+            {
+                // get procedure name
+                string procedureName = p.GetName();
+
+                // for each procedure parameter --> find parameter type
+                // should be integer, string, boolean or array
+                List<INode> parameters = p.GetParameters();
+                string[] paramTypes = new string[parameters.Count];
+
+                for (int i = 0; i < parameters.Count; i++)
+                {
+                    VariableNode varNode = (VariableNode)parameters[i];
+                    paramTypes[i] = SemanticAnalyzer.EvaluateTypeOfTypeNode(varNode.GetVariableType(), new List<string>(), null);
+                }
+                
+                // create new procedure symbol
+                ProcedureSymbol symbol = new ProcedureSymbol(procedureName, paramTypes);
+
+                // declare it
+                visitor.GetSymbolTable().DeclareProcedureSymbol(symbol);
             }
         }
     }

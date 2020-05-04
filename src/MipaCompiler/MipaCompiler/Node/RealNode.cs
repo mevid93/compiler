@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace MipaCompiler.Node
 {
@@ -58,7 +57,10 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
-            // TODO
+            // real value does not need to be assigned
+            // to temporary variable. However, we still has to set
+            // it as the latest tmp variable 
+            visitor.SetLatestTmpVariableName(value);
         }
     }
 }

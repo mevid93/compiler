@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MipaCompiler.Symbol;
+using System;
 using System.Collections.Generic;
 
 namespace MipaCompiler.Node
@@ -73,7 +74,20 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
-            visitor.SetLatestTmpVariableName("var_" + name);
+            // get symbol table
+            SymbolTable symTable = visitor.GetSymbolTable();
+
+            // get variable symbol from table
+            VariableSymbol varSymbol = symTable.GetVariableSymbolByIdentifier(name);
+
+            // get symbol type and parameter info
+            string type = varSymbol.GetSymbolType();
+            bool isParameter = varSymbol.IsParameter();
+            string prefix = CodeGenerator.GetPrefixForVariable(type, isParameter);
+
+            // variable does not need to be assigned to temporary variable.
+            // however, we still have to set it as the latest tmp variable.
+            visitor.SetLatestTmpVariableName($"{prefix}var_{name}");
         }
     }
 }

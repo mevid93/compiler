@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace MipaCompiler.Node
 {
@@ -10,8 +9,8 @@ namespace MipaCompiler.Node
     {
         private readonly int row;           // row in source code
         private readonly int col;           // column in source code
-        private readonly string oper;       // operator symbol
-        private readonly INode expression;  // terget expression of unary operation
+        private readonly string oper;       // operator symbol (not, size)
+        private readonly INode expression;  // target expression of unary operation
 
         /// <summary>
         /// Constructor <c>UnaryExpressionNode</c> creates new UnaryExpressionNode-object.

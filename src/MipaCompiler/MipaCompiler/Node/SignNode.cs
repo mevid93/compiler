@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace MipaCompiler.Node
 {
@@ -72,7 +71,22 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
-            // TODO
+            // check sign
+            string sign = "";
+            if (isNegative) sign = "-";
+
+            // generate code of the term
+            term.GenerateCode(visitor);
+            string tempTerm = visitor.GetLatestUsedTmpVariable();
+
+            // assign new temporary variable
+            int number = visitor.GetTempVariableCounter();
+            visitor.IncreaseTempVariableCounter();
+            string newTmpVarName = $"tmp_{number}";
+            visitor.AddCodeLine($"{newTmpVarName} = {sign}{tempTerm};");
+
+            // set as the latest temp variable
+            visitor.SetLatestTmpVariableName(newTmpVarName);
         }
     }
 }

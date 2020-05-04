@@ -59,18 +59,22 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
-            SymbolTable symTable = visitor.GetSymbolTable();
-
+            // check if return does not return a value
             if (expression == null)
             {
+                // generate code that does not return a value
                 visitor.AddCodeLine("return;");
                 return;
             }
 
+            // value is returned --> genereate code
             expression.GenerateCode(visitor);
 
+            // generated code contains temporary variables
+            // where the last variable should be returned --> retrieve it
             string lastTmp = visitor.GetLatestUsedTmpVariable();
 
+            // generate code that returns a value
             visitor.AddCodeLine($"return {lastTmp};");
         }
     }

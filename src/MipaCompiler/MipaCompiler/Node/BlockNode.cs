@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MipaCompiler.Symbol;
+using System;
 using System.Collections.Generic;
 
 namespace MipaCompiler.Node
@@ -63,11 +64,33 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
+            // get symbol table
+            SymbolTable symTable = visitor.GetSymbolTable();
+
+            // code block increases scope
+            symTable.AddScope();
+
+            // check if current block is main function
+            bool main = visitor.IsBlockMainFunction();
+            visitor.SetIsBlockMainFunction(false);
+
+            // add start of block
+            visitor.AddCodeLine("{");
+
             // will generate code of the statements inside the block
             foreach(INode statement in statements)
             {
                 statement.GenerateCode(visitor);
             }
+
+            // if block is main function --> should return 0
+            if (main) visitor.AddCodeLine("return 0;");
+
+            // add end of block
+            visitor.AddCodeLine("}");
+
+            // decrease scope when exiting block
+            symTable.RemoveScope();
         }
     }
 }

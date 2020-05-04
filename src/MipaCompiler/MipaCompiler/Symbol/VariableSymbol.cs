@@ -141,6 +141,15 @@ namespace MipaCompiler.Symbol
             return isParameter.Peek();
         }
 
+        public void PushParameterInfo(bool info)
+        {
+            isParameter.Push(info);
+        }
+
+        public void PopParameterIndo()
+        {
+            isParameter.Pop();
+        }
   
     }
 }

@@ -118,8 +118,7 @@ namespace MipaCompiler.Node
 
             // add exit point
             visitor.AddCodeLine(ifExit);
-
-
+            
         }
     }
 }

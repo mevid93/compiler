@@ -58,7 +58,9 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
-            // TODO
+            // string does not need to be assigned to temporary variable in C-language.
+            // however, we still have to set it as the latest tmp variable.
+            visitor.SetLatestTmpVariableName($"\"{value}\"");
         }
     }
 }

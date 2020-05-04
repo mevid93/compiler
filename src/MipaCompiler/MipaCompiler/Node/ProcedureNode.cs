@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MipaCompiler.Symbol;
+using System;
 using System.Collections.Generic;
 
 namespace MipaCompiler.Node
@@ -88,22 +89,15 @@ namespace MipaCompiler.Node
             if (block != null) block.PrettyPrint();
         }
 
-        public void GenerateCode(Visitor visitor)
-        {
-            // TODO
-        }
-
         /// <summary>
-        /// Method <c>GenerateForwardDeclaration</c> returns code line of procedure
-        /// forward declaration.
+        /// Method <c>GenerateForwardDeclaration</c> returns  procedure
+        /// forward declaration in C-language.
         /// </summary>
         /// <returns>procedure forward declaration</returns>
         public string GenerateForwardDeclaration()
         {
-            string dcl = "";
-
-            // get return type --> no need to give symbol table
-            dcl += "void " + "procedure_" + name;
+            // variable to hold forward declaration
+            string dcl = $"void procedure_{name}(";
 
             // add parameters
             dcl += "(";
@@ -112,7 +106,7 @@ namespace MipaCompiler.Node
                 INode node = parameters[i];
                 VariableNode variableNode = (VariableNode)node;
                 string varType = SemanticAnalyzer.EvaluateTypeOfTypeNode(variableNode.GetVariableType(), new List<string>(), null);
-                varType = CodeGenerator.ConvertReturnTypeToTargetLanguage(varType);
+                varType = CodeGenerator.ConvertParameterTypeToTargetLanguage(varType);
                 dcl += varType + " ";
                 string varName = "var_" + variableNode.GetName();
                 dcl += varName;
@@ -120,7 +114,50 @@ namespace MipaCompiler.Node
             }
             dcl += ");";
 
+            // return declaration
             return dcl;
         }
+
+        public void GenerateCode(Visitor visitor)
+        {
+            // get symbol table
+            SymbolTable symTable = visitor.GetSymbolTable();
+
+            // declare variables that are passed as parameters to function
+            DeclareProcedureParameterVariables(symTable);
+
+            // get procedure forward declaration
+            string forwardDeclaration = GenerateForwardDeclaration();
+
+            // forward declaration will contain ";" at the end. remove it
+            string firstLine = forwardDeclaration.Remove(forwardDeclaration.Length - 1);
+
+            // add first line of code to list of generated code lines
+            visitor.AddCodeLine(firstLine);
+
+            // generate procedure block code
+            block.GenerateCode(visitor);
+        }
+
+        /// <summary>
+        /// Method <c>DeclareProcedureParameterVariables</c> declares parameter variables to symbol table.
+        /// </summary>
+        private void DeclareProcedureParameterVariables(SymbolTable symTable)
+        {
+            for (int i = 0; i < parameters.Count; i++)
+            {
+                INode node = parameters[i];
+                VariableNode variableNode = (VariableNode)node;
+
+                string varType = SemanticAnalyzer.EvaluateTypeOfTypeNode(variableNode.GetVariableType(), new List<string>(), null);
+                string name = variableNode.GetName();
+                int scope = symTable.GetCurrentScope() + 1; // take scope increase into account 
+
+                VariableSymbol varSymbol = new VariableSymbol(name, varType, null, scope, true);
+                symTable.DeclareVariableSymbol(varSymbol);
+            }
+        }
+
+
     }
 }

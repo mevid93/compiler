@@ -15,6 +15,7 @@ namespace MipaCompiler
         private int ifCounter;                      // counter of if-else structure label
         private string latestTmpVariable;           // latest temporary variable name used
         private int tempVariableCounter;            // counter for latest temporary variable
+        private bool isMainBlock;                   // is current block main function
 
         /// <summary>
         /// Constructor <c>Visitor</c>
@@ -118,6 +119,25 @@ namespace MipaCompiler
         public void IncreaseIfStructureCounter()
         {
             ifCounter++;
+        }
+
+        /// <summary>
+        /// Method <c>IsBlockMainFunction</c> returns true if current block is the main function.
+        /// </summary>
+        /// <returns>true if block is main function</returns>
+        public bool IsBlockMainFunction()
+        {
+            return isMainBlock;
+        }
+
+        /// <summary>
+        /// Method <c>SetIsBlockMainFunction</c> set the flag that tells if current block
+        /// is main function.
+        /// </summary>
+        /// <param name="isMainBlock">new value</param>
+        public void SetIsBlockMainFunction(bool isMainBlock)
+        {
+            this.isMainBlock = isMainBlock;
         }
     }
 }

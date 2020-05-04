@@ -58,8 +58,8 @@ namespace MipaCompiler.Node
         int GetCol();
 
         /// <summary>
-        /// Method <c>GenerateCode</c> generated code corresponding to the node and
-        /// stores it to the list of code lines.
+        /// Method <c>GenerateCode</c> generated C-language code corresponding to the node 
+        /// and stores it to the visitor-object.
         /// </summary>
         /// <param name="visitor">code genreration visitor</param>
         void GenerateCode(Visitor visitor);

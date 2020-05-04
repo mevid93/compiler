@@ -188,5 +188,26 @@ namespace MipaCompiler
                     return "";
             }
         }
+
+        /// <summary>
+        /// Static method <c>GetPrefixForVariable</c> returns prefix for variable. 
+        /// </summary>
+        /// <param name="type">variable type</param>
+        /// <param name="isParameter">is variable a parameter</param>
+        /// <returns>prefix</returns>
+        public static string GetPrefixForVariable(string variableType, bool isParameter)
+        {
+            switch (variableType)
+            {
+                case "integer":
+                case "boolean":
+                case "string":
+                case "real":
+                    if (isParameter) return "*";
+                    return "";
+                default:
+                    return "";
+            }
+        }
     }
 }

@@ -105,40 +105,45 @@ namespace MipaCompiler.Node
         /// </summary>
         private void GenerateCodeForPredefinedRead(Visitor visitor)
         {
+            // get symbol table
             SymbolTable symTable = visitor.GetSymbolTable();
+            
+            // variables to hold scanf format string (first parameter)
+            // and readable arguments
+            string format_str = "";
+            string scan_args = ", ";
 
-            string line = "scanf(";
-
-            string str = "";
-            string var = ", ";
-
-            bool first = true;
-            foreach (INode argument in args)
+            for(int i = 0; i < args.Count; i++)
             {
-                if (first)
+                // arguments must be separated
+                if(i > 0)
                 {
-                    first = false;
+                    format_str += " ";
+                    scan_args += ", ";
                 }
-                else
-                {
-                    str += " ";
-                    var += ", ";
-                }
-                VariableNode varNode = (VariableNode)argument;
+
+                // get variable name and type
+                //string variableName = GetVariableName();
+                //string variableType = GetVariableType();
+
+                // add correct formatting and variable argument for printf-function
+
+                // temp solution
+                VariableNode varNode = (VariableNode)args[i];
                 string varName = varNode.GetName();
                 VariableSymbol varSymbol = symTable.GetVariableSymbolByIdentifier(varName);
                 string varType = varSymbol.GetSymbolType();
 
                 if (varType == "integer")
                 {
-                    str += "%d";
-                    var += "&var_" + varName;
+                    format_str += "%d";
+                    scan_args += "&var_" + varName;
                 }
+
             }
 
-            line += "\"" + str + "\"" + var;
-
-            line += ");";
+            // create new code line to list of generated code lines
+            string line = $"scanf(\"{format_str}\"{scan_args});";
             visitor.AddCodeLine(line);
         }
 

@@ -104,12 +104,13 @@ namespace MipaCompiler.Node
         }
 
         /// <summary>
-        /// Method <c>GenerateForwardDeclaration</c> returns code line of function
-        /// forward declaration.
+        /// Method <c>GenerateForwardDeclaration</c> returns function forward declaration
+        /// in C-language.
         /// </summary>
         /// <returns>function forward declaration</returns>
         public string GenerateForwardDeclaration()
         {
+            // variable to hold forward declaration
             string dcl = "";
 
             // get return type --> no need to give symbol table
@@ -136,55 +137,48 @@ namespace MipaCompiler.Node
             }
             dcl += ");";
 
+            // return declaration
             return dcl;
         }
 
         public void GenerateCode(Visitor visitor)
         {
-            // increase scope when entering function
+            // get symbol table
             SymbolTable symTable = visitor.GetSymbolTable();
-            symTable.AddScope();
 
-            string dcl = "";
+            // declare variables that are passed as parameters to function
+            DeclareFunctionParameterVariables(symTable);
 
-            // get return type --> no need to give symbol table
-            string resultType = SemanticAnalyzer.EvaluateTypeOfTypeNode(type, new List<string>(), null);
+            // get function forward declaration
+            string forwardDeclaration = GenerateForwardDeclaration();
 
-            // convert return type into c-code
-            dcl += CodeGenerator.ConvertReturnTypeToTargetLanguage(resultType) + " ";
+            // forward declaration will contain ";" at the end. remove it
+            string firstLine = forwardDeclaration.Remove(forwardDeclaration.Length - 1);
 
-            // name of the function
-            dcl += "function_" + name;
+            // add first line of code to list of generated code lines
+            visitor.AddCodeLine(firstLine);
 
-            // add parameters
-            dcl += "(";
+            // generate function block code
+            block.GenerateCode(visitor);
+        }
+
+        /// <summary>
+        /// Method <c>DeclareFunctionParameterVariables</c> declares parameter variables to symbol table.
+        /// </summary>
+        private void DeclareFunctionParameterVariables(SymbolTable symTable)
+        {
             for (int i = 0; i < parameters.Count; i++)
             {
                 INode node = parameters[i];
                 VariableNode variableNode = (VariableNode)node;
+
                 string varType = SemanticAnalyzer.EvaluateTypeOfTypeNode(variableNode.GetVariableType(), new List<string>(), null);
-                string cVarType = CodeGenerator.ConvertParameterTypeToTargetLanguage(varType);
+                string name = variableNode.GetName();
+                int scope = symTable.GetCurrentScope() + 1; // take scope increase into account 
 
-                // declare variables to symbol table
-                symTable.DeclareVariableSymbol(new VariableSymbol(variableNode.GetName(), varType, null, symTable.GetCurrentScope(), true));
-
-                dcl += cVarType + " ";
-                string varName = "var_" + variableNode.GetName();
-                dcl += varName;
-                if (i < parameters.Count - 1) dcl += ", ";
+                VariableSymbol varSymbol = new VariableSymbol(name, varType, null, scope, true);
+                symTable.DeclareVariableSymbol(varSymbol);
             }
-            dcl += ")";
-
-            visitor.AddCodeLine(dcl);
-            visitor.AddCodeLine("{");
-
-            block.GenerateCode(visitor);
-
-            visitor.AddCodeLine("}");
-
-
-            // decrease scope when exiting function
-            symTable.RemoveScope();
         }
 
     }
