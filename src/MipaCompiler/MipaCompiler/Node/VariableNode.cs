@@ -1,6 +1,4 @@
-﻿using MipaCompiler.Symbol;
-using System;
-using System.Collections.Generic;
+﻿using System;
 
 namespace MipaCompiler.Node
 {
@@ -74,20 +72,13 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
-            // get symbol table
-            SymbolTable symTable = visitor.GetSymbolTable();
-
-            // get variable symbol from table
-            VariableSymbol varSymbol = symTable.GetVariableSymbolByIdentifier(name);
-
-            // get symbol type and parameter info
-            string type = varSymbol.GetSymbolType();
-            bool isParameter = varSymbol.IsParameter();
-            string prefix = CodeGenerator.GetPrefixForVariable(type, isParameter);
+            // ecah variable should have an alternative variable symbol
+            // in symbol table with name "var_" + name
+            string varName = $"var_{name}";
 
             // variable does not need to be assigned to temporary variable.
             // however, we still have to set it as the latest tmp variable.
-            visitor.SetLatestTmpVariableName($"{prefix}var_{name}");
+            visitor.SetLatestTmpVariableName(varName);
         }
     }
 }

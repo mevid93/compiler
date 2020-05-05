@@ -75,115 +75,150 @@ namespace MipaCompiler.Node
             Console.WriteLine($"Type: {type}");
         }
 
+        //////////////// EVERYTHING AFTER THIS IS RELATED TO CODE GENERATION /////////////////////////
+
         public void GenerateCode(Visitor visitor)
         {
-            // variable to hold new generated code line 
-            string line = "";
-
-            // get symbol table
-            SymbolTable symTable = visitor.GetSymbolTable();
-
             // simple type assignment
             if (type.GetNodeType() == NodeType.SIMPLE_TYPE)
             {
-                SimpleTypeNode stn = (SimpleTypeNode)type;
-                string valueType = stn.GetTypeValue();
-                string varType = CodeGenerator.ConvertSimpleTypeToTargetLanguage(valueType);
-
-                line += varType + " ";
-
-                for(int i = 0; i < variables.Count; i++)
-                {
-                    VariableNode varNode = (VariableNode)variables[i];
-                    string name = varNode.GetName();
-
-                    // symbol table update
-                    if (symTable.IsVariableSymbolInTable(name))
-                    {
-                        symTable.ReDeclareVariableSymbol(new VariableSymbol(name, valueType, null, symTable.GetCurrentScope()));
-                    }
-                    else
-                    {
-                        symTable.DeclareVariableSymbol(new VariableSymbol(name, valueType, null, symTable.GetCurrentScope()));
-                    }
-
-                    name = "var_" + name;
-
-                    if (valueType == "string") name += "[256]";
-
-                    line += name;
-
-                    if (i < variables.Count - 1) line += ", ";
-                }
-
-                // add end of statement 
-                line += ";";
-
-                // add generated code line to list of code lines
-                visitor.AddCodeLine(line);
-
+                GenerateCodeForSimpleType(visitor);
             }
 
             // array type
             if (type.GetNodeType() == NodeType.ARRAY_TYPE)
             {
-                // first find out the simple type of array
-                ArrayTypeNode arr = (ArrayTypeNode)type;
-                SimpleTypeNode stn = (SimpleTypeNode)arr.GetSimpleType();
-                string simpleType = stn.GetTypeValue();
-                string nodeType = SemanticAnalyzer.EvaluateTypeOfTypeNode(type, new List<string>(), symTable);
+                GenerateCodeForArrayType(visitor);
+            }
+        }
 
-                string varType = CodeGenerator.ConvertSimpleTypeToTargetLanguage(simpleType);
+        /// <summary>
+        /// Method <c>GenerateCodeForSimpleType</c> handles the code generation when
+        /// type of the variable to be declared is simple type.
+        /// </summary>
+        private void GenerateCodeForSimpleType(Visitor visitor)
+        {
+            // get symbol table from visitor
+            SymbolTable symTable = visitor.GetSymbolTable();
 
-                line += varType + " ";
+            // get simple type
+            SimpleTypeNode stn = (SimpleTypeNode)type;
+            string valueType = stn.GetTypeValue();
 
-                // next calculate array size
-                arr.GetSizeExpression().GenerateCode(visitor);
+            // get simple type in C-language
+            string varType = CodeGenerator.ConvertSimpleTypeToTargetLanguage(valueType);
 
-                // get tmp variable that holds the size of the array
-                string tmp_size = visitor.GetLatestUsedTmpVariable();
+            // define variable that holds the new generated code line
+            string codeLine = varType + " ";
 
-                List<string> size_name = new List<string>();
+            for (int i = 0; i < variables.Count; i++)
+            {
+                VariableNode varNode = (VariableNode)variables[i];
+                string name = varNode.GetName();
+                string varName = $"var_{name}";
 
-                // declare each variable
-                for (int i = 0; i < variables.Count; i++)
+                // symbol table update
+                if (symTable.IsVariableSymbolInTable(name))
                 {
-                    VariableNode varNode = (VariableNode)variables[i];
-                    string name = varNode.GetName();
-
-                    // symbol table update
-                    if (symTable.IsVariableSymbolInTable(name))
-                    {
-                        symTable.ReDeclareVariableSymbol(new VariableSymbol(name, nodeType, null, symTable.GetCurrentScope()));
-                    }
-                    else
-                    {
-                        symTable.DeclareVariableSymbol(new VariableSymbol(name, nodeType, null, symTable.GetCurrentScope()));
-                    }
-
-                    size_name.Add($"size_{name}");
-
-                    line += $"var_{name}[{tmp_size}]";
-
-                    if (simpleType == "string") line += "[256]";
-
-                    if (i < variables.Count - 1) line += ", ";
+                    symTable.ReDeclareVariableSymbol(new VariableSymbol(name, valueType, null, symTable.GetCurrentScope()));
+                    symTable.ReDeclareVariableSymbol(new VariableSymbol(varName, valueType, null, symTable.GetCurrentScope()));
+                }
+                else
+                {
+                    symTable.DeclareVariableSymbol(new VariableSymbol(name, valueType, null, symTable.GetCurrentScope()));
+                    symTable.DeclareVariableSymbol(new VariableSymbol(varName, valueType, null, symTable.GetCurrentScope()));
                 }
 
-                // add end of statement 
-                line += ";";
+                // each string can be max 256 chars long
+                if (valueType == "string") varName += "[256]";
 
-                // add generated code line to list of code lines
-                visitor.AddCodeLine(line);
+                codeLine += varName;
 
-                // declare size variables
-                foreach (string size in size_name)
+                if (i < variables.Count - 1) codeLine += ", ";
+            }
+
+            // add end of statement 
+            codeLine += ";";
+
+            // add generated code line to list of code lines
+            visitor.AddCodeLine(codeLine);
+        }
+
+        /// <summary>
+        /// Method <c>GenerateCodeForArrayType</c> handles the code genearation when
+        /// variable to be declared is an array.
+        /// </summary>
+        private void GenerateCodeForArrayType(Visitor visitor)
+        {
+            // get symbol table from visitor
+            SymbolTable symTable = visitor.GetSymbolTable();
+
+            // first find out the simple type of array
+            ArrayTypeNode arr = (ArrayTypeNode)type;
+            SimpleTypeNode stn = (SimpleTypeNode)arr.GetSimpleType();
+            string simpleType = stn.GetTypeValue();
+
+            // get actual node type
+            string nodeType = SemanticAnalyzer.EvaluateTypeOfTypeNode(type, new List<string>(), symTable);
+
+            // get simple type in C-languge
+            string varType = CodeGenerator.ConvertSimpleTypeToTargetLanguage(simpleType);
+
+            // create variable that holds the new code line
+            string codeLine = varType + " ";
+
+            // generate code for array size
+            arr.GetSizeExpression().GenerateCode(visitor);
+
+            // get tmp variable that holds the size of the array
+            string tmp_size = visitor.GetLatestUsedTmpVariable();
+
+            // define list where all names of the new size variables are stored
+            List<string> size_name = new List<string>();
+
+            // declare each variable
+            for (int i = 0; i < variables.Count; i++)
+            {
+                VariableNode varNode = (VariableNode)variables[i];
+                string name = varNode.GetName();
+                string varName = $"var_{name}";
+
+                // symbol table update
+                if (symTable.IsVariableSymbolInTable(name))
                 {
-                    VariableSymbol varSymbol = new VariableSymbol(size, "integer", null, symTable.GetCurrentScope());
-                    symTable.DeclareVariableSymbol(varSymbol);
-                    line = $"int {size} = {tmp_size};";
-                    visitor.AddCodeLine(line);
+                    symTable.ReDeclareVariableSymbol(new VariableSymbol(name, nodeType, null, symTable.GetCurrentScope()));
+                    symTable.ReDeclareVariableSymbol(new VariableSymbol(varName, nodeType, null, symTable.GetCurrentScope()));
                 }
+                else
+                {
+                    symTable.DeclareVariableSymbol(new VariableSymbol(name, nodeType, null, symTable.GetCurrentScope()));
+                    symTable.DeclareVariableSymbol(new VariableSymbol(varName, nodeType, null, symTable.GetCurrentScope()));
+                }
+
+                // add new size variable name to list (one for each array)
+                size_name.Add($"size_{name}");
+
+                codeLine += $"{varName}[{tmp_size}]";
+
+                // each string is max 256 char long
+                if (simpleType == "string") codeLine += "[256]";
+
+                if (i < variables.Count - 1) codeLine += ", ";
+            }
+
+            // add end of statement 
+            codeLine += ";";
+
+            // add generated code line to list of code lines
+            visitor.AddCodeLine(codeLine);
+
+            // declare size variables
+            foreach (string size in size_name)
+            {
+                VariableSymbol varSymbol = new VariableSymbol(size, "integer", null, symTable.GetCurrentScope());
+                symTable.DeclareVariableSymbol(varSymbol);
+                codeLine = $"int {size} = {tmp_size};";
+                visitor.AddCodeLine(codeLine);
             }
         }
     }

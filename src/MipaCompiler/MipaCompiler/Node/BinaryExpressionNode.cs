@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using MipaCompiler.Symbol;
+using System;
 
 namespace MipaCompiler.Node
 {
@@ -86,95 +86,153 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
-            string line = "";
+            // generate code for left hand side
+            lhs.GenerateCode(visitor);
+            // retrieve name of the latest tmp variable
+            string lhsTmp = visitor.GetLatestUsedTmpVariable();
+
+            // generate code for right hand side
+            rhs.GenerateCode(visitor);
+            // retrieve name of the latest tmp variable
+            string rhsTmp = visitor.GetLatestUsedTmpVariable();
+
+            // get number for new latest tmp variable
+            int number = visitor.GetTempVariableCounter();
+            visitor.IncreaseTempVariableCounter();
+
+            // define the name of the new tmp variable
+            string tmpName = $"tmp_{number}";
+
+            // update information about latest used tmp variable to visitor
+            visitor.SetLatestTmpVariableName(tmpName);
+
+            // generate the code line
+            GenerateCodeForBinaryExpression(tmpName, lhsTmp, rhsTmp, visitor);
+        }
+
+        private void GenerateCodeForBinaryExpression(string tmpName, string lhsTmp, string rhsTmp, Visitor visitor)
+        {
+            // get symbol table
+            SymbolTable symTable = visitor.GetSymbolTable();
+
+            // variable to hold generated code line
+            string codeLine = "";
+
+            // evaluate type of left hand side
+            string typeLhs = SemanticAnalyzer.EvaluateTypeOfNode(lhs, visitor.GetSymbolTable());
+            // evaluate type of right hand side
+            string typeRhs = SemanticAnalyzer.EvaluateTypeOfNode(rhs, visitor.GetSymbolTable());
+
+            // check if tmp variables are pointers
+            bool lhsIsPointer = symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer();
+            bool rhsIsPointer = symTable.GetVariableSymbolByIdentifier(rhsTmp).IsPointer();
+
+            string numericLhsPrefix = lhsIsPointer ? "*" : "";
+            string numericRhsPrefix = rhsIsPointer ? "*" : "";
+
+            // variable symbol that holds then new tmp variable
+            VariableSymbol varSymbol = null;
+
+            // check the binary operation and generate code line for it
             switch (value)
             {
-                case "and":
-                case "or":
-                case "%":
-                case "+":
-                    lhs.GenerateCode(visitor);
-                    string lhsTmp = visitor.GetLatestUsedTmpVariable();
-                    rhs.GenerateCode(visitor);
-                    string rhsTmp = visitor.GetLatestUsedTmpVariable();
-                    int counter = visitor.GetTempVariableCounter();
-                    visitor.IncreaseTempVariableCounter();
-                    string newTmpVariable = "tmp_" + counter;
-                    visitor.SetLatestTmpVariableName(newTmpVariable);
-                    line = $"int {newTmpVariable} = {lhsTmp} + {rhsTmp};";
-                    break;
                 case "-":
-                    lhs.GenerateCode(visitor);
-                    lhsTmp = visitor.GetLatestUsedTmpVariable();
-                    rhs.GenerateCode(visitor);
-                    rhsTmp = visitor.GetLatestUsedTmpVariable();
-                    counter = visitor.GetTempVariableCounter();
-                    visitor.IncreaseTempVariableCounter();
-                    newTmpVariable = "tmp_" + counter;
-                    visitor.SetLatestTmpVariableName(newTmpVariable);
-                    line = $"int {newTmpVariable} = {lhsTmp} - {rhsTmp};";
-                    break;
                 case "*":
                 case "/":
+                    string type = "int";
+                    if (typeLhs.Equals("real") || typeRhs.Equals("real")) type = "double";
+                    codeLine = $"{type} {tmpName} = {numericLhsPrefix}{lhsTmp} {value} {numericRhsPrefix}{rhsTmp};";
+                    if (type == "double")
+                    {
+                        varSymbol = new VariableSymbol(tmpName, "real", null, symTable.GetCurrentScope());
+                    }
+                    else
+                    {
+                        varSymbol = new VariableSymbol(tmpName, "integer", null, symTable.GetCurrentScope());
+                    }
+                    break;
+                case "+":
+                    if(typeLhs.Equals("real") || typeLhs.Equals("integer"))
+                    {
+                        type = "int";
+                        if (typeLhs.Equals("real") || typeRhs.Equals("real")) type = "double";
+                        codeLine = $"{type} {tmpName} = {numericLhsPrefix}{lhsTmp} {value} {numericRhsPrefix}{rhsTmp};";
+                        if (type == "double")
+                        {
+                            varSymbol = new VariableSymbol(tmpName, "real", null, symTable.GetCurrentScope());
+                        }
+                        else
+                        {
+                            varSymbol = new VariableSymbol(tmpName, "integer", null, symTable.GetCurrentScope());
+                        }
+                    }
+                    else if (typeLhs.Equals("string"))
+                    {
+
+                    }
+                    break;
+                case "and":
+                case "or":
+                    // boolean
+                    break;
+                case "%":
+                    // integer
                     break;
                 case "=":
-                    lhs.GenerateCode(visitor);
-                    lhsTmp = visitor.GetLatestUsedTmpVariable();
-                    rhs.GenerateCode(visitor);
-                    rhsTmp = visitor.GetLatestUsedTmpVariable();
-                    counter = visitor.GetTempVariableCounter();
-                    visitor.IncreaseTempVariableCounter();
-                    newTmpVariable = "tmp_" + counter;
-                    visitor.SetLatestTmpVariableName(newTmpVariable);
-                    line = $"bool {newTmpVariable} = {lhsTmp} == {rhsTmp};";
+                    if (typeLhs.Equals("boolean") || typeLhs.Equals("integer") || typeRhs.Equals("real"))
+                    {
+                        codeLine = $"bool {tmpName} = {numericLhsPrefix}{lhsTmp} == {numericRhsPrefix}{rhsTmp};";
+                        varSymbol = new VariableSymbol(tmpName, "boolean", null, symTable.GetCurrentScope());
+                    }
+                    // integer, real, boolean, string, arrays
                     break;
                 case "<>":
-                    lhs.GenerateCode(visitor);
-                    lhsTmp = visitor.GetLatestUsedTmpVariable();
-                    rhs.GenerateCode(visitor);
-                    rhsTmp = visitor.GetLatestUsedTmpVariable();
-                    counter = visitor.GetTempVariableCounter();
-                    visitor.IncreaseTempVariableCounter();
-                    newTmpVariable = "tmp_" + counter;
-                    visitor.SetLatestTmpVariableName(newTmpVariable);
-                    line = $"bool {newTmpVariable} = {lhsTmp} != {rhsTmp};";
+                    if(typeLhs.Equals("boolean") ||typeLhs.Equals("integer") || typeRhs.Equals("real"))
+                    {
+                        codeLine = $"bool {tmpName} = {numericLhsPrefix}{lhsTmp} != {numericRhsPrefix}{rhsTmp};";
+                        varSymbol = new VariableSymbol(tmpName, "boolean", null, symTable.GetCurrentScope());
+                    }
+                    // integer, real, boolean, string, arrays
                     break;
                 case "<":
-                    lhs.GenerateCode(visitor);
-                    lhsTmp = visitor.GetLatestUsedTmpVariable();
-                    rhs.GenerateCode(visitor);
-                    rhsTmp = visitor.GetLatestUsedTmpVariable();
-                    counter = visitor.GetTempVariableCounter();
-                    visitor.IncreaseTempVariableCounter();
-                    newTmpVariable = "tmp_" + counter;
-                    visitor.SetLatestTmpVariableName(newTmpVariable);
-                    line = $"bool {newTmpVariable} = {lhsTmp} < {rhsTmp};";
+                    if (typeLhs.Equals("boolean") || typeLhs.Equals("integer") || typeRhs.Equals("real"))
+                    {
+                        codeLine = $"bool {tmpName} = {numericLhsPrefix}{lhsTmp} < {numericRhsPrefix}{rhsTmp};";
+                        varSymbol = new VariableSymbol(tmpName, "boolean", null, symTable.GetCurrentScope());
+                    }
+                    // integer, real, boolean, string, arrays
                     break;
                 case "<=":
-                    lhs.GenerateCode(visitor);
-                    lhsTmp = visitor.GetLatestUsedTmpVariable();
-                    rhs.GenerateCode(visitor);
-                    rhsTmp = visitor.GetLatestUsedTmpVariable();
-                    counter = visitor.GetTempVariableCounter();
-                    visitor.IncreaseTempVariableCounter();
-                    newTmpVariable = "tmp_" + counter;
-                    visitor.SetLatestTmpVariableName(newTmpVariable);
-                    line = $"bool {newTmpVariable} = {lhsTmp} <= {rhsTmp};";
+                    if (typeLhs.Equals("boolean") || typeLhs.Equals("integer") || typeRhs.Equals("real"))
+                    {
+                        codeLine = $"bool {tmpName} = {numericLhsPrefix}{lhsTmp} <= {numericRhsPrefix}{rhsTmp};";
+                        varSymbol = new VariableSymbol(tmpName, "boolean", null, symTable.GetCurrentScope());
+                    }
+                    // integer, real, boolean, string, arrays
                     break;
                 case ">":
-                    lhs.GenerateCode(visitor);
-                    lhsTmp = visitor.GetLatestUsedTmpVariable();
-                    rhs.GenerateCode(visitor);
-                    rhsTmp = visitor.GetLatestUsedTmpVariable();
-                    counter = visitor.GetTempVariableCounter();
-                    visitor.IncreaseTempVariableCounter();
-                    newTmpVariable = "tmp_" + counter;
-                    visitor.SetLatestTmpVariableName(newTmpVariable);
-                    line = $"bool {newTmpVariable} = {lhsTmp} > {rhsTmp};";
+                    if (typeLhs.Equals("boolean") || typeLhs.Equals("integer") || typeRhs.Equals("real"))
+                    {
+                        codeLine = $"bool {tmpName} = {numericLhsPrefix}{lhsTmp} > {numericRhsPrefix}{rhsTmp};";
+                        varSymbol = new VariableSymbol(tmpName, "boolean", null, symTable.GetCurrentScope());
+                    }
+                    // integer, real, boolean, string, arrays
                     break;
                 case ">=":
                     break;
                 case "[]":
+
+                    string simpleType = GetSimpleTypeFromArrayType(typeLhs);
+                    string cType = CodeGenerator.ConvertSimpleTypeToTargetLanguage(simpleType);
+
+                    string prefix = "&";
+                    // if array is pointer --> no prefix
+                    if (symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer()) prefix = "";
+
+                    codeLine = $"{cType} *{tmpName} = ({cType} *) {prefix}{lhsTmp} + {rhsTmp};";
+                    varSymbol = new VariableSymbol(tmpName, cType, null, symTable.GetCurrentScope(), true);
+                    
+                    /*
                     lhs.GenerateCode(visitor);
                     string type = SemanticAnalyzer.EvaluateTypeOfNode(lhs, visitor.GetSymbolTable());
                     string simpleType = GetSimpleTypeFromArrayType(type);
@@ -187,12 +245,18 @@ namespace MipaCompiler.Node
                     newTmpVariable = "tmp_" + counter;
                     visitor.SetLatestTmpVariableName(newTmpVariable);
                     line = $"{cType} {newTmpVariable} = {lhsTmp}[{rhsTmp}];";
+                    */
+
                     break;
                 default:
                     throw new Exception("Unexpected exception... Invalid binary operation!");
             }
 
-            visitor.AddCodeLine(line);
+            // declare new variable symbol
+            symTable.DeclareVariableSymbol(varSymbol);
+
+            // add generated code line to list of code lines
+            visitor.AddCodeLine(codeLine);
         }
 
         /// <summary>

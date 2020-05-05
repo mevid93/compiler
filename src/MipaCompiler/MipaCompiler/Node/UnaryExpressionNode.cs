@@ -97,14 +97,11 @@ namespace MipaCompiler.Node
             string identifier = varNode.GetName();
 
             // now we have the name, so let's find its size from the symbol table
-            string size_name = $"size_{identifier}";
-            VariableSymbol varSymbol = visitor.GetSymbolTable().GetVariableSymbolByIdentifier(size_name);
+            string sizeName = $"size_{identifier}";
 
-            string prefix = "";
-            if (varSymbol.IsParameter()) prefix = "*";
 
-            string temp = $"{prefix}{size_name}";
-            visitor.SetLatestTmpVariableName(temp);
+            // update latest tmp variable information in visitor
+            visitor.SetLatestTmpVariableName(sizeName);
         }
     }
 }

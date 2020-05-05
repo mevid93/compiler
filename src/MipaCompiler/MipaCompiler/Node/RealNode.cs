@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MipaCompiler.Symbol;
+using System;
 
 namespace MipaCompiler.Node
 {
@@ -57,10 +58,31 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
-            // real value does not need to be assigned
-            // to temporary variable. However, we still has to set
-            // it as the latest tmp variable 
-            visitor.SetLatestTmpVariableName(value);
+            // get symbol table
+            SymbolTable symTable = visitor.GetSymbolTable();
+
+            // get number for tmp variable
+            int number = visitor.GetTempVariableCounter();
+            visitor.IncreaseTempVariableCounter();
+
+            // define name and type, scope and pointer info
+            string name = $"tmp_{number}";
+            string type = "real";
+            int scope = symTable.GetCurrentScope();
+            bool isPointer = false;
+
+            // define new variable symbol
+            VariableSymbol varSymbol = new VariableSymbol(name, type, null, scope, isPointer);
+
+            // declare tmp variable to symbol table
+            symTable.DeclareVariableSymbol(varSymbol);
+
+            // update latest tmp value to visitor
+            visitor.SetLatestTmpVariableName(name);
+
+            // generate code line
+            string codeLine = $"double {name} = {value};";
+            visitor.AddCodeLine(codeLine);
         }
     }
 }

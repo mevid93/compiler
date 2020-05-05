@@ -142,7 +142,7 @@ namespace MipaCompiler.Node
                         format_str += "%s";
                         break;
                     default:
-                        throw new Exception("Unexpected error... unsupported variable type!");
+                        throw new Exception($"Unexpected error... unsupported variable type {variableType}!");
                 }
 
                 // get the correct scanf argument
@@ -171,18 +171,18 @@ namespace MipaCompiler.Node
                 case NodeType.VARIABLE:
                     string type = SemanticAnalyzer.EvaluateTypeOfVariableNode(node, new List<string>(), symTable);
                     VariableNode varNode = (VariableNode)node;
-                    string name = varNode.GetName();
+                    string name = $"var_{varNode.GetName()}";
                     VariableSymbol varSymbol = symTable.GetVariableSymbolByIdentifier(name);
-                    string prefix = CodeGenerator.GetPrefixForArgumentByType(type, varSymbol.IsParameter());
+                    string prefix = CodeGenerator.GetPrefixForArgumentByType(type, varSymbol.IsPointer());
                     
                     switch (type)
                     {
                         case "integer":
                         case "real":
                         case "string":
-                            return $"{prefix}var_{name}";
+                            return $"{prefix}{name}";
                         default:
-                            return $"var_{name}";
+                            return name;
                     }
                 case NodeType.BINARY_EXPRESSION:
                     BinaryExpressionNode bin = (BinaryExpressionNode)node;
@@ -263,6 +263,12 @@ namespace MipaCompiler.Node
             // generated code expression result should
             // be accessible at the last tmp variable
             string lastTemp = visitor.GetLatestUsedTmpVariable();
+
+            // check if last tmp variable is pointer
+            bool isPointer = symTable.GetVariableSymbolByIdentifier(lastTemp).IsPointer();
+
+            if (isPointer) lastTemp = $"*{lastTemp}";
+
             return lastTemp;
         }
 
@@ -283,8 +289,8 @@ namespace MipaCompiler.Node
             // create new temp variable
             int counter = visitor.GetTempVariableCounter();
             visitor.IncreaseTempVariableCounter();
-            string temp = "tmp_" + counter;
-            visitor.SetLatestTmpVariableName(temp);
+            string tmp = $"tmp_{counter}";
+            visitor.SetLatestTmpVariableName(tmp);
 
             // get function return type (if procedure, then "")
             string returnType = GetCallReturnType(symTable);
@@ -296,7 +302,8 @@ namespace MipaCompiler.Node
             }
             else
             {
-                visitor.AddCodeLine($"{returnType} {temp} = function_{id}({arguments});");
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmp, returnType, null, symTable.GetCurrentScope()));
+                visitor.AddCodeLine($"{returnType} {tmp} = function_{id}({arguments});");
             }
         }
 
@@ -305,6 +312,9 @@ namespace MipaCompiler.Node
         /// </summary>
         private string GetArgumentsCode(Visitor visitor)
         {
+            // get symbol table from visitor
+            SymbolTable symTable = visitor.GetSymbolTable();
+
             // variable to hold generated arguments code
             string code = "";
 
@@ -323,8 +333,8 @@ namespace MipaCompiler.Node
 
 
                 // get proper prefix for argument
-                bool isParameter = false;
-                string prefix = CodeGenerator.GetPrefixForArgumentByType(evaluatedType, isParameter);
+                bool isPointer = symTable.GetVariableSymbolByIdentifier(lastTmp).IsPointer();
+                string prefix = CodeGenerator.GetPrefixForArgumentByType(evaluatedType, isPointer);
 
                 // add code
                 code += $"{prefix}{lastTmp}";

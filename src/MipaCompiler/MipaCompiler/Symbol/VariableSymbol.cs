@@ -12,7 +12,7 @@ namespace MipaCompiler.Symbol
         private Stack<string> types;                // variable type  (string representation)
         private string currentValue;                // value that symbols is currently holding
         private Stack<int> scopes;                  // scope of variable (lower means wider scope)
-        private Stack<bool> isParameter;            // is variable a parameter in scope
+        private Stack<bool> isPointer;              // is variable a pointer in scope
 
         /// <summary>
         /// Constructor <c>Symbol</c> creates new Symbol-object.
@@ -30,8 +30,8 @@ namespace MipaCompiler.Symbol
             this.currentValue = currentValue;
             scopes = new Stack<int>();
             scopes.Push(scope);
-            this.isParameter = new Stack<bool>();
-            this.isParameter.Push(isParameter);
+            this.isPointer = new Stack<bool>();
+            this.isPointer.Push(isParameter);
         }
 
         /// <summary>
@@ -132,23 +132,23 @@ namespace MipaCompiler.Symbol
         }
 
         /// <summary>
-        /// Method <c>IsParameter</c> returns true if variable is a parameter for
+        /// Method <c>IsPointer</c> returns true if variable is a parameter for
         /// function or procedure.
         /// </summary>
         /// <returns>true if variable is parameter</returns>
-        public bool IsParameter()
+        public bool IsPointer()
         {
-            return isParameter.Peek();
+            return isPointer.Peek();
         }
 
-        public void PushParameterInfo(bool info)
+        public void PushPointerInfo(bool info)
         {
-            isParameter.Push(info);
+            isPointer.Push(info);
         }
 
-        public void PopParameterIndo()
+        public void PopPointerInfo()
         {
-            isParameter.Pop();
+            isPointer.Pop();
         }
   
     }

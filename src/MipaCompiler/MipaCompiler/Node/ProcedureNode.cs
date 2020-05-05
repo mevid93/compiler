@@ -157,18 +157,18 @@ namespace MipaCompiler.Node
 
                 string varType = SemanticAnalyzer.EvaluateTypeOfTypeNode(variableNode.GetVariableType(), new List<string>(), null);
                 string name = variableNode.GetName();
+                string varName = $"var_{name}";
                 int scope = symTable.GetCurrentScope() + 1; // take scope increase into account 
 
-                VariableSymbol varSymbol = new VariableSymbol(name, varType, null, scope, true);
-                symTable.DeclareVariableSymbol(varSymbol);
+                symTable.DeclareVariableSymbol(new VariableSymbol(name, varType, null, scope, true));
+                symTable.DeclareVariableSymbol(new VariableSymbol(varName, varType, null, scope, true));
 
                 // if was array, declare the array size as next parameter (always)
                 if (varType.Contains("array"))
                 {
                     name = $"size_{variableNode.GetName()}";
                     varType = "integer";
-                    varSymbol = new VariableSymbol(name, varType, null, scope, true);
-                    symTable.DeclareVariableSymbol(varSymbol);
+                    symTable.DeclareVariableSymbol(new VariableSymbol(name, varType, null, scope, true));
                 }
             }
         }

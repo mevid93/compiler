@@ -1,5 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using MipaCompiler.Symbol;
+using System;
 
 namespace MipaCompiler.Node
 {
@@ -58,9 +58,31 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
-            // string does not need to be assigned to temporary variable in C-language.
-            // however, we still have to set it as the latest tmp variable.
-            visitor.SetLatestTmpVariableName($"\"{value}\"");
+            // get symbol table
+            SymbolTable symTable = visitor.GetSymbolTable();
+
+            // get number for tmp variable
+            int number = visitor.GetTempVariableCounter();
+            visitor.IncreaseTempVariableCounter();
+
+            // define name and type, scope and pointer info
+            string name = $"tmp_{number}";
+            string type = "string";
+            int scope = symTable.GetCurrentScope();
+            bool isPointer = false;
+
+            // define new variable symbol
+            VariableSymbol varSymbol = new VariableSymbol(name, type, null, scope, isPointer);
+
+            // declare tmp variable to symbol table
+            symTable.DeclareVariableSymbol(varSymbol);
+
+            // update latest tmp value to visitor
+            visitor.SetLatestTmpVariableName(name);
+
+            // generate code line
+            string codeLine = $"char {name}[256] = \"{value}\";";
+            visitor.AddCodeLine(codeLine);
         }
     }
 }
