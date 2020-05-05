@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MipaCompiler.Symbol;
+using System;
 
 namespace MipaCompiler.Node
 {
@@ -71,7 +72,39 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
-            // TODO
+            switch (oper)
+            {
+                case "not":
+                    break;
+                case "size":
+                    GenerateCodeForSizeOperator(visitor);
+                    break;
+                default:
+                    throw new Exception("Unexpected error... invalid unary operaror!");
+            }
+        }
+
+        /// <summary>
+        /// Method <c>GenerateCodeForSizeOperator</c> generates code where operator is
+        /// "size".
+        /// </summary>
+        private void GenerateCodeForSizeOperator(Visitor visitor)
+        {
+            // size operator is only meant to be used with arrays.
+            // this means that the variable is array.
+            // retrieve the identifier of that array.
+            VariableNode varNode = (VariableNode)expression;
+            string identifier = varNode.GetName();
+
+            // now we have the name, so let's find its size from the symbol table
+            string size_name = $"size_{identifier}";
+            VariableSymbol varSymbol = visitor.GetSymbolTable().GetVariableSymbolByIdentifier(size_name);
+
+            string prefix = "";
+            if (varSymbol.IsParameter()) prefix = "*";
+
+            string temp = $"{prefix}{size_name}";
+            visitor.SetLatestTmpVariableName(temp);
         }
     }
 }

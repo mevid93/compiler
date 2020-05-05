@@ -157,5 +157,13 @@ namespace MipaCompiler
         {
             arraySizeCounter++;
         }
+
+        /// <summary>
+        /// Method <c>ResetArraySizeCounter</c> will set the array size counter to zero.
+        /// </summary>
+        public void ResetArraySizeCounter()
+        {
+            this.arraySizeCounter = 0;
+        }
     }
 }

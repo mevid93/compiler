@@ -63,7 +63,7 @@ namespace MipaCompilerTests.CodeGeneration
             Assert.AreEqual("label_if_0_exit: ;", visitor.GetCodeLines()[27]);
             Assert.AreEqual("goto label_while_0_entry;", visitor.GetCodeLines()[28]);
             Assert.AreEqual("label_while_0_exit: ;", visitor.GetCodeLines()[29]);
-            Assert.AreEqual("printf(\"%d\", var_i);", visitor.GetCodeLines()[30]);
+            Assert.AreEqual("printf(\"%d\\n\", var_i);", visitor.GetCodeLines()[30]);
             Assert.AreEqual("return 0;", visitor.GetCodeLines()[31]);
             
         }

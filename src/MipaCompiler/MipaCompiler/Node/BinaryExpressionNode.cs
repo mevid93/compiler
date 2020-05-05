@@ -93,8 +93,6 @@ namespace MipaCompiler.Node
                 case "or":
                 case "%":
                 case "+":
-                    break;
-                case "-":
                     lhs.GenerateCode(visitor);
                     string lhsTmp = visitor.GetLatestUsedTmpVariable();
                     rhs.GenerateCode(visitor);
@@ -102,6 +100,17 @@ namespace MipaCompiler.Node
                     int counter = visitor.GetTempVariableCounter();
                     visitor.IncreaseTempVariableCounter();
                     string newTmpVariable = "tmp_" + counter;
+                    visitor.SetLatestTmpVariableName(newTmpVariable);
+                    line = $"int {newTmpVariable} = {lhsTmp} + {rhsTmp};";
+                    break;
+                case "-":
+                    lhs.GenerateCode(visitor);
+                    lhsTmp = visitor.GetLatestUsedTmpVariable();
+                    rhs.GenerateCode(visitor);
+                    rhsTmp = visitor.GetLatestUsedTmpVariable();
+                    counter = visitor.GetTempVariableCounter();
+                    visitor.IncreaseTempVariableCounter();
+                    newTmpVariable = "tmp_" + counter;
                     visitor.SetLatestTmpVariableName(newTmpVariable);
                     line = $"int {newTmpVariable} = {lhsTmp} - {rhsTmp};";
                     break;
@@ -131,6 +140,15 @@ namespace MipaCompiler.Node
                     line = $"bool {newTmpVariable} = {lhsTmp} != {rhsTmp};";
                     break;
                 case "<":
+                    lhs.GenerateCode(visitor);
+                    lhsTmp = visitor.GetLatestUsedTmpVariable();
+                    rhs.GenerateCode(visitor);
+                    rhsTmp = visitor.GetLatestUsedTmpVariable();
+                    counter = visitor.GetTempVariableCounter();
+                    visitor.IncreaseTempVariableCounter();
+                    newTmpVariable = "tmp_" + counter;
+                    visitor.SetLatestTmpVariableName(newTmpVariable);
+                    line = $"bool {newTmpVariable} = {lhsTmp} < {rhsTmp};";
                     break;
                 case "<=":
                     lhs.GenerateCode(visitor);
@@ -155,13 +173,38 @@ namespace MipaCompiler.Node
                     line = $"bool {newTmpVariable} = {lhsTmp} > {rhsTmp};";
                     break;
                 case ">=":
+                    break;
                 case "[]":
+                    lhs.GenerateCode(visitor);
+                    string type = SemanticAnalyzer.EvaluateTypeOfNode(lhs, visitor.GetSymbolTable());
+                    string simpleType = GetSimpleTypeFromArrayType(type);
+                    string cType = CodeGenerator.ConvertSimpleTypeToTargetLanguage(simpleType);
+                    lhsTmp = visitor.GetLatestUsedTmpVariable();
+                    rhs.GenerateCode(visitor);
+                    rhsTmp = visitor.GetLatestUsedTmpVariable();
+                    counter = visitor.GetTempVariableCounter();
+                    visitor.IncreaseTempVariableCounter();
+                    newTmpVariable = "tmp_" + counter;
+                    visitor.SetLatestTmpVariableName(newTmpVariable);
+                    line = $"{cType} {newTmpVariable} = {lhsTmp}[{rhsTmp}];";
                     break;
                 default:
                     throw new Exception("Unexpected exception... Invalid binary operation!");
             }
 
             visitor.AddCodeLine(line);
+        }
+
+        /// <summary>
+        /// Method <c>GetSimpleTypeFromArrayType</c> extracts simple type from array type.
+        /// </summary>
+        private string GetSimpleTypeFromArrayType(string type)
+        {
+            if (type.Contains("integer")) return "integer";
+            if (type.Contains("string")) return "string";
+            if (type.Contains("boolean")) return "boolean";
+            if (type.Contains("real")) return "real";
+            throw new Exception("Unexpected exception... Invalid array type!");
         }
     }
 }

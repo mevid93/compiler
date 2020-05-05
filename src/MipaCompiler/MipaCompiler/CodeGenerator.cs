@@ -163,7 +163,7 @@ namespace MipaCompiler
                 case "boolean":
                     return "bool";
                 default:
-                    throw new Exception("Unexpected error... Invalid simple type!");
+                    throw new Exception($"Unexpected error... Invalid simple type {simpleType}!");
             }
         }
 

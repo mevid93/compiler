@@ -89,7 +89,7 @@ namespace MipaCompilerTests.CodeGeneration
             Assert.AreEqual("bool tmp_10 = var_i <= 19;", visitor.GetCodeLines()[50]);
             Assert.AreEqual("if (!tmp_10) goto label_while_2_exit;", visitor.GetCodeLines()[51]);
             Assert.AreEqual("int tmp_11 = function_f(&var_i);", visitor.GetCodeLines()[52]);
-            Assert.AreEqual("printf(\"%d\", tmp_11);", visitor.GetCodeLines()[53]);
+            Assert.AreEqual("printf(\"%d\\n\", tmp_11);", visitor.GetCodeLines()[53]);
             Assert.AreEqual("goto label_while_2_entry;", visitor.GetCodeLines()[54]);
             Assert.AreEqual("label_while_2_exit: ;", visitor.GetCodeLines()[55]);
             Assert.AreEqual("var_i = 0;", visitor.GetCodeLines()[56]);
@@ -97,7 +97,7 @@ namespace MipaCompilerTests.CodeGeneration
             Assert.AreEqual("bool tmp_12 = var_i <= 19;", visitor.GetCodeLines()[58]);
             Assert.AreEqual("if (!tmp_12) goto label_while_3_exit;", visitor.GetCodeLines()[59]);
             Assert.AreEqual("int tmp_13 = function_m(&var_i);", visitor.GetCodeLines()[60]);
-            Assert.AreEqual("printf(\"%d\", tmp_13);", visitor.GetCodeLines()[61]);
+            Assert.AreEqual("printf(\"%d\\n\", tmp_13);", visitor.GetCodeLines()[61]);
             Assert.AreEqual("goto label_while_3_entry;", visitor.GetCodeLines()[62]);
             Assert.AreEqual("label_while_3_exit: ;", visitor.GetCodeLines()[63]);
             Assert.AreEqual("return 0;", visitor.GetCodeLines()[64]);

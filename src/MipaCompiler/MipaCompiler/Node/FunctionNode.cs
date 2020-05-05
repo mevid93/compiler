@@ -122,8 +122,6 @@ namespace MipaCompiler.Node
             // name of the function
             dcl += "function_" + name;
 
-            int arrayCounter = 0;
-
             // add parameters
             dcl += "(";
             for (int i = 0; i < parameters.Count; i++)
@@ -139,8 +137,7 @@ namespace MipaCompiler.Node
                 // if was array, pass the array size as next parameter (always)
                 if (varType.Contains("array"))
                 {
-                    dcl += $", int * size_{arrayCounter}";
-                    arrayCounter++;
+                    dcl += $", int * size_{variableNode.GetName()}";
                 }
 
                 if (i < parameters.Count - 1) dcl += ", ";
@@ -184,10 +181,19 @@ namespace MipaCompiler.Node
 
                 string varType = SemanticAnalyzer.EvaluateTypeOfTypeNode(variableNode.GetVariableType(), new List<string>(), null);
                 string name = variableNode.GetName();
-                int scope = symTable.GetCurrentScope() + 1; // take scope increase into account 
+                int scope = symTable.GetCurrentScope() + 1; // take scope increase into account
 
                 VariableSymbol varSymbol = new VariableSymbol(name, varType, null, scope, true);
                 symTable.DeclareVariableSymbol(varSymbol);
+
+                // if was array, declare array size as next parameter (always)
+                if (varType.Contains("array"))
+                {
+                    name = $"size_{name}";
+                    varType = "integer";
+                    varSymbol = new VariableSymbol(name, varType, null, scope, true);
+                    symTable.DeclareVariableSymbol(varSymbol);
+                }
             }
         }
 

@@ -190,7 +190,7 @@ namespace MipaCompiler.Node
                     INode rhs = bin.GetRhs();
                     rhs.GenerateCode(visitor);
                     string tmp = visitor.GetLatestUsedTmpVariable();
-                    return $"var_{lhs.GetName()}[{tmp}]";
+                    return $"&var_{lhs.GetName()}[{tmp}]";
                 default:
                     throw new Exception("Unexpected error... invalid scanf argument type!");
             }
@@ -215,7 +215,6 @@ namespace MipaCompiler.Node
                 // arguments must be separated
                 if (i > 0)
                 {
-                    format_str += " ";
                     print_args += ", ";
                 }
 
@@ -244,7 +243,7 @@ namespace MipaCompiler.Node
             }
             
             // add printf to list of generated code lines
-            string line = $"printf(\"{format_str}\"{print_args});";
+            string line = $"printf(\"{format_str}\\n\"{print_args});";
             visitor.AddCodeLine(line);
         }
 
@@ -329,6 +328,15 @@ namespace MipaCompiler.Node
 
                 // add code
                 code += $"{prefix}{lastTmp}";
+
+                // if argument was array, pass the size as next argument
+                if (argument.GetNodeType() == NodeType.VARIABLE && evaluatedType.Contains("array"))
+                {
+                    VariableNode varNode = (VariableNode)argument;
+                    string name = varNode.GetName();
+
+                    code += $", &size_{name}";
+                }
 
                 // if other arguments follow, then add comma
                 if (i < args.Count - 1) code += ", ";

@@ -116,6 +116,12 @@ namespace MipaCompiler.Node
                     if (i < variables.Count - 1) line += ", ";
                 }
 
+                // add end of statement 
+                line += ";";
+
+                // add generated code line to list of code lines
+                visitor.AddCodeLine(line);
+
             }
 
             // array type
@@ -137,6 +143,8 @@ namespace MipaCompiler.Node
                 // get tmp variable that holds the size of the array
                 string tmp_size = visitor.GetLatestUsedTmpVariable();
 
+                List<string> size_name = new List<string>();
+
                 // declare each variable
                 for (int i = 0; i < variables.Count; i++)
                 {
@@ -153,7 +161,7 @@ namespace MipaCompiler.Node
                         symTable.DeclareVariableSymbol(new VariableSymbol(name, nodeType, null, symTable.GetCurrentScope()));
                     }
 
-                    name = "var_" + name;
+                    size_name.Add($"size_{name}");
 
                     line += $"var_{name}[{tmp_size}]";
 
@@ -161,13 +169,22 @@ namespace MipaCompiler.Node
 
                     if (i < variables.Count - 1) line += ", ";
                 }
+
+                // add end of statement 
+                line += ";";
+
+                // add generated code line to list of code lines
+                visitor.AddCodeLine(line);
+
+                // declare size variables
+                foreach (string size in size_name)
+                {
+                    VariableSymbol varSymbol = new VariableSymbol(size, "integer", null, symTable.GetCurrentScope());
+                    symTable.DeclareVariableSymbol(varSymbol);
+                    line = $"int {size} = {tmp_size};";
+                    visitor.AddCodeLine(line);
+                }
             }
-
-            // add end of statement 
-            line += ";";
-
-            // add generated code line to list of code lines
-            visitor.AddCodeLine(line);
         }
     }
 }

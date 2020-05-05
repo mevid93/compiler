@@ -78,8 +78,15 @@ namespace MipaCompiler.Node
             // get latest temp variable
             string temp = visitor.GetLatestUsedTmpVariable();
 
+            // check if variable that is assigned a value is parameter
+            string prefix = "";
+            if (visitor.GetSymbolTable().GetVariableSymbolByIdentifier(identifier).IsParameter())
+            {
+                prefix = "*";
+            }
+
             // define the new code line
-            string line = $"var_{identifier} = {temp};";
+            string line = $"{prefix}var_{identifier} = {temp};";
 
             // add new code line to list of generated code lines
             visitor.AddCodeLine(line);
