@@ -50,7 +50,7 @@ var_j = tmp_3;
 label_if_0_exit: ;
 goto label_while_0_entry;
 label_while_0_exit: ;
-printf("%d", var_i);
+printf("%d\n", var_i);
 return 0;
 }
 ```
