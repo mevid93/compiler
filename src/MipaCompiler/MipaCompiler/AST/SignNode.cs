@@ -1,4 +1,5 @@
-﻿using MipaCompiler.Symbol;
+﻿using MipaCompiler.BackEnd;
+using MipaCompiler.Symbol;
 using System;
 
 namespace MipaCompiler.Node
@@ -86,11 +87,11 @@ namespace MipaCompiler.Node
             // get type of the latest used tmp variable
             VariableSymbol varSymbol = symTable.GetVariableSymbolByIdentifier(tempTerm);
             string type = varSymbol.GetSymbolType();
-            string cType = CodeGenerator.ConvertSimpleTypeToTargetLanguage(type);
+            string cType = Converter.ConvertSimpleTypeToTargetLanguage(type);
 
             // assign new temporary variable
-            int number = visitor.GetTempVariableCounter();
-            visitor.IncreaseTempVariableCounter();
+            int number = visitor.GetTmpVariableCounter();
+            visitor.IncreaseTmpVariableCounter();
             string newTmpVarName = $"tmp_{number}";
             visitor.AddCodeLine($"{cType} {newTmpVarName} = {sign}{tempTerm};");
 

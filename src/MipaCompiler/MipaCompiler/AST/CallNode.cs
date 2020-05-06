@@ -1,4 +1,5 @@
-﻿using MipaCompiler.Symbol;
+﻿using MipaCompiler.BackEnd;
+using MipaCompiler.Symbol;
 using System;
 using System.Collections.Generic;
 
@@ -173,7 +174,7 @@ namespace MipaCompiler.Node
                     VariableNode varNode = (VariableNode)node;
                     string name = $"var_{varNode.GetName()}";
                     VariableSymbol varSymbol = symTable.GetVariableSymbolByIdentifier(name);
-                    string prefix = CodeGenerator.GetPrefixForArgumentByType(type, varSymbol.IsPointer());
+                    string prefix = Converter.GetPrefixForArgumentByType(type, varSymbol.IsPointer());
                     
                     switch (type)
                     {
@@ -287,8 +288,8 @@ namespace MipaCompiler.Node
             string arguments = GetArgumentsCode(visitor);
             
             // create new temp variable
-            int counter = visitor.GetTempVariableCounter();
-            visitor.IncreaseTempVariableCounter();
+            int counter = visitor.GetTmpVariableCounter();
+            visitor.IncreaseTmpVariableCounter();
             string tmp = $"tmp_{counter}";
             visitor.SetLatestTmpVariableName(tmp);
 
@@ -334,7 +335,7 @@ namespace MipaCompiler.Node
 
                 // get proper prefix for argument
                 bool isPointer = symTable.GetVariableSymbolByIdentifier(lastTmp).IsPointer();
-                string prefix = CodeGenerator.GetPrefixForArgumentByType(evaluatedType, isPointer);
+                string prefix = Converter.GetPrefixForArgumentByType(evaluatedType, isPointer);
 
                 // add code
                 code += $"{prefix}{lastTmp}";
@@ -367,7 +368,7 @@ namespace MipaCompiler.Node
 
             string retType = fs.GetReturnType();
 
-            return CodeGenerator.ConvertReturnTypeToTargetLanguage(retType);
+            return Converter.ConvertReturnTypeToTargetLanguage(retType);
         }
 
     }

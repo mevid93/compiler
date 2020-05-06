@@ -62,8 +62,8 @@ namespace MipaCompiler.Node
             SymbolTable symTable = visitor.GetSymbolTable();
 
             // get number for tmp variable
-            int number = visitor.GetTempVariableCounter();
-            visitor.IncreaseTempVariableCounter();
+            int number = visitor.GetTmpVariableCounter();
+            visitor.IncreaseTmpVariableCounter();
 
             // define name and type, scope and pointer info
             string name = $"tmp_{number}";

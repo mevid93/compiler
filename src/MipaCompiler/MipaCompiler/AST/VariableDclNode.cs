@@ -1,4 +1,5 @@
-﻿using MipaCompiler.Symbol;
+﻿using MipaCompiler.BackEnd;
+using MipaCompiler.Symbol;
 using System;
 using System.Collections.Generic;
 
@@ -106,7 +107,7 @@ namespace MipaCompiler.Node
             string valueType = stn.GetTypeValue();
 
             // get simple type in C-language
-            string varType = CodeGenerator.ConvertSimpleTypeToTargetLanguage(valueType);
+            string varType = Converter.ConvertSimpleTypeToTargetLanguage(valueType);
 
             // define variable that holds the new generated code line
             string codeLine = varType + " ";
@@ -162,7 +163,7 @@ namespace MipaCompiler.Node
             string nodeType = SemanticAnalyzer.EvaluateTypeOfTypeNode(type, new List<string>(), symTable);
 
             // get simple type in C-languge
-            string varType = CodeGenerator.ConvertSimpleTypeToTargetLanguage(simpleType);
+            string varType = Converter.ConvertSimpleTypeToTargetLanguage(simpleType);
 
             // create variable that holds the new code line
             string codeLine = varType + " ";

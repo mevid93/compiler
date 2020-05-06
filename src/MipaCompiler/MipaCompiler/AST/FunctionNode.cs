@@ -1,4 +1,5 @@
-﻿using MipaCompiler.Symbol;
+﻿using MipaCompiler.BackEnd;
+using MipaCompiler.Symbol;
 using System;
 using System.Collections.Generic;
 
@@ -117,7 +118,7 @@ namespace MipaCompiler.Node
             string resultType = SemanticAnalyzer.EvaluateTypeOfTypeNode(type, new List<string>(), null);
 
             // convert return type into c-code
-            dcl += CodeGenerator.ConvertReturnTypeToTargetLanguage(resultType) + " ";
+            dcl += Converter.ConvertReturnTypeToTargetLanguage(resultType) + " ";
 
             // name of the function
             dcl += "function_" + name;
@@ -129,7 +130,7 @@ namespace MipaCompiler.Node
                 INode node = parameters[i];
                 VariableNode variableNode = (VariableNode)node;
                 string varType = SemanticAnalyzer.EvaluateTypeOfTypeNode(variableNode.GetVariableType(), new List<string>(), null);
-                string cVarType = CodeGenerator.ConvertParameterTypeToTargetLanguage(varType);
+                string cVarType = Converter.ConvertParameterTypeToTargetLanguage(varType);
                 dcl += cVarType + " ";
                 string varName = "var_" + variableNode.GetName();
                 dcl += varName;

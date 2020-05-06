@@ -4,22 +4,21 @@ using System.Collections.Generic;
 namespace MipaCompiler
 {
     /// <summary>
-    /// Class <c>Visitor</c> contains functionality to visit nodes in AST
-    /// in order to generate code.
+    /// Class <c>Visitor</c> contains functionality to store information about
+    /// code generation process while it visits the nodes in AST during code generation.
     /// </summary>
     public class Visitor
     {
         private List<string> codeLines;             // generated code lines
-        private readonly SymbolTable symbolTable;   // symbol table for storing variable information
-        private int whileCounter;                   // counter of latest while loop label
-        private int ifCounter;                      // counter of if-else structure label
-        private string latestTmpVariable;           // latest temporary variable name used
-        private int tempVariableCounter;            // counter for latest temporary variable
+        private readonly SymbolTable symbolTable;   // symbol table for storing variable, procedure and function information
+        private int whileCounter;                   // counter for while loop label
+        private int ifCounter;                      // counter for if-else structure label
+        private string latestTmpVariable;           // latest tmp variable name used
+        private int tmpVariableCounter;             // counter for tmp variable
         private bool isMainBlock;                   // is current block main function
-        private int arraySizeCounter;               // counter for latest array size variable
 
         /// <summary>
-        /// Constructor <c>Visitor</c>
+        /// Constructor <c>Visitor</c> creates new Visitor-object.
         /// </summary>
         public Visitor()
         {
@@ -37,7 +36,7 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>AddCodeLine</c> adds new code line to list of code lines.
+        /// Method <c>AddCodeLine</c> stores new code line to list of generated code lines.
         /// </summary>
         public void AddCodeLine(string codeLine)
         {
@@ -54,9 +53,9 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>GetWhileCounter</c> returns the latest while loop label counter.
+        /// Method <c>GetWhileCounter</c> returns the next available while loop lable number.
         /// </summary>
-        /// <returns>latest while loop label counter</returns>
+        /// <returns>while loop counter value</returns>
         public int GetWhileCounter()
         {
             return whileCounter;
@@ -71,20 +70,20 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>GetTempVariableCounter</c> returns the counter for latest temporary variable.
+        /// Method <c>GetTmpVariableCounter</c> returns the next available tmp variable number.
         /// </summary>
-        /// <returns>temp variable counter</returns>
-        public int GetTempVariableCounter()
+        /// <returns>tmp variable counter value</returns>
+        public int GetTmpVariableCounter()
         {
-            return tempVariableCounter;
+            return tmpVariableCounter;
         }
 
         /// <summary>
-        /// Method <c>IncreaseTempVariableCounter</c> increases the temp variable counter.
+        /// Method <c>IncreaseTmpVariableCounter</c> increases the tmp variable counter.
         /// </summary>
-        public void IncreaseTempVariableCounter()
+        public void IncreaseTmpVariableCounter()
         {
-            tempVariableCounter++;
+            tmpVariableCounter++;
         }
 
         /// <summary>
@@ -106,16 +105,16 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>GetIfStructureCounter</c> returns the counter of if structure labels.
+        /// Method <c>GetIfStructureCounter</c> returns the next available if-else lable number.
         /// </summary>
-        /// <returns>if strucutre counter</returns>
+        /// <returns>if structure counter value</returns>
         public int GetIfStructureCounter()
         {
             return ifCounter;
         }
 
         /// <summary>
-        /// Method <c>IncreaseIfStructureCounter</c> increases the if structure label counter.
+        /// Method <c>IncreaseIfStructureCounter</c> increases the if-else label counter.
         /// </summary>
         public void IncreaseIfStructureCounter()
         {
@@ -141,29 +140,5 @@ namespace MipaCompiler
             this.isMainBlock = isMainBlock;
         }
 
-        /// <summary>
-        /// Method <c>GetArraySizeCounter</c> returns the counter of array size variables.
-        /// </summary>
-        /// <returns>array size counter value</returns>
-        public int GetArraySizeCounter()
-        {
-            return arraySizeCounter;
-        }
-
-        /// <summary>
-        /// Method <c>IncreaseArraySizeCounter</c> increases the array size counter by one.
-        /// </summary>
-        public void IncreaseArraySizeCounter()
-        {
-            arraySizeCounter++;
-        }
-
-        /// <summary>
-        /// Method <c>ResetArraySizeCounter</c> will set the array size counter to zero.
-        /// </summary>
-        public void ResetArraySizeCounter()
-        {
-            this.arraySizeCounter = 0;
-        }
     }
 }

@@ -1,4 +1,5 @@
-﻿using MipaCompiler.Symbol;
+﻿using MipaCompiler.BackEnd;
+using MipaCompiler.Symbol;
 using System;
 
 namespace MipaCompiler.Node
@@ -97,8 +98,8 @@ namespace MipaCompiler.Node
             string rhsTmp = visitor.GetLatestUsedTmpVariable();
 
             // get number for new latest tmp variable
-            int number = visitor.GetTempVariableCounter();
-            visitor.IncreaseTempVariableCounter();
+            int number = visitor.GetTmpVariableCounter();
+            visitor.IncreaseTmpVariableCounter();
 
             // define the name of the new tmp variable
             string tmpName = $"tmp_{number}";
@@ -223,7 +224,7 @@ namespace MipaCompiler.Node
                 case "[]":
 
                     string simpleType = GetSimpleTypeFromArrayType(typeLhs);
-                    string cType = CodeGenerator.ConvertSimpleTypeToTargetLanguage(simpleType);
+                    string cType = Converter.ConvertSimpleTypeToTargetLanguage(simpleType);
 
                     string prefix = "&";
                     // if array is pointer --> no prefix
@@ -241,7 +242,7 @@ namespace MipaCompiler.Node
                     rhs.GenerateCode(visitor);
                     rhsTmp = visitor.GetLatestUsedTmpVariable();
                     counter = visitor.GetTempVariableCounter();
-                    visitor.IncreaseTempVariableCounter();
+                    visitor.IncreaseTmpVariableCounter();
                     newTmpVariable = "tmp_" + counter;
                     visitor.SetLatestTmpVariableName(newTmpVariable);
                     line = $"{cType} {newTmpVariable} = {lhsTmp}[{rhsTmp}];";
