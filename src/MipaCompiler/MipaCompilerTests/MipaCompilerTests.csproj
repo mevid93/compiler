@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeGeneration\Program1Generation.cs" />
+    <Compile Include="CodeGeneration\Program4Generation.cs" />
     <Compile Include="CodeGeneration\Program3Generation.cs" />
     <Compile Include="CodeGeneration\Program2Generation.cs" />
     <Compile Include="NodeTests\ProgramNodeTests.cs" />
@@ -105,6 +106,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SampleFiles\ValidSemantics\expressionWIthCall.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SampleFiles\program4.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
   </ItemGroup>

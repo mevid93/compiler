@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MipaCompiler.Symbol;
+using System;
 
 namespace MipaCompiler.Node
 {
@@ -71,6 +72,9 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
+            // get symbol table from visitor
+            SymbolTable symTable = visitor.GetSymbolTable();
+
             // check sign
             string sign = "";
             if (isNegative) sign = "-";
@@ -79,14 +83,22 @@ namespace MipaCompiler.Node
             term.GenerateCode(visitor);
             string tempTerm = visitor.GetLatestUsedTmpVariable();
 
+            // get type of the latest used tmp variable
+            VariableSymbol varSymbol = symTable.GetVariableSymbolByIdentifier(tempTerm);
+            string type = varSymbol.GetSymbolType();
+            string cType = CodeGenerator.ConvertSimpleTypeToTargetLanguage(type);
+
             // assign new temporary variable
             int number = visitor.GetTempVariableCounter();
             visitor.IncreaseTempVariableCounter();
             string newTmpVarName = $"tmp_{number}";
-            visitor.AddCodeLine($"{newTmpVarName} = {sign}{tempTerm};");
+            visitor.AddCodeLine($"{cType} {newTmpVarName} = {sign}{tempTerm};");
 
             // set as the latest temp variable
             visitor.SetLatestTmpVariableName(newTmpVarName);
+
+            // declare new tmp variable to symbol table
+            symTable.DeclareVariableSymbol(new VariableSymbol(newTmpVarName, type, null, symTable.GetCurrentScope()));
         }
     }
 }

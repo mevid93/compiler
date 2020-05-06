@@ -7,7 +7,7 @@ using System.Collections.Generic;
 namespace MipaCompiler
 {
     /// <summary>
-    /// Class <c>Semantix</c> holds functionality to perform semantic analysis for
+    /// Class <c>SemanticAnalyzer</c> holds functionality to perform semantic analysis for
     /// intermediate representation of source code. In other words, it takes
     /// AST as input, checks semantic constraints and reports any errors it finds.
     /// </summary>
@@ -15,13 +15,13 @@ namespace MipaCompiler
     {
         private readonly INode ast;                     // AST representation of the source code
         private readonly List<string> errors;           // list of all detected errors
-        private readonly SymbolTable symbolTable;       // symbol table to store variables
+        private readonly SymbolTable symbolTable;       // symbol table to store variables, functions and procedures
         private string returnStmntType;                 // type of return value expected
 
         /// <summary>
         /// Constructor <c>SemanticAnalyzer</c> creates new SemanticAnalyzer-object.
         /// </summary>
-        /// <param name="ast">abstract syntax tree</param>
+        /// <param name="ast">AST</param>
         public SemanticAnalyzer(INode ast)
         {
             this.ast = ast;
@@ -30,7 +30,8 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>ErrorsDetected</c> returns result of analysis.
+        /// Method <c>ErrorsDetected</c> returns true if errors were detected
+        /// during semantic analysis.
         /// </summary>
         /// <returns>true if errors were detected</returns>
         public bool ErrosDetected()
@@ -39,7 +40,7 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>GetDetectedErrors</c> returns the list of detected errors.
+        /// Method <c>GetDetectedErrors</c> returns the list of detected semantic errors.
         /// </summary>
         /// <returns>list of errors</returns>
         public List<string> GetDetectedErrors()
@@ -48,7 +49,7 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>CheckConstraints</c> checks the semantic constraints of source code.
+        /// Method <c>CheckConstraints</c> checks the semantic constraints of the source code.
         /// </summary>
         public void CheckConstraints()
         {
@@ -63,10 +64,12 @@ namespace MipaCompiler
 
         ///////////////////////////////// ACTUAL SEMANTIC CHECKS /////////////////////////////////
 
-        public static string STR_BOOLEAN = "boolean";
-        public static string STR_INTEGER = "integer";
-        public static string STR_REAL = "real";
-        public static string STR_STRING = "string";
+        // different types that are used to describe the type of variables and values
+        public static string STR_BOOLEAN = "boolean";       
+        public static string STR_INTEGER = "integer";       
+        public static string STR_REAL = "real";             
+        public static string STR_STRING = "string";         
+        public static string STR_STRING_ARRAY = "array[] of string";
 
         /// <summary>
         /// Method <c>CheckProgram</c> checks the semantic constraints of program.
@@ -100,7 +103,7 @@ namespace MipaCompiler
 
         /// <summary>
         /// Method <c>InitFunctionToSymbolTable</c> checks function definition
-        /// and adds it to the symbolt table.
+        /// and adds it to the symbol table.
         /// </summary>
         /// <param name="node">function node</param>
         private void InitFunctionToSymbolTable(INode node)
@@ -238,7 +241,7 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>CheckBlock</c> checks semantic constraints for block.
+        /// Method <c>CheckBlock</c> checks semantic constraints for code block.
         /// </summary>
         private void CheckBlock(INode node)
         {
@@ -506,13 +509,13 @@ namespace MipaCompiler
         /// <summary>
         /// Static method <c>EvaluateTypeOfTypeNode</c> returns the type of given typenode. 
         /// Inputnode should be either SimpleTypeNode or ArrayTypeNode. Returns null in case
-        /// errors are detected.
+        /// errors were detected.
         /// </summary>
         /// <param name="node">typenode</param>
         /// <param name="errors">list of detected errors</param>
         /// <param name="symbolTable">symbol table</param>
         /// <param name="isInit">if array initialization type</param>
-        /// <returns>type</returns>
+        /// <returns>type in string representation</returns>
         public static string EvaluateTypeOfTypeNode(INode node, List<string> errors, SymbolTable symbolTable, bool isInit = false)
         {
             if (node == null) return null;
@@ -719,7 +722,7 @@ namespace MipaCompiler
         /// <param name="overrideReturnType">override return type</param>
         /// <param name="errors">list of detected errors</param>
         /// <param name="symbolTable">symbol table</param>
-        /// <returns></returns>
+        /// <returns>type</returns>
         public static string EvaluateTypeOfBinaryOperationForSupportedTypes(INode node, string[] supportedTypes, string overrideReturnType, List<string> errors, SymbolTable symbolTable)
         {
             if (node == null) return null;
@@ -757,7 +760,7 @@ namespace MipaCompiler
         /// <param name="node">binary expression node</param>
         /// <param name="errors">list of detected errors</param>
         /// <param name="symbolTable">symbol table</param>
-        /// <returns></returns>
+        /// <returns>type</returns>
         public static string EvaluateTypeOfArrayIndexNode(INode node, List<string> errors, SymbolTable symbolTable)
         {
             if (node == null) return null;
@@ -834,7 +837,7 @@ namespace MipaCompiler
         /// <param name="node">call node</param>
         /// <param name="errors">list of detected errors</param>
         /// <param name="symbolTable">symbol table</param>
-        /// <returns>result type</returns>
+        /// <returns>type</returns>
         public static string EvaluateTypeOfCallNode(INode node, List<string> errors, SymbolTable symbolTable)
         {
             if (node == null) return null;
@@ -895,7 +898,7 @@ namespace MipaCompiler
         /// <param name="parameters">parameter list</param>
         /// <param name="errors">list of detected errors</param>
         /// <param name="symbolTable">symbol table</param>
-        /// <returns>return type of most similar function definition</returns>
+        /// <returns>return type of the function return value</returns>
         public static string CheckFunctionCall(INode node, bool functionInTable, string identifier, string[] parameters, List<string> errors, SymbolTable symbolTable)
         {
             if (functionInTable)
@@ -1110,7 +1113,7 @@ namespace MipaCompiler
         /// </summary>
         /// <param name="node">node to be evaluated</param>
         /// <param name="symbolTable">symbol table</param>
-        /// <returns>result type of node</returns>
+        /// <returns>type</returns>
         public static string EvaluateTypeOfNode(INode node, SymbolTable symbolTable)
         {
             List<string> errors = new List<string>();

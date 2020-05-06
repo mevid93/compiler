@@ -74,7 +74,7 @@ namespace MipaCompiler
         /// <summary>
         /// Constructor <c>Token</c> creates new Token-object.
         /// <param name="tokenValue">source code symbol</param>
-        /// <param name="tokenType">Type of token</param>
+        /// <param name="tokenType">type of token</param>
         /// <param name="row">row in source code</param>
         /// <param name="col">column in source code</param>
         /// </summary>
@@ -96,7 +96,7 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>GetTokenValue</c> returns value of token. 
+        /// Method <c>GetTokenValue</c> returns the value of token. 
         /// This is the symbol in source code.
         /// </summary>
         /// <returns>token value</returns>
@@ -106,7 +106,7 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>GetRow</c> returns the row number where token is located in source code.
+        /// Method <c>GetRow</c> returns the row number where token is located in the source code.
         /// </summary>
         /// <returns>row number</returns>
         public int GetRow()
@@ -125,6 +125,7 @@ namespace MipaCompiler
 
         /// <summary>
         /// Method <c>ToString</c> returns string representation of Token-object.
+        /// This is not used by the compiler, but it can be usefull for debugging.
         /// </summary>
         /// <returns>token in string format</returns>
         override
@@ -243,8 +244,8 @@ namespace MipaCompiler
         /// <summary>
         /// Static method <c>IsKeyword</c> checks if given string matches keyword token.
         /// </summary>
-        /// <param name="value"></param>
-        /// <returns>true if string is a keyword token</returns>
+        /// <param name="value">possible keyword to check</param>
+        /// <returns>true if string is a keyword</returns>
         public static bool IsKeyword(string value)
         {
             switch (value)
@@ -274,7 +275,7 @@ namespace MipaCompiler
         /// Static method <c>IsPredefinedIdentifier</c> checks if the string matches 
         /// predefined identifier token.
         /// </summary>
-        /// <param name="value"></param>
+        /// <param name="value">possible predefined identifier</param>
         /// <returns>true if string matches predefined identifier token</returns>
         public static bool IsPredefinedIdentifier(string value)
         {
@@ -300,7 +301,7 @@ namespace MipaCompiler
         /// Static method <c>IsSingleCharToken</c> checks if the given char is matches
         /// a single char token.
         /// </summary>
-        /// <param name="c"></param>
+        /// <param name="c">possible single char</param>
         /// <returns>true if char matches a single char token</returns>
         public static bool IsSinleCharToken(char c)
         {
@@ -329,7 +330,7 @@ namespace MipaCompiler
         /// Static method <c>CanBeIdentifier</c> check if the given token can be
         /// used as identifier.
         /// </summary>
-        /// <param name="token"></param>
+        /// <param name="token">possible identifier token</param>
         /// <returns>true if token can be used as identifier</returns>
         public static bool CanBeIdentifier(Token token)
         {

@@ -6,7 +6,7 @@ namespace MipaCompiler
 {
     /// <summary>
     /// Class <c>Parser</c> contains functionality to perform the syntax analysis for source code.
-    /// It also constructs the abstract syntax tree (AST).
+    /// It also constructs the abstract syntax tree (AST) while performing the analysis. It uses
     /// TOP-DOWN parsing by using partial LL(1). There ase some LL(1) violations, which are handled
     /// by peeking incoming tokens.
     /// </summary>
@@ -387,7 +387,7 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>ParseAssert</c> handles the parsing of assert statement.
+        /// Method <c>ParseAssert</c> handles the parsing of an assert statement.
         /// </summary>
         private INode ParseAssert()
         {
@@ -411,7 +411,7 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>ParseType</c> handles the parsing of type.
+        /// Method <c>ParseType</c> handles the parsing of a type.
         /// </summary>
         private INode ParseType()
         {
@@ -435,7 +435,7 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>ParseSimpleType</c> handles the parsing of simple type.
+        /// Method <c>ParseSimpleType</c> handles the parsing of a simple type.
         /// </summary>
         private INode ParseSimpleType()
         {

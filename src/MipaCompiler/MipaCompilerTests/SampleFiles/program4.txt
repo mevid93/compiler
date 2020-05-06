@@ -1,0 +1,22 @@
+program Variables; 
+begin
+	{* Declare variables *}
+    var myInteger : integer;
+	var myReal: real;
+	var myBoolean: boolean;
+	var myString: string;
+	var integerArray : array [2] of integer;
+	var realArray : array [2] of real;
+	var booleanArray : array [2] of boolean;
+	var stringArray: array [2] of string;
+
+	{* Add values to variables *}
+	myInteger := 99;
+	myReal := -123.23e+23;
+	myBoolean := false;
+	myString := "Bugs everywhere";
+	integerArray[0] := myInteger;
+	realArray[1] := myReal;
+	booleanArray[0] := myBoolean;
+	stringArray[1] := myString;
+end.

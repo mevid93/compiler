@@ -4,16 +4,16 @@ namespace MipaCompiler
 {
     /// <summary>
     /// Class <c>Scanner</c> contains functionality to scan tokens from source code file.
-    /// Scans and groups successive characters in souce code into tokens.
+    /// It scans and groups successive characters from the souce code into tokens.
     /// </summary>
     public class Scanner
     {
-        private bool processingCommentblock;            // flag telling if processing multiline comment block {* *}
-        private int rowNum;                             // row of source code that is processed
-        private int colNum;                             // column of source code that is processed
-        private int tmpRowNum;                          // tmp variable to hold original row
-        private int tmpColNum;                          // tmp variable to hold original column
-        private string[] lines;                         // source code lines
+        private bool processingCommentblock;       // flag telling if processing multiline comment block {* *}
+        private int rowNum;                        // row of source code that is processed
+        private int colNum;                        // column of source code that is processed
+        private int tmpRowNum;                     // tmp variable to hold original row
+        private int tmpColNum;                     // tmp variable to hold original column
+        private string[] lines;                    // source code lines
 
         /// <summary>
         /// Constructor <c>Scanner</c> creates new Scanner-object.
@@ -26,8 +26,10 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>PeekNthToken</c> returns the n:th token, but does not
-        /// update row or column position in source code.
+        /// Method <c>PeekNthToken</c> returns the n:th token from current position, 
+        /// but does not update row or column position in source code. This is used by
+        /// the parser for overcoming LL(1) violations in the contect free grammar of
+        /// the Mini-Pascal language definition.
         /// </summary>
         /// <returns>n:th token</returns>
         public Token PeekNthToken(int n)
