@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace MipaCompiler.Node
 {
     /// <summary>
-    /// Class <c>ProgramDclNode</c> represents root node in AST.
+    /// Class <c>ProgramNode</c> represents root node in AST.
     /// </summary>
     public class ProgramNode : INode
     {
@@ -107,23 +107,66 @@ namespace MipaCompiler.Node
             if (mainBlock != null) mainBlock.PrettyPrint();
         }
 
+        ////////////////// EVERYTHING AFTER THIS IS FOR CODE GENERATION /////////////////////
+
         public void GenerateCode(Visitor visitor)
         {
-            // add standard input output libraries
-            visitor.AddCodeLine("#include <stdio.h>");
-            visitor.AddCodeLine("");
+            // include libraries
+            InsertIncludes(visitor);
 
+            // insert required typedefs
+            InsertTypedefs(visitor);
+
+            // insert function and procedure forward declarations
+            InsertForwardDeclarations(visitor);
+
+            // initialize function symbols to symbol table
+            InitFunctionSymbols(visitor);
+
+            // initialize procedure symbols to symbol table
+            InitProcedureSymbols(visitor);
+
+            // do actual function and procedure code
+            InsertFunctionAndProcedureCode(visitor);
+
+            // insert main function code
+            InsertMainFunctionCode(visitor);
+        }
+
+        /// <summary>
+        /// Method <c>InsertIncludes</c> inserts lines that include required C-standard libaries.
+        /// </summary>
+        private void InsertIncludes(Visitor visitor)
+        {
+            // add standard input output libraries + string manipulation library
+            visitor.AddCodeLine("#include <stdio.h>");
+            visitor.AddCodeLine("#include <string.h>");
+            visitor.AddCodeLine("#include <stdlib.h>");
+            visitor.AddCodeLine("");
+        }
+
+        /// <summary>
+        /// Method <c>InsertTypedefs</c> inserts lines that define required typedefs.
+        /// </summary>
+        private void InsertTypedefs(Visitor visitor)
+        {
             // add typedef for boolean
             visitor.AddCodeLine("typedef int bool;");
             visitor.AddCodeLine("#define true 1");
             visitor.AddCodeLine("#define false 0");
             visitor.AddCodeLine("");
+        }
 
-            // do function and procedure forward declaration (for mutual recursion)
+        /// <summary>
+        /// Method <c>InsertForwardDeclarations</c> inserts forward declarations lines
+        /// of functions and procedures. Forward declarations are needed for mutual recursion.
+        /// </summary>
+        private void InsertForwardDeclarations(Visitor visitor)
+        {
             visitor.AddCodeLine("// here are forward declarations for functions and procedures (if any exists)");
             if (functions != null && functions.Count > 0)
             {
-                foreach(INode function in functions)
+                foreach (INode function in functions)
                 {
                     FunctionNode fNode = (FunctionNode)function;
                     string line = fNode.GenerateForwardDeclaration();
@@ -139,45 +182,6 @@ namespace MipaCompiler.Node
                     visitor.AddCodeLine(line);
                 }
             }
-
-            // init function symbols to symbol table
-            InitFunctionSymbols(visitor);
-
-            // init procedure symbols to symbol table
-            InitProcedureSymbols(visitor);
-
-            // do actual function and procedure code
-            visitor.AddCodeLine("");
-            visitor.AddCodeLine("// here are the definitions of functions and procedures (if any exists)");
-            if (functions != null && functions.Count > 0)
-            {
-                foreach (INode function in functions)
-                {
-                    FunctionNode fNode = (FunctionNode)function;
-                    fNode.GenerateCode(visitor);
-                    visitor.AddCodeLine("");
-                }
-            }
-            if (procedures != null && procedures.Count > 0)
-            {
-                foreach (INode procedure in procedures)
-                {
-                    ProcedureNode pNode = (ProcedureNode)procedure;
-                    pNode.GenerateCode(visitor);
-                    visitor.AddCodeLine("");
-                }
-            }
-
-            // main block
-            visitor.AddCodeLine("");
-            visitor.AddCodeLine("// here is the main function");
-            visitor.AddCodeLine("int main()");
-
-            // update information that current block is main function
-            visitor.SetIsBlockMainFunction(true);
-
-            // generate block code
-            mainBlock.GenerateCode(visitor);
         }
 
         /// <summary>
@@ -239,6 +243,49 @@ namespace MipaCompiler.Node
                 // declare it
                 visitor.GetSymbolTable().DeclareProcedureSymbol(symbol);
             }
+        }
+
+        /// <summary>
+        /// Method <c>InsertFunctionAndProcedureCode</c> inserts function and procedure code.
+        /// </summary>
+        private void InsertFunctionAndProcedureCode(Visitor visitor)
+        {
+            visitor.AddCodeLine("");
+            visitor.AddCodeLine("// here are the definitions of functions and procedures (if any exists)");
+            if (functions != null && functions.Count > 0)
+            {
+                foreach (INode function in functions)
+                {
+                    FunctionNode fNode = (FunctionNode)function;
+                    fNode.GenerateCode(visitor);
+                    visitor.AddCodeLine("");
+                }
+            }
+            if (procedures != null && procedures.Count > 0)
+            {
+                foreach (INode procedure in procedures)
+                {
+                    ProcedureNode pNode = (ProcedureNode)procedure;
+                    pNode.GenerateCode(visitor);
+                    visitor.AddCodeLine("");
+                }
+            }
+        }
+
+        /// <summary>
+        /// Method <c>InsertMainFunctionCode</c> inserts main function code.
+        /// </summary>
+        private void InsertMainFunctionCode(Visitor visitor)
+        {
+            visitor.AddCodeLine("");
+            visitor.AddCodeLine("// here is the main function");
+            visitor.AddCodeLine("int main()");
+
+            // update information that current block is main function
+            visitor.SetIsBlockMainFunction(true);
+
+            // generate block code
+            mainBlock.GenerateCode(visitor);
         }
     }
 }

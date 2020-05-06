@@ -224,7 +224,7 @@ namespace MipaCompiler.Node
                 case "[]":
 
                     string simpleType = GetSimpleTypeFromArrayType(typeLhs);
-                    string cType = Converter.ConvertSimpleTypeToTargetLanguage(simpleType);
+                    string cType = Converter.ConvertSimpleTypeToC(simpleType);
 
                     string prefix = "&";
                     // if array is pointer --> no prefix
@@ -237,7 +237,7 @@ namespace MipaCompiler.Node
                     lhs.GenerateCode(visitor);
                     string type = SemanticAnalyzer.EvaluateTypeOfNode(lhs, visitor.GetSymbolTable());
                     string simpleType = GetSimpleTypeFromArrayType(type);
-                    string cType = CodeGenerator.ConvertSimpleTypeToTargetLanguage(simpleType);
+                    string cType = CodeGenerator.ConvertSimpleTypeToC(simpleType);
                     lhsTmp = visitor.GetLatestUsedTmpVariable();
                     rhs.GenerateCode(visitor);
                     rhsTmp = visitor.GetLatestUsedTmpVariable();

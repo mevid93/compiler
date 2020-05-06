@@ -106,7 +106,7 @@ namespace MipaCompiler.Node
                 INode node = parameters[i];
                 VariableNode variableNode = (VariableNode)node;
                 string varType = SemanticAnalyzer.EvaluateTypeOfTypeNode(variableNode.GetVariableType(), new List<string>(), null);
-                string cVarType = Converter.ConvertParameterTypeToTargetLanguage(varType);
+                string cVarType = Converter.ConvertParameterTypeToC(varType);
                 dcl += cVarType + " ";
                 string varName = "var_" + variableNode.GetName();
                 dcl += varName;

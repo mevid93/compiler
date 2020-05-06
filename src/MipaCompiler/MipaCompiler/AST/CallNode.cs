@@ -77,133 +77,159 @@ namespace MipaCompiler.Node
             }
         }
 
-        ////////////// EVERYTHING AFTER THIS IS FOR CODE GENERATION ////////////////
+        ////////////////// EVERYTHING AFTER THIS IS FOR CODE GENERATION /////////////////////
 
         public void GenerateCode(Visitor visitor)
         {
-            // get symbol table
             SymbolTable symTable = visitor.GetSymbolTable();
 
             // check if predfined read procedure
             if (id.Equals("read") && !symTable.IsFunctionInTable(id) && !symTable.IsProcedureInTable(id))
             {
-                GenerateCodeForPredefinedRead(visitor);
+                GenerateCodeForScanf(visitor);
                 return;
             }
 
             // check if predefined writeln procedure
             if (id.Equals("writeln") && !symTable.IsFunctionInTable(id) && !symTable.IsProcedureInTable(id))
             {
-                GenerateCodeForPredefinedWriteln(visitor);
+                GenerateCodeForPrintf(visitor);
                 return;
             }
 
             // custom procedure or function
             GenerateCodeForCustomFunction(visitor);
         }
-
-        ///////////// METHODS THAT ARE RELATED TO SCANF /////////////////
-
+        
         /// <summary>
-        /// Method <c>GenerateCodeForPredefinedRead</c> genereates the code
-        /// for predefined read method.
+        /// Method <c>GenerateCodeForScanf</c> genereates the code
+        /// for predefined read method. In other words, it generates
+        /// scanf-statement in C-language.
         /// </summary>
-        private void GenerateCodeForPredefinedRead(Visitor visitor)
+        private void GenerateCodeForScanf(Visitor visitor)
         {
-            // get symbol table
             SymbolTable symTable = visitor.GetSymbolTable();
             
-            // variables to hold scanf format string (first parameter)
-            // and readable arguments
-            string format_str = "";
-            string scan_args = ", ";
+            // scanf-function takes format string as first parameter and
+            // pointer arguments as the following arguments.
+            // let's define two variables, where one is for format string
+            // and the other one is for pointer arguments
+            string formatStr = "";
+            string pointerArgs = ", ";
 
+            // go through all call arguments and add them to
+            // the two string variables defined earlier
             for(int i = 0; i < args.Count; i++)
             {
-                // arguments must be separated
+                // arguments must be separated in scanf-function
                 if(i > 0)
                 {
-                    format_str += " ";
-                    scan_args += ", ";
+                    formatStr += " ";
+                    pointerArgs += ", ";
                 }
 
-                // get variable type
+                // get argument type
                 string variableType = SemanticAnalyzer.EvaluateTypeOfNode(args[i], symTable);
-                
-                // add correct formatting 
-                switch (variableType)
-                {
-                    case "integer":
-                        format_str += "%d";
-                        break;
-                    case "real":
-                        format_str += "%lf";
-                        break;
-                    case "string":
-                        format_str += "%s";
-                        break;
-                    default:
-                        throw new Exception($"Unexpected error... unsupported variable type {variableType}!");
-                }
 
-                // get the correct scanf argument
-                string argument = GetScanfArgument(args[i], visitor);
-                scan_args += argument;
+                // add correct formatting to the format string
+                formatStr += GetFormattingForType(variableType);
 
+                // add correct pointer argument to the argument string
+                pointerArgs += GetPointerArgumentForScanf(args[i], visitor);
             }
 
             // create new code line to list of generated code lines
-            string line = $"scanf(\"{format_str}\"{scan_args});";
-            visitor.AddCodeLine(line);
+            visitor.AddCodeLine($"scanf(\"{formatStr}\"{pointerArgs});");
         }
 
         /// <summary>
-        /// Method <c>GetScanfArgument</c> will return correct argument
+        /// Method <c>GetFormattingForType</c> returns correct formatting
+        /// for given type.
+        /// </summary>
+        private string GetFormattingForType(string type)
+        {
+            switch (type)
+            {
+                case "integer":
+                    return "%d";
+                case "real":
+                    return "%lf";
+                case "string":
+                    return "%s";
+                default:
+                    throw new Exception($"Unexpected error: Unsupported variable type!");
+            }
+        }
+
+        /// <summary>
+        /// Method <c>GetPointerArgumentForScanf</c> will return correct argument
         /// for scanf corresponding the given node. Node should be variable
         /// or binary expression (array index).
         /// </summary>
-        private string GetScanfArgument(INode node, Visitor visitor)
+        private string GetPointerArgumentForScanf(INode node, Visitor visitor)
+        {
+            // check node type
+            switch (node.GetNodeType())
+            {
+                case NodeType.VARIABLE:
+                    VariableNode varNode = (VariableNode)node;
+                    return GetPointerArgumentFromVariableToScanf(varNode, visitor);
+                case NodeType.BINARY_EXPRESSION:
+                    BinaryExpressionNode bin = (BinaryExpressionNode)node;
+                    return GetPointerArgumentFromArrayIndexToScanf(bin, visitor);
+                default:
+                    throw new Exception("Unexpected error: Invalid scanf argument type!");
+            }
+        }
+
+        /// <summary>
+        /// Method <c>GetPointerArgumentFromVariableToScanf</c> returns scanf argument
+        /// for given variable node.
+        /// </summary>
+        private string GetPointerArgumentFromVariableToScanf(VariableNode varNode, Visitor visitor)
         {
             // get symbol table
             SymbolTable symTable = visitor.GetSymbolTable();
 
-            switch (node.GetNodeType())
-            {
-                case NodeType.VARIABLE:
-                    string type = SemanticAnalyzer.EvaluateTypeOfVariableNode(node, new List<string>(), symTable);
-                    VariableNode varNode = (VariableNode)node;
-                    string name = $"var_{varNode.GetName()}";
-                    VariableSymbol varSymbol = symTable.GetVariableSymbolByIdentifier(name);
-                    string prefix = Converter.GetPrefixForArgumentByType(type, varSymbol.IsPointer());
-                    
-                    switch (type)
-                    {
-                        case "integer":
-                        case "real":
-                        case "string":
-                            return $"{prefix}{name}";
-                        default:
-                            return name;
-                    }
-                case NodeType.BINARY_EXPRESSION:
-                    BinaryExpressionNode bin = (BinaryExpressionNode)node;
-                    VariableNode lhs = (VariableNode)bin.GetLhs();
-                    INode rhs = bin.GetRhs();
-                    rhs.GenerateCode(visitor);
-                    string tmp = visitor.GetLatestUsedTmpVariable();
-                    return $"&var_{lhs.GetName()}[{tmp}]";
-                default:
-                    throw new Exception("Unexpected error... invalid scanf argument type!");
-            }
+            // get argument name
+            string varName = varNode.GetName();
+
+            // get variable type
+            string varType = SemanticAnalyzer.EvaluateTypeOfVariableNode(varNode, new List<string>(), symTable);
+
+            // check if argument is pointer
+            varName = $"var_{varName}";
+            VariableSymbol varSymbol = symTable.GetVariableSymbolByIdentifier(varName);
+            bool isPointer = varSymbol.IsPointer();
+
+            string prefix = Converter.GetPrefixWhenPointerNeeded(varType, isPointer);
+            return $"{prefix}{varName}";
         }
 
-        ///////////// METHODS THAT ARE RELATED TO PRINTF /////////////////
+        /// <summary>
+        /// Method <c>GetPointerArgumentFromArrayIndexToScanf</c> returns scanf argument
+        /// for given binary expression node. BinaryExpression node at scan mean array index access.
+        /// </summary>
+        private string GetPointerArgumentFromArrayIndexToScanf(BinaryExpressionNode bin, Visitor visitor)
+        {
+            // get variable name
+            VariableNode lhs = (VariableNode)bin.GetLhs();
+            string varName = $"var_{lhs.GetName()}";
+
+            // get index variable
+            INode rhs = bin.GetRhs();
+            rhs.GenerateCode(visitor);
+            string tmp = visitor.GetLatestUsedTmpVariable();
+
+            // return argument
+            return $"&var_{lhs.GetName()}[{tmp}]";
+        }
 
         /// <summary>
-        /// Method <c>GenerateCodeForPredefinedWriteln</c> generates the code for predefined
+        /// Method <c>GenerateCodeForPrintf</c> generates the code for predefined
         /// writeln.
         /// </summary>
-        private void GenerateCodeForPredefinedWriteln(Visitor visitor)
+        private void GenerateCodeForPrintf(Visitor visitor)
         {
             // get symbol table
             SymbolTable symTable = visitor.GetSymbolTable();
@@ -273,16 +299,14 @@ namespace MipaCompiler.Node
             return lastTemp;
         }
 
-        ///////////// METHODS THAT ARE RELATED TO CUSTOM FUNCTIONS /////////////////
-
         /// <summary>
         /// Method <c>GenerateCodeForCustomFunction</c> generates the code for custom
         /// function.
         /// </summary>
         private void GenerateCodeForCustomFunction(Visitor visitor)
         {
-            // get symbol table
             SymbolTable symTable = visitor.GetSymbolTable();
+            int scope = symTable.GetCurrentScope();
 
             // get arguments code that is passed to function or procedure call
             string arguments = GetArgumentsCode(visitor);
@@ -313,7 +337,6 @@ namespace MipaCompiler.Node
         /// </summary>
         private string GetArgumentsCode(Visitor visitor)
         {
-            // get symbol table from visitor
             SymbolTable symTable = visitor.GetSymbolTable();
 
             // variable to hold generated arguments code
@@ -335,7 +358,7 @@ namespace MipaCompiler.Node
 
                 // get proper prefix for argument
                 bool isPointer = symTable.GetVariableSymbolByIdentifier(lastTmp).IsPointer();
-                string prefix = Converter.GetPrefixForArgumentByType(evaluatedType, isPointer);
+                string prefix = Converter.GetPrefixWhenPointerNeeded(evaluatedType, isPointer);
 
                 // add code
                 code += $"{prefix}{lastTmp}";
@@ -368,7 +391,7 @@ namespace MipaCompiler.Node
 
             string retType = fs.GetReturnType();
 
-            return Converter.ConvertReturnTypeToTargetLanguage(retType);
+            return Converter.ConvertReturnTypeToC(retType);
         }
 
     }

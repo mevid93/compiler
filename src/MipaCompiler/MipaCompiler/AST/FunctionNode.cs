@@ -118,19 +118,18 @@ namespace MipaCompiler.Node
             string resultType = SemanticAnalyzer.EvaluateTypeOfTypeNode(type, new List<string>(), null);
 
             // convert return type into c-code
-            dcl += Converter.ConvertReturnTypeToTargetLanguage(resultType) + " ";
+            dcl += Converter.ConvertReturnTypeToC(resultType) + " ";
 
             // name of the function
-            dcl += "function_" + name;
+            dcl += $"function_{name}(";
 
-            // add parameters
-            dcl += "(";
+            // iterate through all parameters and add them to declaration
             for (int i = 0; i < parameters.Count; i++)
             {
                 INode node = parameters[i];
                 VariableNode variableNode = (VariableNode)node;
                 string varType = SemanticAnalyzer.EvaluateTypeOfTypeNode(variableNode.GetVariableType(), new List<string>(), null);
-                string cVarType = Converter.ConvertParameterTypeToTargetLanguage(varType);
+                string cVarType = Converter.ConvertParameterTypeToC(varType);
                 dcl += cVarType + " ";
                 string varName = "var_" + variableNode.GetName();
                 dcl += varName;
@@ -175,6 +174,9 @@ namespace MipaCompiler.Node
         /// </summary>
         private void DeclareFunctionParameterVariables(SymbolTable symTable)
         {
+            int scope = symTable.GetCurrentScope() + 1; // take scope increase into account
+
+            // declare rest of the parameters
             for (int i = 0; i < parameters.Count; i++)
             {
                 INode node = parameters[i];
@@ -183,7 +185,6 @@ namespace MipaCompiler.Node
                 string varType = SemanticAnalyzer.EvaluateTypeOfTypeNode(variableNode.GetVariableType(), new List<string>(), null);
                 string name = variableNode.GetName();
                 string varName = $"var_{name}";
-                int scope = symTable.GetCurrentScope() + 1; // take scope increase into account
 
                 symTable.DeclareVariableSymbol(new VariableSymbol(name, varType, null, scope, true));
                 symTable.DeclareVariableSymbol(new VariableSymbol(varName, varType, null, scope, true));

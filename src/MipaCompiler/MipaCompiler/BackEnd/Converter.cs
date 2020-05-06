@@ -9,133 +9,206 @@ namespace MipaCompiler.BackEnd
     /// </summary>
     public class Converter
     {
+        // Mini-Pascal type defnitions
+        const string STR_BOOLEAN = "boolean";
+        const string STR_INTEGER = "integer";
+        const string STR_REAL = "real";
+        const string STR_STRING = "string";
+        const string STR_ARRAY_BOOLEAN = "array[] of boolean";
+        const string STR_ARRAY_INTEGER = "array[] of integer";
+        const string STR_ARRAY_REAL = "array[] of real";
+        const string STR_ARRAY_STRING = "array[] of string";
+
         /// <summary>
-        /// Static method <c>ConvertTypeToTargetLanguage</c> converts Mini-Pascal type
-        /// to C-language type.
+        /// Static method <c>ConvertReturnTypeToC</c> converts Mini-Pascal function return
+        /// type to equivalent type in C-language.
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="type">type in Mini-Pascal</param>
         /// <returns>C-language type</returns>
-        public static string ConvertReturnTypeToTargetLanguage(string type)
+        public static string ConvertReturnTypeToC(string type)
         {
             switch (type)
             {
-                case "string":
-                    return "const char *";
-                case "real":
+                case STR_STRING:
+                    return "char *";
+                case STR_REAL:
                     return "double";
-                case "integer":
+                case STR_INTEGER:
                     return "int";
-                case "boolean":
+                case STR_BOOLEAN:
                     return "bool";
-                case "array[] of string":
+                case STR_ARRAY_STRING:
                     return "char **";
-                case "array[] of real":
+                case STR_ARRAY_REAL:
                     return "double *";
-                case "array[] of integer":
+                case STR_ARRAY_INTEGER:
                     return "int *";
-                case "array[] of boolean":
+                case STR_ARRAY_BOOLEAN:
                     return "bool *";
                 default:
-                    throw new Exception("Unexpected error... Invalid return type!");
+                    throw new Exception("Unexpected error: Invalid Mini-Pascal return type!");
             }
         }
 
         /// <summary>
-        /// Static method <c>ConvertParameterTypeToTargetLanguage</c> converts parameter
+        /// Static method <c>ConvertParameterTypeToC</c> converts Mini-Pascal function
+        /// parameter te equivalent C-language type.
         /// type to C-language.
         /// </summary>
-        /// <param name="type"></param>
+        /// <param name="type">parameter type in Mini-Pascal</param>
         /// <returns>parameter type in C-language</returns>
-        public static string ConvertParameterTypeToTargetLanguage(string type)
+        public static string ConvertParameterTypeToC(string type)
         {
             switch (type)
             {
-                case "string":
-                    return "const char *";
-                case "real":
+                case STR_STRING:
+                    return "char *";
+                case STR_REAL:
                     return "double *";
-                case "integer":
+                case STR_INTEGER:
                     return "int *";
-                case "boolean":
-                    return "bool";
-                case "array[] of string":
+                case STR_BOOLEAN:
+                    return "bool *";
+                case STR_ARRAY_STRING:
                     return "char **";
-                case "array[] of real":
+                case STR_ARRAY_REAL:
                     return "double *";
-                case "array[] of integer":
+                case STR_ARRAY_INTEGER:
                     return "int *";
-                case "array[] of boolean":
+                case STR_ARRAY_BOOLEAN:
                     return "bool *";
                 default:
-                    throw new Exception("Unexpected error... Invalid parameter type!");
+                    throw new Exception("Unexpected error: Invalid Mini-Pascal parameter type!");
             }
         }
 
         /// <summary>
-        /// Static method <c>ConvertSimpleTypeToTargetLanguage</c> converts simple type to 
+        /// Static method <c>ConvertSimpleTypeToC</c> converts Mini-Pascal simple type to 
         /// C-language equivalent.
         /// </summary>
         /// <param name="simpleType">simple type in Mini-Pascal</param>
-        /// <returns>simple type</returns>
-        public static string ConvertSimpleTypeToTargetLanguage(string simpleType)
+        /// <returns>simple type in C-language</returns>
+        public static string ConvertSimpleTypeToC(string simpleType)
         {
             switch (simpleType)
             {
-                case "string":
+                case STR_STRING:
                     return "char";
-                case "real":
+                case STR_REAL:
                     return "double";
-                case "integer":
+                case STR_INTEGER:
                     return "int";
-                case "boolean":
+                case STR_BOOLEAN:
                     return "bool";
                 default:
-                    throw new Exception($"Unexpected error... Invalid simple type {simpleType}!");
+                    throw new Exception($"Unexpected error: Invalid Mini-Pascal simple type!");
             }
         }
 
         /// <summary>
-        /// Static method <c>GetPrefixForArgumentByType</c> returns prefix for given
-        /// argument type.
+        /// Static method <c>GetPrefixWhenPointerNeeded</c> returns C-language prefix for variable
+        /// when pointer is needed. Method checks the variable type and pointer information,
+        /// and returns a prefix, so that the prefix + variable name is a pointer.
         /// </summary>
-        /// <param name="evaluatedType">argument type</param>
-        /// <param name="isParameter">is argument also a parameter</param>
-        /// <returns>argument prefix</returns>
-        public static string GetPrefixForArgumentByType(string evaluatedType, bool isParameter)
+        /// <param name="variableType">type of the variable</param>
+        /// <param name="isPointer">is pointer</param>
+        /// <returns>prefix for variable name</returns>
+        public static string GetPrefixWhenPointerNeeded(string variableType, bool isPointer)
         {
-            if (isParameter) return "";
+            if (isPointer) return "";
 
-            switch (evaluatedType)
-            {
-                case "boolean":
-                case "real":
-                case "integer":
-                    return "&";
-                default:
-                    return "";
-            }
-        }
-
-        /// <summary>
-        /// Static method <c>GetPrefixForVariable</c> returns prefix for variable. 
-        /// </summary>
-        /// <param name="type">variable type</param>
-        /// <param name="isParameter">is variable a parameter</param>
-        /// <returns>prefix</returns>
-        public static string GetPrefixForVariable(string variableType, bool isParameter)
-        {
             switch (variableType)
             {
-                case "integer":
-                case "boolean":
-                case "string":
-                case "real":
-                    if (isParameter) return "*";
+                case STR_STRING:
+                    return "&";
+                case STR_REAL:
+                    return "&";
+                case STR_INTEGER:
+                    return "&";
+                case STR_BOOLEAN:
+                    return "&";
+                case STR_ARRAY_STRING:
+                    return "";
+                case STR_ARRAY_REAL:
+                    return "";
+                case STR_ARRAY_INTEGER:
+                    return "";
+                case STR_ARRAY_BOOLEAN:
                     return "";
                 default:
-                    return "";
+                    throw new Exception("Unexpected error: Invalid Mini-Pascal return type!");
             }
         }
 
+        /// <summary>
+        /// Method <c>ConvertDeclarationTypeToC</c> converts Mini-Pascal variable declaration
+        /// type into equivalent C-language type.
+        /// </summary>
+        /// <param name="type">variable declaration type</param>
+        /// <returns>declaration type</returns>
+        public static string ConvertDeclarationTypeToC(string type)
+        {
+            switch (type)
+            {
+                case STR_STRING:
+                    return "char *";
+                case STR_REAL:
+                    return "double";
+                case STR_INTEGER:
+                    return "int";
+                case STR_BOOLEAN:
+                    return "bool";
+                case STR_ARRAY_STRING:
+                    return "char **";
+                case STR_ARRAY_REAL:
+                    return "double *";
+                case STR_ARRAY_INTEGER:
+                    return "int *";
+                case STR_ARRAY_BOOLEAN:
+                    return "bool *";
+                default:
+                    throw new Exception("Unexpected error: Invalid Mini-Pascal declaration type!");
+            }
+        }
+
+        /// <summary>
+        /// Method <c>GetStringBufferSize</c> returns string buffer size in C-language.
+        /// </summary>
+        /// <returns></returns>
+        public static string GetStringBufferSize()
+        {
+            return "[256]";
+        }
+
+        /// <summary>
+        /// Method <c>ConvertTypeToMallocTypeInC</c> converts Mini-Pascal type into
+        /// C-language type that is used to allocate memoery.
+        /// </summary>
+        /// <param name="type">Mini-Pascal type</param>
+        /// <returns>type of malloc</returns>
+        public static string ConvertTypeToMallocTypeInC(string type)
+        {
+            switch (type)
+            {
+                case STR_STRING:
+                    return "char *";
+                case STR_REAL:
+                    return "double";
+                case STR_INTEGER:
+                    return "int";
+                case STR_BOOLEAN:
+                    return "bool";
+                case STR_ARRAY_STRING:
+                    return "char *";
+                case STR_ARRAY_REAL:
+                    return "double";
+                case STR_ARRAY_INTEGER:
+                    return "int";
+                case STR_ARRAY_BOOLEAN:
+                    return "bool";
+                default:
+                    throw new Exception("Unexpected error: Invalid Mini-Pascal malloc type!");
+            }
+        }
     }
 }

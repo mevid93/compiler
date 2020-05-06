@@ -87,7 +87,7 @@ namespace MipaCompiler.Node
             // get type of the latest used tmp variable
             VariableSymbol varSymbol = symTable.GetVariableSymbolByIdentifier(tempTerm);
             string type = varSymbol.GetSymbolType();
-            string cType = Converter.ConvertSimpleTypeToTargetLanguage(type);
+            string cType = Converter.ConvertSimpleTypeToC(type);
 
             // assign new temporary variable
             int number = visitor.GetTmpVariableCounter();

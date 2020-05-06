@@ -87,6 +87,7 @@ namespace MipaCompiler.Node
 
             // check if assigned value is pointer
             string prefix2 = "";
+            //foreach (string linec in visitor.GetCodeLines()) Console.WriteLine(linec);
             if (visitor.GetSymbolTable().GetVariableSymbolByIdentifier(temp).IsPointer())
             {
                 prefix2 = "*";

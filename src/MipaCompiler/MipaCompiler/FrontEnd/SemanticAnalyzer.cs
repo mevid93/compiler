@@ -68,8 +68,7 @@ namespace MipaCompiler
         public static string STR_BOOLEAN = "boolean";       
         public static string STR_INTEGER = "integer";       
         public static string STR_REAL = "real";             
-        public static string STR_STRING = "string";         
-        public static string STR_STRING_ARRAY = "array[] of string";
+        public static string STR_STRING = "string";
 
         /// <summary>
         /// Method <c>CheckProgram</c> checks the semantic constraints of program.

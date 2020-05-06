@@ -76,7 +76,7 @@ namespace MipaCompiler.Node
             Console.WriteLine($"Type: {type}");
         }
 
-        //////////////// EVERYTHING AFTER THIS IS RELATED TO CODE GENERATION /////////////////////////
+        ////////////////// EVERYTHING AFTER THIS IS FOR CODE GENERATION /////////////////////
 
         public void GenerateCode(Visitor visitor)
         {
@@ -99,7 +99,6 @@ namespace MipaCompiler.Node
         /// </summary>
         private void GenerateCodeForSimpleType(Visitor visitor)
         {
-            // get symbol table from visitor
             SymbolTable symTable = visitor.GetSymbolTable();
 
             // get simple type
@@ -107,11 +106,9 @@ namespace MipaCompiler.Node
             string valueType = stn.GetTypeValue();
 
             // get simple type in C-language
-            string varType = Converter.ConvertSimpleTypeToTargetLanguage(valueType);
+            string varType = Converter.ConvertDeclarationTypeToC(valueType);
 
-            // define variable that holds the new generated code line
-            string codeLine = varType + " ";
-
+            // declare each variable to newline (easier to read)
             for (int i = 0; i < variables.Count; i++)
             {
                 VariableNode varNode = (VariableNode)variables[i];
@@ -130,19 +127,15 @@ namespace MipaCompiler.Node
                     symTable.DeclareVariableSymbol(new VariableSymbol(varName, valueType, null, symTable.GetCurrentScope()));
                 }
 
-                // each string can be max 256 chars long
-                if (valueType == "string") varName += "[256]";
+                // string has fixed buffer size
+                if (valueType == "string") varName += Converter.GetStringBufferSize();
 
-                codeLine += varName;
+                // define variable that holds the new generated code line
+                string codeLine = $"{varType} {varName};";
 
-                if (i < variables.Count - 1) codeLine += ", ";
+                // add generated code line to list of code lines
+                visitor.AddCodeLine(codeLine);
             }
-
-            // add end of statement 
-            codeLine += ";";
-
-            // add generated code line to list of code lines
-            visitor.AddCodeLine(codeLine);
         }
 
         /// <summary>
@@ -151,7 +144,6 @@ namespace MipaCompiler.Node
         /// </summary>
         private void GenerateCodeForArrayType(Visitor visitor)
         {
-            // get symbol table from visitor
             SymbolTable symTable = visitor.GetSymbolTable();
 
             // first find out the simple type of array
@@ -162,8 +154,8 @@ namespace MipaCompiler.Node
             // get actual node type
             string nodeType = SemanticAnalyzer.EvaluateTypeOfTypeNode(type, new List<string>(), symTable);
 
-            // get simple type in C-languge
-            string varType = Converter.ConvertSimpleTypeToTargetLanguage(simpleType);
+            // get declaration type
+            string varType = Converter.ConvertDeclarationTypeToC(nodeType);
 
             // create variable that holds the new code line
             string codeLine = varType + " ";
@@ -177,7 +169,7 @@ namespace MipaCompiler.Node
             // define list where all names of the new size variables are stored
             List<string> size_name = new List<string>();
 
-            // declare each variable
+            // declare each variable in a new line (easier to read)
             for (int i = 0; i < variables.Count; i++)
             {
                 VariableNode varNode = (VariableNode)variables[i];
@@ -199,19 +191,18 @@ namespace MipaCompiler.Node
                 // add new size variable name to list (one for each array)
                 size_name.Add($"size_{name}");
 
-                codeLine += $"{varName}[{tmp_size}]";
+                string allocationType = Converter.ConvertTypeToMallocTypeInC(nodeType);
 
-                // each string is max 256 char long
-                if (simpleType == "string") codeLine += "[256]";
+                // allocate memory for array
+                codeLine += $"{varName} = malloc({tmp_size} * sizeof({allocationType}";
 
-                if (i < variables.Count - 1) codeLine += ", ";
+                // each string is has fixed buffer size
+                if (simpleType == "string") codeLine += Converter.GetStringBufferSize();
+                codeLine += "));";
+
+                // add generated code line to list of code lines
+                visitor.AddCodeLine(codeLine);
             }
-
-            // add end of statement 
-            codeLine += ";";
-
-            // add generated code line to list of code lines
-            visitor.AddCodeLine(codeLine);
 
             // declare size variables
             foreach (string size in size_name)
