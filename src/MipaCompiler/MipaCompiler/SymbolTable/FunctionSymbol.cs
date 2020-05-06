@@ -37,7 +37,6 @@ namespace MipaCompiler.Symbol
             if (!symbol.GetIdentifier().Equals(identifier)) return false;
 
             string[] types1 = symbol.GetParameterTypes();
-
             if (types1.Length != parameters.Length) return false;
 
             for (int i = 0; i < types1.Length; i++)

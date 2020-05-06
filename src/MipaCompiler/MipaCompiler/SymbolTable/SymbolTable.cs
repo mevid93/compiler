@@ -3,9 +3,8 @@
 namespace MipaCompiler.Symbol
 {
     /// <summary>
-    /// Class <c>SymbolTable</c> represents the datastructure of semantic analysis
-    /// where smybols and their status are stored. Functions and procedures are
-    /// also stored into symbol table.
+    /// Class <c>SymbolTable</c> represents the datastructure used to store variable symbols,
+    /// function symbols, and procedure symbols. It is used in semantic analysis and code generation.
     /// </summary>
     public class SymbolTable
     {
@@ -33,7 +32,7 @@ namespace MipaCompiler.Symbol
         }
 
         /// <summary>
-        /// Method <c>RemoveScope</c> removes last scope level.
+        /// Method <c>RemoveScope</c> removes most recent scope level.
         /// </summary>
         public void RemoveScope()
         {
@@ -47,6 +46,11 @@ namespace MipaCompiler.Symbol
                     int next = tmp.PopScope();
                     tmp.PopType();
                     if (next == -1) variables.Remove(tmp);
+                    if (next == -1)
+                    {
+                        tmp.PopType();
+                        tmp.PopPointerInfo();
+                    }
                 }
             }
 
@@ -112,8 +116,8 @@ namespace MipaCompiler.Symbol
         /// Method <c>IsFunctionInTable</c> checks if there exists a function with 
         /// given identifier in table.
         /// </summary>
-        /// <param name="identifier"></param>
-        /// <returns>true if at least one function exists</returns>
+        /// <param name="identifier">function identifier</param>
+        /// <returns>true if function exists</returns>
         public bool IsFunctionInTable(string identifier)
         {
             foreach (FunctionSymbol f in functions)
@@ -128,8 +132,8 @@ namespace MipaCompiler.Symbol
         /// Method <c>IsProcedureInTable</c> checks if there exists a procedure with 
         /// given identifier in table.
         /// </summary>
-        /// <param name="identifier"></param>
-        /// <returns>true if at least one procedure exists</returns>
+        /// <param name="identifier">procedure identifier</param>
+        /// <returns>true if procedure exists</returns>
         public bool IsProcedureInTable(string identifier)
         {
             foreach (ProcedureSymbol p in procedures)
@@ -163,23 +167,26 @@ namespace MipaCompiler.Symbol
 
                     // push new type
                     varSym.PushType(updateSymbol.GetSymbolType());
+
+                    // push new pointer info
+                    varSym.PushPointerInfo(updateSymbol.IsPointer());
                 }
             }
         }
 
         /// <summary>
-        /// Method <c>DeclareFunctionSymbol</c> adds the symbol to symbol table.
+        /// Method <c>DeclareFunctionSymbol</c> stores the function symbol to the symbol table.
         /// </summary>
-        /// <param name="newSymbol">new symbol</param>
+        /// <param name="newSymbol">new function symbol</param>
         public void DeclareFunctionSymbol(FunctionSymbol newSymbol)
         {
             functions.Add(newSymbol);
         }
 
         /// <summary>
-        /// Method <c>DeclareProcedureFunction</c> adds the symbol to symbol table.
+        /// Method <c>DeclareProcedureFunction</c> stores the procedure symbol to symbol table.
         /// </summary>
-        /// <param name="newSymbol">new symbol</param>
+        /// <param name="newSymbol">new procdure symbol</param>
         public void DeclareProcedureSymbol(ProcedureSymbol newSymbol)
         {
             procedures.Add(newSymbol);
@@ -187,33 +194,15 @@ namespace MipaCompiler.Symbol
 
         /// <summary>
         /// Method <c>GetVariableSymbolByIdentifier</c> returns the variable symbol that matches the identifier.
-        /// Returns the symbol with highest scope. If nor symbol is matched, null is returned.
         /// </summary>
         /// <returns>varaible symbol</returns>
         public VariableSymbol GetVariableSymbolByIdentifier(string identifier)
         {
-            VariableSymbol symbol = null;
-
-            // find correct symbol from symbol table.
-            // same identifier can be used multiple time in different scopes,
-            // which is why we have to find the correct one by iterating all symbols.
-            // correct one is the one with highest scope
-            foreach (VariableSymbol s in variables)
+            foreach(VariableSymbol symbol in variables)
             {
-                if (s.GetIdentifier().Equals(identifier))
-                {
-                    if (symbol == null)
-                    {
-                        symbol = s;
-                    }
-                    else if (s.GetCurrentScope() > symbol.GetCurrentScope())
-                    {
-                        symbol = s;
-                    }
-                }
+                if (symbol.GetIdentifier().Equals(identifier)) return symbol;
             }
-
-            return symbol;
+            return null;
         }
 
         /// <summary>
@@ -241,7 +230,7 @@ namespace MipaCompiler.Symbol
         /// </summary>
         /// <param name="identifier">procedure name</param>
         /// <param name="parameters">procedure parameters (types)</param>
-        /// <returns>function symbol</returns>
+        /// <returns>procedure symbol</returns>
         public ProcedureSymbol GetProcedureSymbolByIdentifierAndArguments(string identifier, string[] parameters)
         {
             ProcedureSymbol p = new ProcedureSymbol(identifier, parameters);
@@ -252,43 +241,6 @@ namespace MipaCompiler.Symbol
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// Method <c>UpdateSymbol</c> updates the value of variable symbol corresponding to given identifier.
-        /// This will update the symbol with highest scope in allowed scope range.
-        /// </summary>
-        /// <param name="identifier">variable symbol to be updated</param>
-        /// <param name="value">new value for symbol</param>
-        /// <param name="minScope">minimum scope value that variable must have</param>
-        public void UpdateVariableSymbol(string identifier, string value, int minScope)
-        {
-            VariableSymbol symbol = null;
-
-            // find correct symbol from symbol table.
-            // same identifier can be used multiple time in different scopes,
-            // which is why we have to find the correct one by iterating all symbols.
-            // correct one is the one with highest scope
-            foreach (VariableSymbol s in variables)
-            {
-                if (s.GetIdentifier().Equals(identifier) && s.GetCurrentScope() >= minScope)
-                {
-                    if (symbol == null)
-                    {
-                        symbol = s;
-                    }
-                    else if(s.GetCurrentScope() > symbol.GetCurrentScope())
-                    {
-                        symbol = s;
-                    }
-                }
-            }
-
-            // symbol not found
-            if (symbol == null) return;
-
-            // symbol was found --> update value
-            symbol.SetValue(value);
         }
 
         /// <summary>
@@ -311,8 +263,8 @@ namespace MipaCompiler.Symbol
         /// Method <c>GetMostSimilarFunctionSymbol</c> returns the function symvbol which has
         /// highest number of correct parameters.
         /// </summary>
-        /// <param name="identifier"></param>
-        /// <param name="parameters"></param>
+        /// <param name="identifier">function name</param>
+        /// <param name="parameters">parameter types</param>
         /// <returns>most similar function symbol</returns>
         public FunctionSymbol GetMostSimilarFunctionSymbol(string identifier, string[] parameters)
         {
@@ -342,11 +294,11 @@ namespace MipaCompiler.Symbol
         }
 
         /// <summary>
-        /// Method <c>GetMostSimilarProcedureSymbol</c> returns the function symbol which has
+        /// Method <c>GetMostSimilarProcedureSymbol</c> returns the procedure symbol which has
         /// highest number of correct parameters.
         /// </summary>
-        /// <param name="identifier"></param>
-        /// <param name="parameters"></param>
+        /// <param name="identifier">procedure name</param>
+        /// <param name="parameters">parameter types</param>
         /// <returns>most similar procedure symbol</returns>
         public ProcedureSymbol GetMostSimilarProcedureSymbol(string identifier, string[] parameters)
         {
@@ -394,6 +346,22 @@ namespace MipaCompiler.Symbol
             foreach(FunctionSymbol f in functions)
             {
                 if (f.GetIdentifier().Equals(identifier)) return f;
+            }
+
+            return null;
+        }
+
+        /// <summary>
+        /// Method <c>GetProcedureSymbolByIdentifier</c> returns the procedue that matches the
+        /// given identifier.
+        /// </summary>
+        /// <param name="identifier">procedure identifier</param>
+        /// <returns>procedure symbol</returns>
+        public ProcedureSymbol GetProcedureSymbolByIdentifier(string identifier)
+        {
+            foreach (ProcedureSymbol p in procedures)
+            {
+                if (p.GetIdentifier().Equals(identifier)) return p;
             }
 
             return null;

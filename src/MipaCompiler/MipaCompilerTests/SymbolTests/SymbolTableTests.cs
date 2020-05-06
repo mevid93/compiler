@@ -30,15 +30,15 @@ namespace MipaCompilerTests.SymbolTests
             Assert.AreEqual("symbol1", symbolTable.GetVariableSymbolByIdentifier("symbol1").GetIdentifier());
             symbolTable.AddScope();
 
-            symbolTable.DeclareVariableSymbol(new VariableSymbol("symbol1", "string", "hello world", symbolTable.GetCurrentScope()));
+            symbolTable.ReDeclareVariableSymbol(new VariableSymbol("symbol1", "string", "hello world", symbolTable.GetCurrentScope()));
             Assert.IsTrue(symbolTable.IsVariableSymbolInTable("symbol1"));
-            string value = symbolTable.GetVariableSymbolByIdentifier("symbol1").GetCurrentValue();
-            Assert.AreEqual("hello world", value);
+            string type = symbolTable.GetVariableSymbolByIdentifier("symbol1").GetSymbolType();
+            Assert.AreEqual("string", type);
 
             symbolTable.RemoveScope();
             Assert.IsTrue(symbolTable.IsVariableSymbolInTable("symbol1"));
-            value = symbolTable.GetVariableSymbolByIdentifier("symbol1").GetCurrentValue();
-            Assert.AreEqual("26", value);
+            type = symbolTable.GetVariableSymbolByIdentifier("symbol1").GetSymbolType();
+            Assert.AreEqual("integer", type);
         }
 
         [TestMethod]

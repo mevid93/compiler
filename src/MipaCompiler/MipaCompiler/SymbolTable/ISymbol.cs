@@ -14,8 +14,8 @@ namespace MipaCompiler.Symbol
 
         /// <summary>
         /// Method <c>HasSameDefinition</c> checks if two ISymbol instances have same
-        /// definition. In other words, it checks if procedures or functions have
-        /// identical declarations.
+        /// definition. This is used to check if procedure symbols and function
+        /// symbols have similar defnitions.
         /// </summary>
         /// <param name="symbol">symbol to compare</param>
         /// <returns>true if identical</returns>

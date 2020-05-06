@@ -6,11 +6,11 @@ namespace MipaCompiler.Symbol
     /// </summary>
     public class ProcedureSymbol : ISymbol
     {
-        private readonly string identifier;     // function name
+        private readonly string identifier;     // procedure name
         private readonly string[] parameters;   // array of parameter types
 
         /// <summary>
-        /// Constructor <c>FunctionSymbol</c> creates new ProcedureSymbol-object.
+        /// Constructor <c>ProcedureSymbol</c> creates new ProcedureSymbol-object.
         /// </summary>
         /// <param name="identifier">name of the procedure</param>
         /// <param name="parameter">parameter types</param>
