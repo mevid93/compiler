@@ -236,6 +236,8 @@ namespace MipaCompiler
                     return TokenType.SUBSTRACTION;
                 case "true":
                     return TokenType.PREDEFINED_TRUE;
+                case "not":
+                    return TokenType.LOGICAL_NOT;
                 default:
                     return TokenType.ERROR;
             }
@@ -250,6 +252,7 @@ namespace MipaCompiler
         {
             switch (value)
             {
+                case "and":
                 case "array":
                 case "assert":
                 case "begin":
@@ -258,7 +261,9 @@ namespace MipaCompiler
                 case "function":
                 case "end":
                 case "if":
+                case "not":
                 case "of":
+                case "or":
                 case "procedure":
                 case "program":
                 case "return":

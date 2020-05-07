@@ -65,6 +65,60 @@ namespace MipaCompilerTests
         }
 
         [TestMethod]
+        [DeploymentItem("SampleFiles\\program4.txt")]
+        public void CheckConstraintsWorksWithValidProgram4()
+        {
+            string filename = "program4.txt";
+            Scanner scanner = new Scanner(filename);
+            Parser parser = new Parser(scanner);
+            INode ast = parser.Parse();
+
+            Assert.IsFalse(parser.ErrorsDetected());
+
+            SemanticAnalyzer analyzer = new SemanticAnalyzer(ast);
+            analyzer.CheckConstraints();
+
+            Assert.IsFalse(analyzer.ErrosDetected());
+            Assert.IsTrue(analyzer.GetDetectedErrors().Count == 0);
+        }
+
+        [TestMethod]
+        [DeploymentItem("SampleFiles\\program5.txt")]
+        public void CheckConstraintsWorksWithValidProgram5()
+        {
+            string filename = "program5.txt";
+            Scanner scanner = new Scanner(filename);
+            Parser parser = new Parser(scanner);
+            INode ast = parser.Parse();
+
+            Assert.IsFalse(parser.ErrorsDetected());
+
+            SemanticAnalyzer analyzer = new SemanticAnalyzer(ast);
+            analyzer.CheckConstraints();
+
+            Assert.IsFalse(analyzer.ErrosDetected());
+            Assert.IsTrue(analyzer.GetDetectedErrors().Count == 0);
+        }
+
+        [TestMethod]
+        [DeploymentItem("SampleFiles\\program6.txt")]
+        public void CheckConstraintsWorksWithValidProgram6()
+        {
+            string filename = "program6.txt";
+            Scanner scanner = new Scanner(filename);
+            Parser parser = new Parser(scanner);
+            INode ast = parser.Parse();
+
+            Assert.IsFalse(parser.ErrorsDetected());
+
+            SemanticAnalyzer analyzer = new SemanticAnalyzer(ast);
+            analyzer.CheckConstraints();
+
+            Assert.IsFalse(analyzer.ErrosDetected());
+            Assert.IsTrue(analyzer.GetDetectedErrors().Count == 0);
+        }
+
+        [TestMethod]
         [DeploymentItem("SampleFiles\\types1.txt")]
         public void CheckConstraintsWorksWithValidTypes1()
         {

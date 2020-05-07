@@ -90,6 +90,7 @@ namespace MipaCompiler.Node
 
             // check if assigned value is pointer
             string prefix2 = "";
+
             if (!temp.Equals("false") && !temp.Equals("true"))
             {
                 if (visitor.GetSymbolTable().GetVariableSymbolByIdentifier(temp).IsPointer())

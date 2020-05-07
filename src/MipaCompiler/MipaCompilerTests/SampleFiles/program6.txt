@@ -1,0 +1,42 @@
+program Booleans;
+
+function opposite (value : boolean) : boolean; 
+begin
+    return not value; 
+end;
+
+procedure opposite2 (value: boolean);
+begin
+    value := not value;
+end;
+
+begin
+	{* Declare reals *}
+    var myBoolean1 : boolean;
+	var myBoolean2: boolean;
+	var boolean : boolean;
+
+	{* Insert values *}
+	myBoolean1 := false;
+	boolean := true;
+	myBoolean2 := boolean;
+
+	{* Do basic operations *}
+	myBoolean1 := not myBoolean1;
+	boolean := boolean and myBoolean1;
+	myBoolean2 := myBoolean1 or myBoolean2;
+
+	{* function call and procedure call *}
+	boolean := opposite(myBoolean1);
+	opposite2(boolean);
+
+	{* comparison *}
+	var comparison : boolean;
+	comparison := myBoolean1 = myBoolean2;
+	comparison := myBoolean1 <> myBoolean2;
+	comparison := myBoolean1 < myBoolean2;
+	comparison := myBoolean1 > myBoolean2;
+	comparison := myBoolean1 <= myBoolean2;
+	comparison := myBoolean1 >= myBoolean2;
+
+end.

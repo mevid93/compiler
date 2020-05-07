@@ -1050,7 +1050,7 @@ namespace MipaCompiler
                     int rowL = inputToken.GetRow();
                     int colL = inputToken.GetColumn();
                     string oper = Match(TokenType.LOGICAL_NOT);
-
+          
                     // parse expression
                     INode factor = ParseFactor();
                     factor = ParseFactorTail(factor);

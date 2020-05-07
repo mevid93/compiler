@@ -65,9 +65,9 @@ namespace MipaCompiler
         ///////////////////////////////// ACTUAL SEMANTIC CHECKS /////////////////////////////////
 
         // different types that are used to describe the type of variables and values
-        public static string STR_BOOLEAN = "boolean";       
-        public static string STR_INTEGER = "integer";       
-        public static string STR_REAL = "real";             
+        public static string STR_BOOLEAN = "boolean";
+        public static string STR_INTEGER = "integer";
+        public static string STR_REAL = "real";
         public static string STR_STRING = "string";
 
         /// <summary>
@@ -256,7 +256,7 @@ namespace MipaCompiler
             List<INode> statements = block.GetStatements();
 
             // check semantics for each statement
-            foreach(INode stmnt in statements)
+            foreach (INode stmnt in statements)
             {
                 CheckStatement(stmnt);
             }
@@ -356,7 +356,7 @@ namespace MipaCompiler
             VariableSymbol symbol = symbolTable.GetVariableSymbolByIdentifier(identifier);
             string symtype = symbol.GetSymbolType();
 
-            if(type == null || !symtype.Equals(type))
+            if (type == null || !symtype.Equals(type))
             {
                 // was not correct --> report error
                 string errorMsg = $"Cannot implicitly convert type {type} to {symtype}!";
@@ -378,7 +378,8 @@ namespace MipaCompiler
 
             string type = EvaluateTypeOfExpressionNode(condition, errors, symbolTable);
 
-            if (type != null && !type.Equals(STR_BOOLEAN)){
+            if (type != null && !type.Equals(STR_BOOLEAN))
+            {
                 // condition not boolean expression
                 string errorMsg = $"Cannot implicitly convert type {type} to boolean!";
                 ReportError(condition.GetRow(), condition.GetCol(), errors, errorMsg);
@@ -409,7 +410,7 @@ namespace MipaCompiler
 
             string type = EvaluateTypeOfExpressionNode(expr, errors, symbolTable);
 
-            if(type != null && !type.Equals(returnStmntType))
+            if (type != null && !type.Equals(returnStmntType))
             {
                 string errorMsg = $"Cannot implicitly convert type {type} to {returnStmntType}!";
                 ReportError(expr.GetRow(), expr.GetCol(), errors, errorMsg);
@@ -435,7 +436,7 @@ namespace MipaCompiler
 
             // for each variable --> check that they have not been declared in current scope
             // if not --> then declare it
-            foreach(INode n in variables)
+            foreach (INode n in variables)
             {
                 // get variable name
                 VariableNode varNode = (VariableNode)n;
@@ -482,7 +483,7 @@ namespace MipaCompiler
 
             string type = EvaluateTypeOfExpressionNode(expr, errors, symbolTable);
 
-            if(type == null || !type.Equals(STR_BOOLEAN))
+            if (type == null || !type.Equals(STR_BOOLEAN))
             {
                 // report error
                 string errorMsg = $"Cannot implicitly convert type {type} to boolean!";
@@ -534,7 +535,7 @@ namespace MipaCompiler
                             // report error
                             string errorMsg = "Array must have integer as size argument!";
                             ReportError(at.GetRow(), at.GetCol(), errors, errorMsg);
-                        } 
+                        }
                     }
                     string tmp = $"array[] of ";
                     SimpleTypeNode stn = (SimpleTypeNode)at.GetSimpleType();
@@ -641,7 +642,7 @@ namespace MipaCompiler
                 case "not":
                     // check that type is boolean
                     if (type.Equals(STR_BOOLEAN)) return type;
-                    
+
                     // was not correct type --> report error
                     string errorMsg = $"Cannot implicitly convert type {type} to boolean!";
                     ReportError(node.GetRow(), node.GetCol(), errors, errorMsg);
@@ -735,15 +736,31 @@ namespace MipaCompiler
             string left = EvaluateTypeOfExpressionNode(lhs, errors, symbolTable);
             string right = EvaluateTypeOfExpressionNode(rhs, errors, symbolTable);
 
-            // if correct 
-            foreach(string type in supportedTypes)
+            // if left and right have same type and that type is among allowed types --> then ok
+            foreach (string type in supportedTypes)
             {
                 if (left != null && left.Equals(type) && right != null && right.Equals(type))
                 {
                     if (overrideReturnType != null) return overrideReturnType;
                     return type;
-                } 
+                }
             }
+
+            // there are also cases where left and right do not have same type but still valid
+            // for example, it is ok to sum integer and real
+            if ((left.Equals(STR_INTEGER) || left.Equals(STR_REAL)) && (right.Equals(STR_INTEGER) || right.Equals(STR_REAL)))
+            {
+                bool realIsSupported = false;
+                bool integerIsSupported = false;
+                foreach(string type in supportedTypes)
+                {
+                    if (type == "integer") integerIsSupported = true;
+                    if (type == "real") realIsSupported = true;
+                }
+
+                if (realIsSupported && integerIsSupported) return "real";
+            }
+
 
             // was not correct --> report error
             string errorMsg = $"Operation {bin.GetOperation()} not supported between types {left} and {right}";
@@ -782,11 +799,11 @@ namespace MipaCompiler
             }
 
             // get array
-            VariableNode array = (VariableNode) arrayIndex.GetLhs();
+            VariableNode array = (VariableNode)arrayIndex.GetLhs();
 
             string arrayType = EvaluateTypeOfVariableNode(array, errors, symbolTable);
 
-            if(arrayType != null && arrayType.Equals("array[] of " + STR_INTEGER)) return STR_INTEGER;
+            if (arrayType != null && arrayType.Equals("array[] of " + STR_INTEGER)) return STR_INTEGER;
             if (arrayType != null && arrayType.Equals("array[] of " + STR_REAL)) return STR_REAL;
             if (arrayType != null && arrayType.Equals("array[] of " + STR_STRING)) return STR_STRING;
             if (arrayType != null && arrayType.Equals("array[] of " + STR_BOOLEAN)) return STR_BOOLEAN;
@@ -849,7 +866,7 @@ namespace MipaCompiler
 
             List<INode> arguments = callNode.GetArguments();
             string[] parameters = new string[arguments.Count];
-            for(int i = 0; i < arguments.Count; i++)
+            for (int i = 0; i < arguments.Count; i++)
             {
                 string type = EvaluateTypeOfExpressionNode(arguments[i], errors, symbolTable);
                 if (type != null) parameters[i] = type;
@@ -870,7 +887,7 @@ namespace MipaCompiler
             bool procedureInTable = symbolTable.IsProcedureSymbolInTable(ps);
 
             // is a function
-            if(functionNameExists && !procedureNameExists) return CheckFunctionCall(node, functionInTable, identifier, parameters, errors, symbolTable);
+            if (functionNameExists && !procedureNameExists) return CheckFunctionCall(node, functionInTable, identifier, parameters, errors, symbolTable);
             // is a procedure
             if (!functionNameExists && procedureNameExists) return CheckProcedureCall(node, procedureInTable, identifier, parameters, errors, symbolTable);
             // can be both function or procedure call
@@ -879,7 +896,7 @@ namespace MipaCompiler
             if (identifier.Equals("read")) return CheckReadCall(node, errors, symbolTable);
             // is predefined writeln procedure call
             if (identifier.Equals("writeln")) return CheckWritelnCall(node, errors, symbolTable);
-            
+
             // is not a valid function or procedure name --> report error
             string errorMsg = $"SemanticError::Row {node.GetRow()}::Column {node.GetCol()}::";
             errorMsg += $"Procedure/Function {identifier} not declared in this scope!";
@@ -959,7 +976,7 @@ namespace MipaCompiler
             CallNode callNode = (CallNode)node;
 
             // check that all paramateres are correct type and declared in scope
-            foreach(INode p in callNode.GetArguments())
+            foreach (INode p in callNode.GetArguments())
             {
                 VariableNode varNode = null;
                 if (p.GetNodeType() != NodeType.VARIABLE && p.GetNodeType() != NodeType.BINARY_EXPRESSION)
@@ -968,7 +985,7 @@ namespace MipaCompiler
                     ReportError(p.GetRow(), p.GetCol(), errors, notVariable);
                     continue;
                 }
-                else if(p.GetNodeType() == NodeType.BINARY_EXPRESSION)
+                else if (p.GetNodeType() == NodeType.BINARY_EXPRESSION)
                 {
                     BinaryExpressionNode bin = (BinaryExpressionNode)p;
                     INode lhs = bin.GetLhs();
@@ -979,7 +996,8 @@ namespace MipaCompiler
                         continue;
                     }
                     varNode = (VariableNode)lhs;
-                }else if(p.GetNodeType() == NodeType.VARIABLE)
+                }
+                else if (p.GetNodeType() == NodeType.VARIABLE)
                 {
                     varNode = (VariableNode)p;
                 }
@@ -1027,7 +1045,7 @@ namespace MipaCompiler
                 {
                     case NodeType.VARIABLE:
                         string varType = EvaluateTypeOfVariableNode(p, errors, symbolTable);
-                        if(varType != null && varType.Equals(STR_BOOLEAN))
+                        if (varType != null && varType.Equals(STR_BOOLEAN))
                         {
                             string errorVar = "Argument must be numeric or string!";
                             ReportError(p.GetRow(), p.GetCol(), errors, errorVar);
@@ -1104,7 +1122,7 @@ namespace MipaCompiler
                 FunctionSymbol f = symbolTable.GetMostSimilarFunctionSymbol(identifier, parameters);
                 return f.GetReturnType();
             }
-            
+
         }
 
         /// <summary>

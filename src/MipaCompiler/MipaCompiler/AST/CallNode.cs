@@ -310,12 +310,6 @@ namespace MipaCompiler.Node
 
             // get arguments code that is passed to function or procedure call
             string arguments = GetArgumentsCode(visitor);
-            
-            // create new temp variable
-            int counter = visitor.GetTmpVariableCounter();
-            visitor.IncreaseTmpVariableCounter();
-            string tmp = $"tmp_{counter}";
-            visitor.SetLatestTmpVariableName(tmp);
 
             // get function return type (if procedure, then "")
             string returnType = GetCallReturnType(symTable);
@@ -327,6 +321,12 @@ namespace MipaCompiler.Node
             }
             else
             {
+                // create new temp variable
+                int counter = visitor.GetTmpVariableCounter();
+                visitor.IncreaseTmpVariableCounter();
+                string tmp = $"tmp_{counter}";
+                visitor.SetLatestTmpVariableName(tmp);
+
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmp, returnType, null, symTable.GetCurrentScope()));
                 visitor.AddCodeLine($"{returnType} {tmp} = function_{id}({arguments});");
             }

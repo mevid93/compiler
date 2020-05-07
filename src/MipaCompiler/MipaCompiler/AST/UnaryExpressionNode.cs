@@ -1,4 +1,5 @@
-﻿using MipaCompiler.Symbol;
+﻿using MipaCompiler.BackEnd;
+using MipaCompiler.Symbol;
 using System;
 
 namespace MipaCompiler.Node
@@ -75,12 +76,13 @@ namespace MipaCompiler.Node
             switch (oper)
             {
                 case "not":
+                    GenerateCodeForNotOperator(visitor);
                     break;
                 case "size":
                     GenerateCodeForSizeOperator(visitor);
                     break;
                 default:
-                    throw new Exception("Unexpected error... invalid unary operaror!");
+                    throw new Exception("Unexpected error: Invalid unary operaror!");
             }
         }
 
@@ -102,6 +104,38 @@ namespace MipaCompiler.Node
 
             // update latest tmp variable information in visitor
             visitor.SetLatestTmpVariableName(sizeName);
+        }
+
+        /// <summary>
+        /// Method <c>GenerateCodeForNotOperator</c> generates code for not operator.
+        /// </summary>
+        private void GenerateCodeForNotOperator(Visitor visitor)
+        {
+            SymbolTable symTable = visitor.GetSymbolTable();
+
+            // generate code for the expression
+            expression.GenerateCode(visitor);
+
+            // get last tmp variable which should be a boolean value
+            string tmpLast = visitor.GetLatestUsedTmpVariable();
+
+            // get tmp counter
+            int number = visitor.GetTmpVariableCounter();
+            visitor.IncreaseTmpVariableCounter();
+
+            // check if assigned variable is pointer
+            bool isPointer = symTable.GetVariableSymbolByIdentifier(tmpLast).IsPointer();
+            string prefix = Converter.GetPrefixWhenPointerNotNeeded("boolean", isPointer);
+
+            // create new tmp variable for not operator
+            string line = $"bool tmp_{number} = !{prefix}{tmpLast};";
+            visitor.AddCodeLine(line);
+
+            // update last used tmp variable
+            visitor.SetLatestTmpVariableName($"tmp_{number}");
+
+            // declare new variable
+            symTable.DeclareVariableSymbol(new VariableSymbol($"tmp_{number}", "boolean", null, symTable.GetCurrentScope()));
         }
     }
 }

@@ -22,13 +22,16 @@ begin
 	read(myInteger2);
 
 	{* Do basic math *}
-	var sum, sub, mul, mod : integer;
-	var div : real;
+	var sum, sub, mul, mod, div : integer;
 	sum := myInteger1 + myInteger2;
 	sub := myInteger1 - myInteger2;
 	mul := myInteger1 * myInteger2;
 	div := myInteger1 / myInteger2;
 	mod := myInteger1 % myInteger2;
+
+	{* Function and procedure call *}
+	sum := square(sum);
+	increase(sum);
 
 	{* comparison *}
 	var comparison : boolean;

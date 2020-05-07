@@ -28,6 +28,10 @@ begin
 	mul := myReal1 * myReal2;
 	div := myReal1 / myReal2;
 
+	{* Function and procedure call *}
+	sum := square(sum);
+	increase(sum);
+
 	{* comparison *}
 	var comparison : boolean;
 	comparison := myReal1 = myReal2;

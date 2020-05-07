@@ -425,8 +425,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("boolean", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("boolean", rhsIsPointer);
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} == {prefixRhs}{rhsTmp};");
             }
         }
@@ -473,8 +473,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("boolean", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("boolean", rhsIsPointer);
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} != {prefixRhs}{rhsTmp};");
             }
         }
@@ -521,8 +521,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("boolean", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("boolean", rhsIsPointer);
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} < {prefixRhs}{rhsTmp};");
             }
         }
@@ -569,8 +569,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("boolean", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("boolean", rhsIsPointer);
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} <= {prefixRhs}{rhsTmp};");
             }
         }
@@ -617,8 +617,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("boolean", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("boolean", rhsIsPointer);
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} > {prefixRhs}{rhsTmp};");
             }
         }
@@ -666,8 +666,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("boolean", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("boolean", rhsIsPointer);
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} >= {prefixRhs}{rhsTmp};");
             }
         }
