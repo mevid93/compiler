@@ -1,4 +1,5 @@
-﻿using MipaCompiler.Symbol;
+﻿using MipaCompiler.BackEnd;
+using MipaCompiler.Symbol;
 using System;
 using System.Collections.Generic;
 
@@ -83,8 +84,8 @@ namespace MipaCompiler.Node
                 statement.GenerateCode(visitor);
             }
 
-            // free allocated arrays
-            visitor.FreeArrays(symTable.GetCurrentScope() - 1);
+            // free allocated strings
+            Helper.FreeAllocatedStrings(visitor, false);
 
             // if block is main function --> should return 0
             if (main) visitor.AddCodeLine("return 0;");

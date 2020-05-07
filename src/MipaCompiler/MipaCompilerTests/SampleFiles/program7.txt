@@ -1,0 +1,34 @@
+program Strings;
+
+function DoubleString (value : string) : string; 
+begin
+    return value + value; 
+end;
+
+procedure replaceWithYolo (value: string);
+begin
+    value := "Yolo";
+end;
+
+begin
+	{* Declare strings *}
+    var myString1 : string;
+	var myString2, myString3: string;
+
+	{* Insert values *}
+	myString1 := "Hello";
+	myString2 := "World";
+	read(myString3);
+
+	writeln(myString1);
+	writeln(myString2);
+	writeln(myString3);
+
+	{* function call and procedure call *}
+	myString1 := DoubleString(myString3);
+	replaceWithYolo(myString2);
+
+	writeln(myString1);
+	writeln(myString2);
+	writeln(myString3);
+end.

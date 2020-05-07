@@ -118,7 +118,7 @@ namespace MipaCompiler.Node
             string resultType = SemanticAnalyzer.EvaluateTypeOfTypeNode(type, new List<string>(), null);
 
             // convert return type into c-code
-            dcl += Converter.ConvertReturnTypeToC(resultType) + " ";
+            dcl += Helper.ConvertReturnTypeToC(resultType) + " ";
 
             // name of the function
             dcl += $"function_{name}(";
@@ -129,7 +129,7 @@ namespace MipaCompiler.Node
                 INode node = parameters[i];
                 VariableNode variableNode = (VariableNode)node;
                 string varType = SemanticAnalyzer.EvaluateTypeOfTypeNode(variableNode.GetVariableType(), new List<string>(), null);
-                string cVarType = Converter.ConvertParameterTypeToC(varType);
+                string cVarType = Helper.ConvertParameterTypeToC(varType);
                 dcl += cVarType + " ";
                 string varName = "var_" + variableNode.GetName();
                 dcl += varName;

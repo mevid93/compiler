@@ -106,7 +106,7 @@ namespace MipaCompiler.Node
             string valueType = stn.GetTypeValue();
 
             // get simple type in C-language
-            string varType = Converter.ConvertDeclarationTypeToC(valueType);
+            string varType = Helper.ConvertDeclarationTypeToC(valueType);
 
             // declare each variable to newline (easier to read)
             for (int i = 0; i < variables.Count; i++)
@@ -127,8 +127,12 @@ namespace MipaCompiler.Node
                     symTable.DeclareVariableSymbol(new VariableSymbol(varName, valueType, null, symTable.GetCurrentScope()));
                 }
 
-                // string has fixed buffer size
-                if (valueType == "string") varName += Converter.GetStringBufferSize();
+                // if string --> allocate memory buffer
+                if (valueType.Equals("string"))
+                {
+                    varName += " = malloc(256 * sizeof(char))";
+                    visitor.AddAllocatedString($"var_{name}");
+                }
 
                 // define variable that holds the new generated code line
                 string codeLine = $"{varType} {varName};";
@@ -155,7 +159,7 @@ namespace MipaCompiler.Node
             string nodeType = SemanticAnalyzer.EvaluateTypeOfTypeNode(type, new List<string>(), symTable);
 
             // get declaration type
-            string varType = Converter.ConvertDeclarationTypeToC(nodeType);
+            string varType = Helper.ConvertDeclarationTypeToC(nodeType);
 
             // create variable that holds the new code line
             string codeLine = varType + " ";
@@ -191,14 +195,14 @@ namespace MipaCompiler.Node
                 // add new size variable name to list (one for each array)
                 size_name.Add($"size_{name}");
 
-                string allocationType = Converter.ConvertTypeToMallocTypeInC(nodeType);
+                string allocationType = Helper.ConvertTypeToMallocTypeInC(nodeType);
 
                 // allocate memory for array
                 codeLine += $"{varName} = malloc({tmp_size} * sizeof({allocationType}";
                 visitor.AddAllocatedArray(varName);
 
                 // each string is has fixed buffer size
-                if (simpleType == "string") codeLine += Converter.GetStringBufferSize();
+                if (simpleType == "string") codeLine += Helper.GetStringBufferSize();
                 codeLine += "));";
 
                 // add generated code line to list of code lines

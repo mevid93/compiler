@@ -81,7 +81,7 @@ namespace MipaCompiler.Node
             visitor.SetLatestTmpVariableName(name);
 
             // generate code line
-            string codeLine = $"char {name}[256] = \"{value}\";";
+            string codeLine = $"char * {name} = \"{value}\";";
             visitor.AddCodeLine(codeLine);
         }
     }

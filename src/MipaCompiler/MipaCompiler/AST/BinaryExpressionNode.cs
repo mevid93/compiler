@@ -216,8 +216,8 @@ namespace MipaCompiler.Node
             {
                 string type = "double";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "real", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} - {prefixRhs}{rhsTmp};");
             }
             // integer case
@@ -225,8 +225,8 @@ namespace MipaCompiler.Node
             {
                 string type = "int";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "integer", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} - {prefixRhs}{rhsTmp};");
             }
         }
@@ -246,8 +246,8 @@ namespace MipaCompiler.Node
             {
                 string type = "double";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "real", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} * {prefixRhs}{rhsTmp};");
             }
             // integer case
@@ -255,8 +255,8 @@ namespace MipaCompiler.Node
             {
                 string type = "int";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "integer", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} * {prefixRhs}{rhsTmp};");
             }
         }
@@ -276,8 +276,8 @@ namespace MipaCompiler.Node
             {
                 string type = "double";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "real", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} / {prefixRhs}{rhsTmp};");
             }
             // integer case
@@ -285,8 +285,8 @@ namespace MipaCompiler.Node
             {
                 string type = "int";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "integer", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} / {prefixRhs}{rhsTmp};");
             }
         }
@@ -306,8 +306,8 @@ namespace MipaCompiler.Node
             {
                 string type = "double";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "real", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} + {prefixRhs}{rhsTmp};");
             }
             // integer case
@@ -315,8 +315,8 @@ namespace MipaCompiler.Node
             {
                 string type = "int";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "integer", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} + {prefixRhs}{rhsTmp};");
             }
             // string case
@@ -324,11 +324,11 @@ namespace MipaCompiler.Node
             {
                 string type = "char *";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "string", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("string", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("string", rhsIsPointer);
-                visitor.AddCodeLine($"{type} {tmpName}[256]");
-                visitor.AddCodeLine($"strcpy({tmpName}, {prefixLhs}{lhsTmp}");
-                visitor.AddCodeLine($"strcat({tmpName}, {prefixRhs}{rhsTmp}");
+                string prefixLhs = Helper.GetPrefixWhenPointerNeeded("string", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNeeded("string", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = malloc(256 * sizeof(char));");
+                visitor.AddCodeLine($"strcpy({tmpName}, {prefixLhs}{lhsTmp});");
+                visitor.AddCodeLine($"strcat({tmpName}, {prefixRhs}{rhsTmp});");
             }
         }
 
@@ -344,8 +344,8 @@ namespace MipaCompiler.Node
 
             string type = "int";
             symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "integer", null, scope));
-            string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
-            string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
+            string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
+            string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
             visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} % {prefixRhs}{rhsTmp};");
         }
 
@@ -361,8 +361,8 @@ namespace MipaCompiler.Node
 
             string type = "bool";
             symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-            string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
-            string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
+            string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
+            string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
             visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} && {prefixRhs}{rhsTmp};");
         }
 
@@ -378,8 +378,8 @@ namespace MipaCompiler.Node
 
             string type = "bool";
             symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-            string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
-            string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
+            string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
+            string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
             visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} || {prefixRhs}{rhsTmp};");
         }
 
@@ -398,8 +398,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} == {prefixRhs}{rhsTmp};");
             }
             // integer case
@@ -407,8 +407,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} == {prefixRhs}{rhsTmp};");
             }
             // string case
@@ -416,8 +416,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("string", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("string", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNeeded("string", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNeeded("string", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = 0 == strcmp({prefixLhs}{lhsTmp}, {prefixRhs}{rhsTmp});");
             }
             // boolean case
@@ -425,8 +425,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} == {prefixRhs}{rhsTmp};");
             }
         }
@@ -446,8 +446,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} != {prefixRhs}{rhsTmp};");
             }
             // integer case
@@ -455,8 +455,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} != {prefixRhs}{rhsTmp};");
             }
             // string case
@@ -464,8 +464,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("string", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("string", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNeeded("string", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNeeded("string", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = 0 != strcmp({prefixLhs}{lhsTmp}, {prefixRhs}{rhsTmp});");
             }
             // boolean case
@@ -473,8 +473,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} != {prefixRhs}{rhsTmp};");
             }
         }
@@ -494,8 +494,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} < {prefixRhs}{rhsTmp};");
             }
             // integer case
@@ -503,8 +503,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} < {prefixRhs}{rhsTmp};");
             }
             // string case
@@ -512,8 +512,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("string", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("string", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNeeded("string", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNeeded("string", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = 0 > strcmp({prefixLhs}{lhsTmp}, {prefixRhs}{rhsTmp});");
             }
             // boolean case
@@ -521,8 +521,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} < {prefixRhs}{rhsTmp};");
             }
         }
@@ -542,8 +542,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} <= {prefixRhs}{rhsTmp};");
             }
             // integer case
@@ -551,8 +551,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} <= {prefixRhs}{rhsTmp};");
             }
             // string case
@@ -560,8 +560,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("string", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("string", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNeeded("string", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNeeded("string", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = 0 >= strcmp({prefixLhs}{lhsTmp}, {prefixRhs}{rhsTmp});");
             }
             // boolean case
@@ -569,8 +569,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} <= {prefixRhs}{rhsTmp};");
             }
         }
@@ -590,8 +590,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} > {prefixRhs}{rhsTmp};");
             }
             // integer case
@@ -599,8 +599,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} > {prefixRhs}{rhsTmp};");
             }
             // string case
@@ -608,8 +608,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("string", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("string", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNeeded("string", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNeeded("string", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = 0 < strcmp({prefixLhs}{lhsTmp}, {prefixRhs}{rhsTmp});");
             }
             // boolean case
@@ -617,8 +617,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} > {prefixRhs}{rhsTmp};");
             }
         }
@@ -639,8 +639,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} >= {prefixRhs}{rhsTmp};");
             }
             // integer case
@@ -648,8 +648,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} >= {prefixRhs}{rhsTmp};");
             }
             // string case
@@ -657,8 +657,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("string", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("string", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNeeded("string", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNeeded("string", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = 0 <= strcmp({prefixLhs}{lhsTmp}, {prefixRhs}{rhsTmp});");
             }
             // boolean case
@@ -666,8 +666,8 @@ namespace MipaCompiler.Node
             {
                 string type = "bool";
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
-                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
-                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
+                string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
+                string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} >= {prefixRhs}{rhsTmp};");
             }
         }

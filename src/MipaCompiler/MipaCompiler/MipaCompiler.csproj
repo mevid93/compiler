@@ -65,7 +65,7 @@
     <Compile Include="AST\VariableDclNode.cs" />
     <Compile Include="AST\VariableNode.cs" />
     <Compile Include="AST\WhileNode.cs" />
-    <Compile Include="BackEnd\Converter.cs" />
+    <Compile Include="BackEnd\Helper.cs" />
     <Compile Include="FrontEnd\Parser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

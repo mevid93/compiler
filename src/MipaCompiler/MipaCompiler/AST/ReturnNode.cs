@@ -1,4 +1,5 @@
-﻿using MipaCompiler.Symbol;
+﻿using MipaCompiler.BackEnd;
+using MipaCompiler.Symbol;
 using System;
 
 namespace MipaCompiler.Node
@@ -62,6 +63,9 @@ namespace MipaCompiler.Node
             // check if return does not return a value
             if (expression == null)
             {
+                // free strings that have been allocated
+                Helper.FreeAllocatedStrings(visitor, true);
+
                 // generate code that does not return a value
                 visitor.AddCodeLine("return;");
                 return;
@@ -74,8 +78,8 @@ namespace MipaCompiler.Node
             // where the last variable should be returned --> retrieve it
             string lastTmp = visitor.GetLatestUsedTmpVariable();
 
-            // free arrays that are allocated
-            visitor.FreeArrays(-1, lastTmp);
+            // free allocated string before return statement (avoid memory leaks)
+            Helper.FreeAllocatedStrings(visitor, true, lastTmp);
 
             // generate code that returns a value
             visitor.AddCodeLine($"return {lastTmp};");

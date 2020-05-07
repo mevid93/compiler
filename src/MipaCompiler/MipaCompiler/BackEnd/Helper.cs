@@ -1,13 +1,15 @@
-﻿using System;
+﻿using MipaCompiler.Symbol;
+using System;
+using System.Collections.Generic;
 
 namespace MipaCompiler.BackEnd
 {
     /// <summary>
-    /// Class <c>Converter</c> contains static methods that can be used to convert some of the
+    /// Class <c>Helper</c> contains static methods that can be used to convert some of the
     /// simple values, types or expressions to equivalent C-code. Its purpose is to reduce the
     /// amount of duplicate code in different AST nodes.
     /// </summary>
-    public class Converter
+    public class Helper
     {
         // Mini-Pascal type defnitions
         const string STR_BOOLEAN = "boolean";
@@ -120,7 +122,7 @@ namespace MipaCompiler.BackEnd
             switch (variableType)
             {
                 case STR_STRING:
-                    return "&";
+                    return "";
                 case STR_REAL:
                     return "&";
                 case STR_INTEGER:
@@ -243,6 +245,55 @@ namespace MipaCompiler.BackEnd
                     return "bool";
                 default:
                     throw new Exception("Unexpected error: Invalid Mini-Pascal malloc type!");
+            }
+        }
+
+        /// <summary>
+        /// Method <c>FreeStrings</c> frees all strings before return statement.
+        /// Second parameter is optional and meant for strings that are returned
+        /// and should not be freed. String that is skipped, is removed from the
+        /// list of allocated strings.
+        /// </summary>
+        /// <param name="visitor">visitor object</param>
+        /// <param name="skipString">string that should not be freed (optional)</param>
+        public static void FreeAllocatedStrings(Visitor visitor, bool freeBeforeReturn, string skipString = null)
+        {
+            // get list of allocated strings
+            List<string> allocatedStrings = visitor.GetAllocatedStrings();
+
+            // get symbol table
+            SymbolTable symTable = visitor.GetSymbolTable();
+
+            // get scope level that is one below current level
+            int thresholdScope = symTable.GetCurrentScope() - 1;
+
+            // free and remove all strings from list that are above threshold scope.
+            // if freeBeforeReturn is true --> then free also other strings,
+            // but do not remove those from the list of allocated strings
+            for (int i = allocatedStrings.Count - 1; i >= 0; i--)
+            {
+                VariableSymbol varSymbol = symTable.GetVariableSymbolByIdentifier(allocatedStrings[i]);
+
+                // remove skipped string from list of allocated strings
+                if (skipString != null && skipString.Equals(allocatedStrings[i]))
+                {
+                    allocatedStrings.Remove(allocatedStrings[i]);
+                    continue;
+                }
+
+                // free and remove strings from list that are above threshold
+                if (varSymbol.GetCurrentScope() > thresholdScope)
+                {
+                    visitor.AddCodeLine($"free({allocatedStrings[i]});");
+                    allocatedStrings.Remove(allocatedStrings[i]);
+                    continue;
+                }
+
+                // free strings below threshold but do not remove them (only is freeBeforeReturn)
+                if (freeBeforeReturn)
+                {
+                    visitor.AddCodeLine($"free({allocatedStrings[i]});");
+                }
             }
         }
     }

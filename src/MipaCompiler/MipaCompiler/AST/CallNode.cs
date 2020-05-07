@@ -202,7 +202,7 @@ namespace MipaCompiler.Node
             VariableSymbol varSymbol = symTable.GetVariableSymbolByIdentifier(varName);
             bool isPointer = varSymbol.IsPointer();
 
-            string prefix = Converter.GetPrefixWhenPointerNeeded(varType, isPointer);
+            string prefix = Helper.GetPrefixWhenPointerNeeded(varType, isPointer);
             return $"{prefix}{varName}";
         }
 
@@ -358,7 +358,7 @@ namespace MipaCompiler.Node
 
                 // get proper prefix for argument
                 bool isPointer = symTable.GetVariableSymbolByIdentifier(lastTmp).IsPointer();
-                string prefix = Converter.GetPrefixWhenPointerNeeded(evaluatedType, isPointer);
+                string prefix = Helper.GetPrefixWhenPointerNeeded(evaluatedType, isPointer);
 
                 // add code
                 code += $"{prefix}{lastTmp}";
@@ -391,7 +391,7 @@ namespace MipaCompiler.Node
 
             string retType = fs.GetReturnType();
 
-            return Converter.ConvertReturnTypeToC(retType);
+            return Helper.ConvertReturnTypeToC(retType);
         }
 
     }

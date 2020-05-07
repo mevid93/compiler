@@ -125,7 +125,7 @@ namespace MipaCompiler.Node
 
             // check if assigned variable is pointer
             bool isPointer = symTable.GetVariableSymbolByIdentifier(tmpLast).IsPointer();
-            string prefix = Converter.GetPrefixWhenPointerNotNeeded("boolean", isPointer);
+            string prefix = Helper.GetPrefixWhenPointerNotNeeded("boolean", isPointer);
 
             // create new tmp variable for not operator
             string line = $"bool tmp_{number} = !{prefix}{tmpLast};";

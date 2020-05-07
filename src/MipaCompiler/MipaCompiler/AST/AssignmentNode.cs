@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MipaCompiler.Symbol;
+using System;
 
 namespace MipaCompiler.Node
 {
@@ -99,8 +100,20 @@ namespace MipaCompiler.Node
                 }
             }
 
-            // define the new code line
-            string line = $"{prefix}var_{identifier} = {prefix2}{temp};";
+            // check the type of variable
+            VariableSymbol varSymbol = visitor.GetSymbolTable().GetVariableSymbolByIdentifier($"var_{identifier}");
+
+            string line = "";
+
+            // string assignment is done with strcpy
+            if (varSymbol.GetSymbolType().Equals("string"))
+            {
+                line = $"strcpy(var_{identifier}, {temp});";
+            }
+            else
+            {
+                line = $"{prefix}var_{identifier} = {prefix2}{temp};";
+            }
 
             // add new code line to list of generated code lines
             visitor.AddCodeLine(line);
