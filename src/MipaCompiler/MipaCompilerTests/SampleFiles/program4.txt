@@ -1,22 +1,44 @@
-program Variables; 
-begin
-	{* Declare variables *}
-    var myInteger : integer;
-	var myReal: real;
-	var myBoolean: boolean;
-	var myString: string;
-	var integerArray : array [2] of integer;
-	var realArray : array [2] of real;
-	var booleanArray : array [2] of boolean;
-	var stringArray: array [2] of string;
+program Integers;
 
-	{* Add values to variables *}
-	myInteger := 99;
-	myReal := -123.23e+23;
-	myBoolean := false;
-	myString := "Bugs everywhere";
-	integerArray[0] := myInteger;
-	realArray[1] := myReal;
-	booleanArray[0] := myBoolean;
-	stringArray[1] := myString;
+function square (value : integer) : integer; 
+begin
+    var i: integer;
+	i := value * value;
+    return i; 
+end;
+
+procedure increase(value: integer);
+begin
+    value := value + 1;
+end;
+
+begin
+	{* Declare integers *}
+    var myInteger1 : integer;
+	var myInteger2: integer;
+
+	{* Insert values *}
+	myInteger1 := 100;
+	read(myInteger2);
+
+	{* Do basic math *}
+	var sum, sub, mul, mod : integer;
+	var div : real;
+	sum := myInteger1 + myInteger2;
+	sub := myInteger1 - myInteger2;
+	mul := myInteger1 * myInteger2;
+	div := myInteger1 / myInteger2;
+	mod := myInteger1 % myInteger2;
+
+	{* comparison *}
+	var comparison : boolean;
+	comparison := myInteger1 = myInteger2;
+	comparison := myInteger1 <> myInteger2;
+	comparison := myInteger1 < myInteger2;
+	comparison := myInteger1 > myInteger2;
+	comparison := myInteger1 <= myInteger2;
+	comparison := myInteger1 >= myInteger2;
+
+	{* print function *}
+	writeln(sum);
 end.

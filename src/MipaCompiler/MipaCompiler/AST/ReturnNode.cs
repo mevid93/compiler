@@ -74,6 +74,9 @@ namespace MipaCompiler.Node
             // where the last variable should be returned --> retrieve it
             string lastTmp = visitor.GetLatestUsedTmpVariable();
 
+            // free arrays that are allocated
+            visitor.FreeArrays(-1, lastTmp);
+
             // generate code that returns a value
             visitor.AddCodeLine($"return {lastTmp};");
         }

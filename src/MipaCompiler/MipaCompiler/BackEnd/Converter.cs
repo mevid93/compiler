@@ -141,6 +141,41 @@ namespace MipaCompiler.BackEnd
         }
 
         /// <summary>
+        /// Static method <c>GetPrefixWhenPointerNotNeeded</c> returns C-language prefix for variable
+        /// when pointer is not needed. Method checks the variable type and pointer information,
+        /// and returns a prefix, so that the prefix + variable name is not a pointer.
+        /// </summary>
+        /// <param name="variableType">type of the variable</param>
+        /// <param name="isPointer">is pointer</param>
+        /// <returns>prefix for variable name</returns>
+        public static string GetPrefixWhenPointerNotNeeded(string variableType, bool isPointer)
+        {
+            if (isPointer) return "*";
+
+            switch (variableType)
+            {
+                case STR_STRING:
+                    return "";
+                case STR_REAL:
+                    return "";
+                case STR_INTEGER:
+                    return "";
+                case STR_BOOLEAN:
+                    return "";
+                case STR_ARRAY_STRING:
+                    return "";
+                case STR_ARRAY_REAL:
+                    return "";
+                case STR_ARRAY_INTEGER:
+                    return "";
+                case STR_ARRAY_BOOLEAN:
+                    return "";
+                default:
+                    throw new Exception("Unexpected error: Invalid Mini-Pascal type!");
+            }
+        }
+
+        /// <summary>
         /// Method <c>ConvertDeclarationTypeToC</c> converts Mini-Pascal variable declaration
         /// type into equivalent C-language type.
         /// </summary>

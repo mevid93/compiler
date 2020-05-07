@@ -83,6 +83,9 @@ namespace MipaCompiler.Node
                 statement.GenerateCode(visitor);
             }
 
+            // free allocated arrays
+            visitor.FreeArrays(symTable.GetCurrentScope() - 1);
+
             // if block is main function --> should return 0
             if (main) visitor.AddCodeLine("return 0;");
 

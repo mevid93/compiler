@@ -16,6 +16,7 @@ namespace MipaCompiler
         private string latestTmpVariable;           // latest tmp variable name used
         private int tmpVariableCounter;             // counter for tmp variable
         private bool isMainBlock;                   // is current block main function
+        private List<string> arrays;                // list of arrays that are allocated and need to be freed
 
         /// <summary>
         /// Constructor <c>Visitor</c> creates new Visitor-object.
@@ -24,6 +25,7 @@ namespace MipaCompiler
         {
             codeLines = new List<string>();
             symbolTable = new SymbolTable();
+            arrays = new List<string>();
         }
 
         /// <summary>
@@ -140,5 +142,47 @@ namespace MipaCompiler
             this.isMainBlock = isMainBlock;
         }
 
+        /// <summary>
+        /// Method <c>GetAllocatedArrays</c> returns list of allocated arrays that need to
+        /// be freed.
+        /// </summary>
+        /// <returns>list of allocated arrays</returns>
+        public List<string> GetAllocatedArrays()
+        {
+            return arrays;
+        }
+
+        /// <summary>
+        /// Method <c>AddAllocatedArray</c> inserts new array name to list of allocated arrays.
+        /// </summary>
+        /// <param name="array">name of new array</param>
+        public void AddAllocatedArray(string array)
+        {
+            arrays.Add(array);
+        }
+
+        /// <summary>
+        /// Method <c>FreeArrays</c> frees arrays that are above threshold value. If
+        /// second parameter is given, that array is not freed.
+        /// </summary>
+        /// <param name="thresholdScope">threshold scope value</param>
+        /// <param name="arrayToSkip">array that should not be freed</param>
+        public void FreeArrays(int thresholdScope, string arrayToSkip = null)
+        {
+            for(int i = arrays.Count - 1; i >= 0; i--)
+            {
+                VariableSymbol varSymbol = symbolTable.GetVariableSymbolByIdentifier(arrays[i]);
+                if (varSymbol.GetCurrentScope() <= thresholdScope) continue;
+                
+
+                if(arrayToSkip != null && arrayToSkip.Equals(arrays[i]))
+                {
+                    arrays.Remove(arrays[i]);
+                    continue;
+                }
+
+                AddCodeLine($"free({arrays[i]});");
+            }
+        }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace MipaCompiler.Node
 {
@@ -70,6 +69,8 @@ namespace MipaCompiler.Node
             if (expression != null) expression.PrettyPrint();
         }
 
+        ////////////////// EVERYTHING AFTER THIS IS FOR CODE GENERATION /////////////////////
+
         public void GenerateCode(Visitor visitor)
         {
             // avaluate expression
@@ -77,6 +78,8 @@ namespace MipaCompiler.Node
 
             // get latest temp variable
             string temp = visitor.GetLatestUsedTmpVariable();
+
+            //foreach (string linec in visitor.GetCodeLines()) Console.WriteLine(linec);
 
             // check if variable that is assigned a value is parameter
             string prefix = "";
@@ -87,10 +90,12 @@ namespace MipaCompiler.Node
 
             // check if assigned value is pointer
             string prefix2 = "";
-            //foreach (string linec in visitor.GetCodeLines()) Console.WriteLine(linec);
-            if (visitor.GetSymbolTable().GetVariableSymbolByIdentifier(temp).IsPointer())
+            if (!temp.Equals("false") && !temp.Equals("true"))
             {
-                prefix2 = "*";
+                if (visitor.GetSymbolTable().GetVariableSymbolByIdentifier(temp).IsPointer())
+                {
+                    prefix2 = "*";
+                }
             }
 
             // define the new code line

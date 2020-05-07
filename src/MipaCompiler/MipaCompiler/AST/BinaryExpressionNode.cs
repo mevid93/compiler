@@ -85,6 +85,8 @@ namespace MipaCompiler.Node
             if (rhs != null) rhs.PrettyPrint();
         }
 
+        ////////////////// EVERYTHING AFTER THIS IS FOR CODE GENERATION /////////////////////
+
         public void GenerateCode(Visitor visitor)
         {
             // generate code for left hand side
@@ -111,116 +113,64 @@ namespace MipaCompiler.Node
             GenerateCodeForBinaryExpression(tmpName, lhsTmp, rhsTmp, visitor);
         }
 
+        /// <summary>
+        /// Method <c>GenerateCodeForBinaryExpression</c> generates the code line for binary operation.
+        /// </summary>
         private void GenerateCodeForBinaryExpression(string tmpName, string lhsTmp, string rhsTmp, Visitor visitor)
         {
-            // get symbol table
-            SymbolTable symTable = visitor.GetSymbolTable();
-
-            // variable to hold generated code line
-            string codeLine = "";
 
             // evaluate type of left hand side
             string typeLhs = SemanticAnalyzer.EvaluateTypeOfNode(lhs, visitor.GetSymbolTable());
             // evaluate type of right hand side
             string typeRhs = SemanticAnalyzer.EvaluateTypeOfNode(rhs, visitor.GetSymbolTable());
 
-            // check if tmp variables are pointers
-            bool lhsIsPointer = symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer();
-            bool rhsIsPointer = symTable.GetVariableSymbolByIdentifier(rhsTmp).IsPointer();
-
-            string numericLhsPrefix = lhsIsPointer ? "*" : "";
-            string numericRhsPrefix = rhsIsPointer ? "*" : "";
-
-            // variable symbol that holds then new tmp variable
-            VariableSymbol varSymbol = null;
-
             // check the binary operation and generate code line for it
             switch (value)
             {
                 case "-":
+                    GenerateCodeForSubstractionOperation(tmpName, lhsTmp, rhsTmp, typeLhs, typeRhs, visitor);
+                    break;
                 case "*":
+                    GenerateCodeForMultiplicationOperation(tmpName, lhsTmp, rhsTmp, typeLhs, typeRhs, visitor);
+                    break;
                 case "/":
-                    string type = "int";
-                    if (typeLhs.Equals("real") || typeRhs.Equals("real")) type = "double";
-                    codeLine = $"{type} {tmpName} = {numericLhsPrefix}{lhsTmp} {value} {numericRhsPrefix}{rhsTmp};";
-                    if (type == "double")
-                    {
-                        varSymbol = new VariableSymbol(tmpName, "real", null, symTable.GetCurrentScope());
-                    }
-                    else
-                    {
-                        varSymbol = new VariableSymbol(tmpName, "integer", null, symTable.GetCurrentScope());
-                    }
+                    GenerateCodeForDivisionOperation(tmpName, lhsTmp, rhsTmp, typeLhs, typeRhs, visitor);
                     break;
                 case "+":
-                    if(typeLhs.Equals("real") || typeLhs.Equals("integer"))
-                    {
-                        type = "int";
-                        if (typeLhs.Equals("real") || typeRhs.Equals("real")) type = "double";
-                        codeLine = $"{type} {tmpName} = {numericLhsPrefix}{lhsTmp} {value} {numericRhsPrefix}{rhsTmp};";
-                        if (type == "double")
-                        {
-                            varSymbol = new VariableSymbol(tmpName, "real", null, symTable.GetCurrentScope());
-                        }
-                        else
-                        {
-                            varSymbol = new VariableSymbol(tmpName, "integer", null, symTable.GetCurrentScope());
-                        }
-                    }
-                    else if (typeLhs.Equals("string"))
-                    {
-
-                    }
-                    break;
-                case "and":
-                case "or":
-                    // boolean
+                    GenerateCodeForAdditionOperation(tmpName, lhsTmp, rhsTmp, typeLhs, typeRhs, visitor);
                     break;
                 case "%":
-                    // integer
+                    GenerateCodeForModuloOperation(tmpName, lhsTmp, rhsTmp, typeLhs, typeRhs, visitor);
+                    break;
+                case "and":
+                    GenerateCodeForLogicalAndOperation(tmpName, lhsTmp, rhsTmp, typeLhs, typeRhs, visitor);
+                    break;
+                case "or":
+                    GenerateCodeForLogicalOrOperation(tmpName, lhsTmp, rhsTmp, typeLhs, typeRhs, visitor);
                     break;
                 case "=":
-                    if (typeLhs.Equals("boolean") || typeLhs.Equals("integer") || typeRhs.Equals("real"))
-                    {
-                        codeLine = $"bool {tmpName} = {numericLhsPrefix}{lhsTmp} == {numericRhsPrefix}{rhsTmp};";
-                        varSymbol = new VariableSymbol(tmpName, "boolean", null, symTable.GetCurrentScope());
-                    }
-                    // integer, real, boolean, string, arrays
+                    GenerateCodeForEqualOperation(tmpName, lhsTmp, rhsTmp, typeLhs, typeRhs, visitor);
                     break;
                 case "<>":
-                    if(typeLhs.Equals("boolean") ||typeLhs.Equals("integer") || typeRhs.Equals("real"))
-                    {
-                        codeLine = $"bool {tmpName} = {numericLhsPrefix}{lhsTmp} != {numericRhsPrefix}{rhsTmp};";
-                        varSymbol = new VariableSymbol(tmpName, "boolean", null, symTable.GetCurrentScope());
-                    }
-                    // integer, real, boolean, string, arrays
+                    GenerateCodeForNotEqualOperation(tmpName, lhsTmp, rhsTmp, typeLhs, typeRhs, visitor);
                     break;
                 case "<":
-                    if (typeLhs.Equals("boolean") || typeLhs.Equals("integer") || typeRhs.Equals("real"))
-                    {
-                        codeLine = $"bool {tmpName} = {numericLhsPrefix}{lhsTmp} < {numericRhsPrefix}{rhsTmp};";
-                        varSymbol = new VariableSymbol(tmpName, "boolean", null, symTable.GetCurrentScope());
-                    }
-                    // integer, real, boolean, string, arrays
+                    GenerateCodeForLessThanOperation(tmpName, lhsTmp, rhsTmp, typeLhs, typeRhs, visitor);
                     break;
                 case "<=":
-                    if (typeLhs.Equals("boolean") || typeLhs.Equals("integer") || typeRhs.Equals("real"))
-                    {
-                        codeLine = $"bool {tmpName} = {numericLhsPrefix}{lhsTmp} <= {numericRhsPrefix}{rhsTmp};";
-                        varSymbol = new VariableSymbol(tmpName, "boolean", null, symTable.GetCurrentScope());
-                    }
-                    // integer, real, boolean, string, arrays
+                    GenerateCodeForLessThanOrEqualOperation(tmpName, lhsTmp, rhsTmp, typeLhs, typeRhs, visitor);
                     break;
                 case ">":
-                    if (typeLhs.Equals("boolean") || typeLhs.Equals("integer") || typeRhs.Equals("real"))
-                    {
-                        codeLine = $"bool {tmpName} = {numericLhsPrefix}{lhsTmp} > {numericRhsPrefix}{rhsTmp};";
-                        varSymbol = new VariableSymbol(tmpName, "boolean", null, symTable.GetCurrentScope());
-                    }
-                    // integer, real, boolean, string, arrays
+                    GenerateCodeForLargerThanOperation(tmpName, lhsTmp, rhsTmp, typeLhs, typeRhs, visitor);
                     break;
                 case ">=":
+                    GenerateCodeForLargerThanOrEqualOperation(tmpName, lhsTmp, rhsTmp, typeLhs, typeRhs, visitor);
                     break;
+                case "[]":
+                default:
+                    throw new Exception("Unexpected exception: Invalid binary operation!");
+            }
+            /*
                 case "[]":
 
                     string simpleType = GetSimpleTypeFromArrayType(typeLhs);
@@ -228,11 +178,11 @@ namespace MipaCompiler.Node
 
                     string prefix = "&";
                     // if array is pointer --> no prefix
-                    if (symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer()) prefix = "";
+                    //if (symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer()) prefix = "";
 
-                    codeLine = $"{cType} *{tmpName} = ({cType} *) {prefix}{lhsTmp} + {rhsTmp};";
+                    codeLine = $"{cType} *{tmpName} = {prefix}{lhsTmp}[{rhsTmp}];";
                     varSymbol = new VariableSymbol(tmpName, cType, null, symTable.GetCurrentScope(), true);
-                    
+
                     /*
                     lhs.GenerateCode(visitor);
                     string type = SemanticAnalyzer.EvaluateTypeOfNode(lhs, visitor.GetSymbolTable());
@@ -246,30 +196,480 @@ namespace MipaCompiler.Node
                     newTmpVariable = "tmp_" + counter;
                     visitor.SetLatestTmpVariableName(newTmpVariable);
                     line = $"{cType} {newTmpVariable} = {lhsTmp}[{rhsTmp}];";
-                    */
 
-                    break;
-                default:
-                    throw new Exception("Unexpected exception... Invalid binary operation!");
             }
-
-            // declare new variable symbol
-            symTable.DeclareVariableSymbol(varSymbol);
-
-            // add generated code line to list of code lines
-            visitor.AddCodeLine(codeLine);
+*/
         }
 
         /// <summary>
-        /// Method <c>GetSimpleTypeFromArrayType</c> extracts simple type from array type.
+        /// Method <c>GenerateCodeForSubstractionOperation</c> generates code for substraction operation.
         /// </summary>
-        private string GetSimpleTypeFromArrayType(string type)
+        private void GenerateCodeForSubstractionOperation(string tmpName, string lhsTmp, string rhsTmp, string lhsType, string rhsType, Visitor visitor)
         {
-            if (type.Contains("integer")) return "integer";
-            if (type.Contains("string")) return "string";
-            if (type.Contains("boolean")) return "boolean";
-            if (type.Contains("real")) return "real";
-            throw new Exception("Unexpected exception... Invalid array type!");
+            SymbolTable symTable = visitor.GetSymbolTable();
+            int scope = visitor.GetSymbolTable().GetCurrentScope();
+            bool lhsIsPointer = symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer();
+            bool rhsIsPointer = symTable.GetVariableSymbolByIdentifier(rhsTmp).IsPointer();
+
+            // real case
+            if (lhsType.Equals("real") || rhsType.Equals("real"))
+            {
+                string type = "double";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "real", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} - {prefixRhs}{rhsTmp};");
+            }
+            // integer case
+            else if (lhsType.Equals("integer") || rhsType.Equals("integer"))
+            {
+                string type = "int";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "integer", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} - {prefixRhs}{rhsTmp};");
+            }
+        }
+
+        /// <summary>
+        /// Method <c>GenerateCodeForMultiplicationOperation</c> generates code for multiplication operation.
+        /// </summary>
+        private void GenerateCodeForMultiplicationOperation(string tmpName, string lhsTmp, string rhsTmp, string lhsType, string rhsType, Visitor visitor)
+        {
+            SymbolTable symTable = visitor.GetSymbolTable();
+            int scope = visitor.GetSymbolTable().GetCurrentScope();
+            bool lhsIsPointer = symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer();
+            bool rhsIsPointer = symTable.GetVariableSymbolByIdentifier(rhsTmp).IsPointer();
+
+            // real case
+            if (lhsType.Equals("real") || rhsType.Equals("real"))
+            {
+                string type = "double";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "real", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} * {prefixRhs}{rhsTmp};");
+            }
+            // integer case
+            else if (lhsType.Equals("integer") || rhsType.Equals("integer"))
+            {
+                string type = "int";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "integer", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} * {prefixRhs}{rhsTmp};");
+            }
+        }
+
+        /// <summary>
+        /// Method <c>GenerateCodeForDivisionOperation</c> generates code for division operation.
+        /// </summary>
+        private void GenerateCodeForDivisionOperation(string tmpName, string lhsTmp, string rhsTmp, string lhsType, string rhsType, Visitor visitor)
+        {
+            SymbolTable symTable = visitor.GetSymbolTable();
+            int scope = visitor.GetSymbolTable().GetCurrentScope();
+            bool lhsIsPointer = symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer();
+            bool rhsIsPointer = symTable.GetVariableSymbolByIdentifier(rhsTmp).IsPointer();
+
+            // real case
+            if (lhsType.Equals("real") || rhsType.Equals("real"))
+            {
+                string type = "double";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "real", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} / {prefixRhs}{rhsTmp};");
+            }
+            // integer case
+            else if (lhsType.Equals("integer") || rhsType.Equals("integer"))
+            {
+                string type = "int";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "integer", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} / {prefixRhs}{rhsTmp};");
+            }
+        }
+
+        /// <summary>
+        /// Method <c>GenerateCodeForAdditionOperation</c> generates code for addition operation.
+        /// </summary>
+        private void GenerateCodeForAdditionOperation(string tmpName, string lhsTmp, string rhsTmp, string lhsType, string rhsType, Visitor visitor)
+        {
+            SymbolTable symTable = visitor.GetSymbolTable();
+            int scope = visitor.GetSymbolTable().GetCurrentScope();
+            bool lhsIsPointer = symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer();
+            bool rhsIsPointer = symTable.GetVariableSymbolByIdentifier(rhsTmp).IsPointer();
+
+            // real case
+            if (lhsType.Equals("real") || rhsType.Equals("real"))
+            {
+                string type = "double";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "real", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} + {prefixRhs}{rhsTmp};");
+            }
+            // integer case
+            else if (lhsType.Equals("integer") || rhsType.Equals("integer"))
+            {
+                string type = "int";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "integer", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} + {prefixRhs}{rhsTmp};");
+            }
+            // string case
+            else if(lhsType.Equals("string") || rhsType.Equals("string"))
+            {
+                string type = "char *";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "string", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("string", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("string", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName}[256]");
+                visitor.AddCodeLine($"strcpy({tmpName}, {prefixLhs}{lhsTmp}");
+                visitor.AddCodeLine($"strcat({tmpName}, {prefixRhs}{rhsTmp}");
+            }
+        }
+
+        /// <summary>
+        /// Method <c>GenerateCodeForModuloOperation</c> generates code for modulo operation.
+        /// </summary>
+        private void GenerateCodeForModuloOperation(string tmpName, string lhsTmp, string rhsTmp, string lhsType, string rhsType, Visitor visitor)
+        {
+            SymbolTable symTable = visitor.GetSymbolTable();
+            int scope = visitor.GetSymbolTable().GetCurrentScope();
+            bool lhsIsPointer = symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer();
+            bool rhsIsPointer = symTable.GetVariableSymbolByIdentifier(rhsTmp).IsPointer();
+
+            string type = "int";
+            symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "integer", null, scope));
+            string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
+            string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
+            visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} % {prefixRhs}{rhsTmp};");
+        }
+
+        /// <summary>
+        /// Method <c>GenerateCodeForLogicalAndOperation</c> generates code for logical AND operation.
+        /// </summary>
+        private void GenerateCodeForLogicalAndOperation(string tmpName, string lhsTmp, string rhsTmp, string lhsType, string rhsType, Visitor visitor)
+        {
+            SymbolTable symTable = visitor.GetSymbolTable();
+            int scope = visitor.GetSymbolTable().GetCurrentScope();
+            bool lhsIsPointer = symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer();
+            bool rhsIsPointer = symTable.GetVariableSymbolByIdentifier(rhsTmp).IsPointer();
+
+            string type = "bool";
+            symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+            string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
+            string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
+            visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} && {prefixRhs}{rhsTmp};");
+        }
+
+        /// <summary>
+        /// Method <c>GenerateCodeForLogicalOrOperation</c> generates code for logical OR operation.
+        /// </summary>
+        private void GenerateCodeForLogicalOrOperation(string tmpName, string lhsTmp, string rhsTmp, string lhsType, string rhsType, Visitor visitor)
+        {
+            SymbolTable symTable = visitor.GetSymbolTable();
+            int scope = visitor.GetSymbolTable().GetCurrentScope();
+            bool lhsIsPointer = symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer();
+            bool rhsIsPointer = symTable.GetVariableSymbolByIdentifier(rhsTmp).IsPointer();
+
+            string type = "bool";
+            symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+            string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
+            string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
+            visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} || {prefixRhs}{rhsTmp};");
+        }
+
+        /// <summary>
+        /// Method <c>GenerateCodeForEqualOperation</c> generates code for equal operation.
+        /// </summary>
+        private void GenerateCodeForEqualOperation(string tmpName, string lhsTmp, string rhsTmp, string lhsType, string rhsType, Visitor visitor)
+        {
+            SymbolTable symTable = visitor.GetSymbolTable();
+            int scope = visitor.GetSymbolTable().GetCurrentScope();
+            bool lhsIsPointer = symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer();
+            bool rhsIsPointer = symTable.GetVariableSymbolByIdentifier(rhsTmp).IsPointer();
+
+            // real case
+            if (lhsType.Equals("real") || rhsType.Equals("real"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} == {prefixRhs}{rhsTmp};");
+            }
+            // integer case
+            else if (lhsType.Equals("integer") || rhsType.Equals("integer"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} == {prefixRhs}{rhsTmp};");
+            }
+            // string case
+            else if (lhsType.Equals("string") || rhsType.Equals("string"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("string", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("string", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = 0 == strcmp({prefixLhs}{lhsTmp}, {prefixRhs}{rhsTmp});");
+            }
+            // boolean case
+            else if (lhsType.Equals("boolean") || rhsType.Equals("boolean"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("boolean", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("boolean", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} == {prefixRhs}{rhsTmp};");
+            }
+        }
+
+        /// <summary>
+        /// Method <c>GenerateCodeForNotEqualOperation</c> generates code for not equal operation.
+        /// </summary>
+        private void GenerateCodeForNotEqualOperation(string tmpName, string lhsTmp, string rhsTmp, string lhsType, string rhsType, Visitor visitor)
+        {
+            SymbolTable symTable = visitor.GetSymbolTable();
+            int scope = visitor.GetSymbolTable().GetCurrentScope();
+            bool lhsIsPointer = symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer();
+            bool rhsIsPointer = symTable.GetVariableSymbolByIdentifier(rhsTmp).IsPointer();
+
+            // real case
+            if (lhsType.Equals("real") || rhsType.Equals("real"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} != {prefixRhs}{rhsTmp};");
+            }
+            // integer case
+            else if (lhsType.Equals("integer") || rhsType.Equals("integer"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} != {prefixRhs}{rhsTmp};");
+            }
+            // string case
+            else if (lhsType.Equals("string") || rhsType.Equals("string"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("string", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("string", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = 0 != strcmp({prefixLhs}{lhsTmp}, {prefixRhs}{rhsTmp});");
+            }
+            // boolean case
+            else if (lhsType.Equals("boolean") || rhsType.Equals("boolean"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("boolean", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("boolean", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} != {prefixRhs}{rhsTmp};");
+            }
+        }
+
+        /// <summary>
+        /// Method <c>GenerateCodeForLessThanOperation</c> generates code for less than operation.
+        /// </summary>
+        private void GenerateCodeForLessThanOperation(string tmpName, string lhsTmp, string rhsTmp, string lhsType, string rhsType, Visitor visitor)
+        {
+            SymbolTable symTable = visitor.GetSymbolTable();
+            int scope = visitor.GetSymbolTable().GetCurrentScope();
+            bool lhsIsPointer = symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer();
+            bool rhsIsPointer = symTable.GetVariableSymbolByIdentifier(rhsTmp).IsPointer();
+
+            // real case
+            if (lhsType.Equals("real") || rhsType.Equals("real"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} < {prefixRhs}{rhsTmp};");
+            }
+            // integer case
+            else if (lhsType.Equals("integer") || rhsType.Equals("integer"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} < {prefixRhs}{rhsTmp};");
+            }
+            // string case
+            else if (lhsType.Equals("string") || rhsType.Equals("string"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("string", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("string", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = 0 > strcmp({prefixLhs}{lhsTmp}, {prefixRhs}{rhsTmp});");
+            }
+            // boolean case
+            else if (lhsType.Equals("boolean") || rhsType.Equals("boolean"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("boolean", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("boolean", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} < {prefixRhs}{rhsTmp};");
+            }
+        }
+
+        /// <summary>
+        /// Method <c>GenerateCodeForLessThanOrEqualOperation</c> generates code for less than or equal operation.
+        /// </summary>
+        private void GenerateCodeForLessThanOrEqualOperation(string tmpName, string lhsTmp, string rhsTmp, string lhsType, string rhsType, Visitor visitor)
+        {
+            SymbolTable symTable = visitor.GetSymbolTable();
+            int scope = visitor.GetSymbolTable().GetCurrentScope();
+            bool lhsIsPointer = symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer();
+            bool rhsIsPointer = symTable.GetVariableSymbolByIdentifier(rhsTmp).IsPointer();
+
+            // real case
+            if (lhsType.Equals("real") || rhsType.Equals("real"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} <= {prefixRhs}{rhsTmp};");
+            }
+            // integer case
+            else if (lhsType.Equals("integer") || rhsType.Equals("integer"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} <= {prefixRhs}{rhsTmp};");
+            }
+            // string case
+            else if (lhsType.Equals("string") || rhsType.Equals("string"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("string", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("string", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = 0 >= strcmp({prefixLhs}{lhsTmp}, {prefixRhs}{rhsTmp});");
+            }
+            // boolean case
+            else if (lhsType.Equals("boolean") || rhsType.Equals("boolean"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("boolean", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("boolean", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} <= {prefixRhs}{rhsTmp};");
+            }
+        }
+
+        /// <summary>
+        /// Method <c>GenerateCodeForLargerThanOperation</c> generates code for larger than operation.
+        /// </summary>
+        private void GenerateCodeForLargerThanOperation(string tmpName, string lhsTmp, string rhsTmp, string lhsType, string rhsType, Visitor visitor)
+        {
+            SymbolTable symTable = visitor.GetSymbolTable();
+            int scope = visitor.GetSymbolTable().GetCurrentScope();
+            bool lhsIsPointer = symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer();
+            bool rhsIsPointer = symTable.GetVariableSymbolByIdentifier(rhsTmp).IsPointer();
+
+            // real case
+            if (lhsType.Equals("real") || rhsType.Equals("real"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} > {prefixRhs}{rhsTmp};");
+            }
+            // integer case
+            else if (lhsType.Equals("integer") || rhsType.Equals("integer"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} > {prefixRhs}{rhsTmp};");
+            }
+            // string case
+            else if (lhsType.Equals("string") || rhsType.Equals("string"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("string", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("string", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = 0 < strcmp({prefixLhs}{lhsTmp}, {prefixRhs}{rhsTmp});");
+            }
+            // boolean case
+            else if (lhsType.Equals("boolean") || rhsType.Equals("boolean"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("boolean", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("boolean", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} > {prefixRhs}{rhsTmp};");
+            }
+        }
+
+        /// <summary>
+        /// Method <c>GenerateCodeForLargerThanOrEqualOperation</c> generates code for larget than or 
+        /// equal operation.
+        /// </summary>
+        private void GenerateCodeForLargerThanOrEqualOperation(string tmpName, string lhsTmp, string rhsTmp, string lhsType, string rhsType, Visitor visitor)
+        {
+            SymbolTable symTable = visitor.GetSymbolTable();
+            int scope = visitor.GetSymbolTable().GetCurrentScope();
+            bool lhsIsPointer = symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer();
+            bool rhsIsPointer = symTable.GetVariableSymbolByIdentifier(rhsTmp).IsPointer();
+
+            // real case
+            if (lhsType.Equals("real") || rhsType.Equals("real"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("real", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("real", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} >= {prefixRhs}{rhsTmp};");
+            }
+            // integer case
+            else if (lhsType.Equals("integer") || rhsType.Equals("integer"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNotNeeded("integer", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNotNeeded("integer", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} >= {prefixRhs}{rhsTmp};");
+            }
+            // string case
+            else if (lhsType.Equals("string") || rhsType.Equals("string"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("string", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("string", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = 0 <= strcmp({prefixLhs}{lhsTmp}, {prefixRhs}{rhsTmp});");
+            }
+            // boolean case
+            else if (lhsType.Equals("boolean") || rhsType.Equals("boolean"))
+            {
+                string type = "bool";
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
+                string prefixLhs = Converter.GetPrefixWhenPointerNeeded("boolean", lhsIsPointer);
+                string prefixRhs = Converter.GetPrefixWhenPointerNeeded("boolean", rhsIsPointer);
+                visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} >= {prefixRhs}{rhsTmp};");
+            }
         }
     }
 }

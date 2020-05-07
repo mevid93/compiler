@@ -30,45 +30,81 @@ namespace MipaCompilerTests.CodeGeneration
             }
 
             // check that code lines exists
-            Assert.AreEqual("#include <stdio.h>", visitor.GetCodeLines()[0]);
-            Assert.AreEqual("", visitor.GetCodeLines()[1]);
-            Assert.AreEqual("typedef int bool;", visitor.GetCodeLines()[2]);
-            Assert.AreEqual("#define true 1", visitor.GetCodeLines()[3]);
-            Assert.AreEqual("#define false 0", visitor.GetCodeLines()[4]);
-            Assert.AreEqual("", visitor.GetCodeLines()[5]);
+            int i = 0;
+            Assert.AreEqual("#include <stdio.h>", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("#include <string.h>", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("#include <stdlib.h>", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("typedef int bool;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("#define true 1", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("#define false 0", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("", visitor.GetCodeLines()[i++]);
 
             string comment = "// here are forward declarations for functions and procedures (if any exists)";
-            Assert.AreEqual(comment, visitor.GetCodeLines()[6]);
-            Assert.AreEqual("", visitor.GetCodeLines()[7]);
+            Assert.AreEqual(comment, visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int function_square(int * var_value);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("void procedure_increase(int * var_value);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("", visitor.GetCodeLines()[i++]);
 
             comment = "// here are the definitions of functions and procedures (if any exists)";
-            Assert.AreEqual(comment, visitor.GetCodeLines()[8]);
+            Assert.AreEqual(comment, visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int function_square(int * var_value)", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("{", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int var_i;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_0 = *var_value * *var_value;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_i = tmp_0;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("return var_i;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("}", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("", visitor.GetCodeLines()[i++]);
 
-            Assert.AreEqual("// here is the main function", visitor.GetCodeLines()[9]);
-            Assert.AreEqual("int main()", visitor.GetCodeLines()[10]);
-            Assert.AreEqual("{", visitor.GetCodeLines()[11]);
-            Assert.AreEqual("int tmp_7 = 2;", visitor.GetCodeLines()[46]);
-            Assert.AreEqual("int var_a[tmp_7];", visitor.GetCodeLines()[47]);
-            Assert.AreEqual("int size_a = tmp_7;", visitor.GetCodeLines()[48]);
-            Assert.AreEqual("int tmp_8 = 0;", visitor.GetCodeLines()[49]);
-            Assert.AreEqual("int tmp_9 = 1;", visitor.GetCodeLines()[50]);
-            Assert.AreEqual("scanf(\"%d %d\", &var_a[tmp_8], &var_a[tmp_9]);", visitor.GetCodeLines()[51]);
-            Assert.AreEqual("int tmp_10 = 0;", visitor.GetCodeLines()[52]);
-            Assert.AreEqual("int *tmp_11 = (int *) &var_a + tmp_10;", visitor.GetCodeLines()[53]);
-            Assert.AreEqual("int tmp_12 = 1;", visitor.GetCodeLines()[54]);
-            Assert.AreEqual("int *tmp_13 = (int *) &var_a + tmp_12;", visitor.GetCodeLines()[55]);
-            Assert.AreEqual("procedure_swap(tmp_11, tmp_13);", visitor.GetCodeLines()[56]);
-            Assert.AreEqual("int tmp_15 = 0;", visitor.GetCodeLines()[57]);
-            Assert.AreEqual("int *tmp_16 = (int *) &var_a + tmp_15;", visitor.GetCodeLines()[58]);
-            Assert.AreEqual("int tmp_17 = 1;", visitor.GetCodeLines()[59]);
-            Assert.AreEqual("int *tmp_18 = (int *) &var_a + tmp_17;", visitor.GetCodeLines()[60]);
-            Assert.AreEqual("printf(\"%d%d\\n\", *tmp_16, *tmp_18);", visitor.GetCodeLines()[61]);
-            Assert.AreEqual("char tmp_19[256] = \"Sum is \";", visitor.GetCodeLines()[62]);
-            Assert.AreEqual("int tmp_20 = function_sum(var_a, &size_a);", visitor.GetCodeLines()[63]);
-            Assert.AreEqual("printf(\"%s%d\\n\", tmp_19, tmp_20);", visitor.GetCodeLines()[64]);
-            Assert.AreEqual("return 0;", visitor.GetCodeLines()[65]);
-            Assert.AreEqual("}", visitor.GetCodeLines()[66]);
-            
+            Assert.AreEqual("void procedure_increase(int * var_value)", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("{", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_1 = 1;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_2 = *var_value + tmp_1;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("*var_value = tmp_2;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("}", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("", visitor.GetCodeLines()[i++]);
+
+            Assert.AreEqual("// here is the main function", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int main()", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("{", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int var_myinteger1;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int var_myinteger2;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_3 = 100;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_myinteger1 = tmp_3;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("scanf(\"%d\", &var_myinteger2);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int var_sum;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int var_sub;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int var_mul;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int var_mod;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("double var_div;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_4 = var_myinteger1 + var_myinteger2;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_sum = tmp_4;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_5 = var_myinteger1 - var_myinteger2;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_sub = tmp_5;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_6 = var_myinteger1 * var_myinteger2;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_mul = tmp_6;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_7 = var_myinteger1 / var_myinteger2;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_div = tmp_7;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_8 = var_myinteger1 % var_myinteger2;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_mod = tmp_8;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("bool var_comparison;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("bool tmp_9 = var_myinteger1 == var_myinteger2;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_comparison = tmp_9;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("bool tmp_10 = var_myinteger1 != var_myinteger2;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_comparison = tmp_10;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("bool tmp_11 = var_myinteger1 < var_myinteger2;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_comparison = tmp_11;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("bool tmp_12 = var_myinteger1 > var_myinteger2;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_comparison = tmp_12;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("bool tmp_13 = var_myinteger1 <= var_myinteger2;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_comparison = tmp_13;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("bool tmp_14 = var_myinteger1 >= var_myinteger2;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_comparison = tmp_14;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("printf(\"%d\\n\", var_sum);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("return 0;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("}", visitor.GetCodeLines()[i++]);
         }
     }
 }

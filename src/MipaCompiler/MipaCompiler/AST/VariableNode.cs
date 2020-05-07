@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MipaCompiler.Symbol;
+using System;
 
 namespace MipaCompiler.Node
 {
@@ -72,6 +73,18 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
+            // boolean values are special case that do not need "var_" prefix
+            // unless they are actually used as a variable
+            if(name.Equals("true") || name.Equals("false"))
+            {
+                SymbolTable symTable = visitor.GetSymbolTable();
+                if (!symTable.IsVariableSymbolInTable(name))
+                {
+                    visitor.SetLatestTmpVariableName(name);
+                    return;
+                }
+            }
+
             // ecah variable should have an alternative variable symbol
             // in symbol table with name "var_" + name
             string varName = $"var_{name}";

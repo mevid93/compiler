@@ -60,7 +60,7 @@ namespace MipaCompilerTests.CodeGeneration
             Assert.AreEqual("bool tmp_2 = var_i < *size_data;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("if (!tmp_2) goto label_while_0_exit;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("{", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int *tmp_3 = (int *) var_data + var_i;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int *tmp_3 = &var_data[var_i];", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int tmp_4 = var_sum + *tmp_3;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("var_sum = tmp_4;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int tmp_5 = 1;", visitor.GetCodeLines()[i++]);
@@ -93,14 +93,14 @@ namespace MipaCompilerTests.CodeGeneration
             Assert.AreEqual("int tmp_9 = 1;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("scanf(\"%d %d\", &var_a[tmp_8], &var_a[tmp_9]);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int tmp_10 = 0;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int *tmp_11 = (int *) &var_a + tmp_10;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int *tmp_11 = &var_a[tmp_10];", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int tmp_12 = 1;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int *tmp_13 = (int *) &var_a + tmp_12;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int *tmp_13 = &var_a[tmp_12];", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("procedure_swap(tmp_11, tmp_13);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int tmp_15 = 0;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int *tmp_16 = (int *) &var_a + tmp_15;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int *tmp_16 = &var_a[tmp_15];", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int tmp_17 = 1;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int *tmp_18 = (int *) &var_a + tmp_17;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int *tmp_18 = &var_a[tmp_17];", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("printf(\"%d%d\\n\", *tmp_16, *tmp_18);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("char tmp_19[256] = \"Sum is \";", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int tmp_20 = function_sum(var_a, &size_a);", visitor.GetCodeLines()[i++]);

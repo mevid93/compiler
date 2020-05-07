@@ -195,6 +195,7 @@ namespace MipaCompiler.Node
 
                 // allocate memory for array
                 codeLine += $"{varName} = malloc({tmp_size} * sizeof({allocationType}";
+                visitor.AddAllocatedArray(varName);
 
                 // each string is has fixed buffer size
                 if (simpleType == "string") codeLine += Converter.GetStringBufferSize();
