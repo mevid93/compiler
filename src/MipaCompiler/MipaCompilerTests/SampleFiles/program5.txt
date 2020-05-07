@@ -1,0 +1,42 @@
+program Reals;
+
+function square (value : real) : real; 
+begin
+    var i: real;
+	i := value * value;
+    return i; 
+end;
+
+procedure increase(value: real);
+begin
+    value := value + 1;
+end;
+
+begin
+	{* Declare reals *}
+    var myReal1 : real;
+	var myReal2: real;
+
+	{* Insert values *}
+	myReal1 := 100.0;
+	read(myReal2);
+
+	{* Do basic math *}
+	var sum, sub, mul, div : real;
+	sum := myReal1 + myReal2;
+	sub := myReal1 - myReal2;
+	mul := myReal1 * myReal2;
+	div := myReal1 / myReal2;
+
+	{* comparison *}
+	var comparison : boolean;
+	comparison := myReal1 = myReal2;
+	comparison := myReal1 <> myReal2;
+	comparison := myReal1 < myReal2;
+	comparison := myReal1 > myReal2;
+	comparison := myReal1 <= myReal2;
+	comparison := myReal1 >= myReal2;
+
+	{* print function *}
+	writeln(sum);
+end.

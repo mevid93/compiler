@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeGeneration\Program1Generation.cs" />
+    <Compile Include="CodeGeneration\Program5Generation.cs" />
     <Compile Include="CodeGeneration\Program4Generation.cs" />
     <Compile Include="CodeGeneration\Program3Generation.cs" />
     <Compile Include="CodeGeneration\Program2Generation.cs" />
@@ -97,6 +98,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SampleFiles\program3.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SampleFiles\program5.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SampleFiles\types1.txt">
