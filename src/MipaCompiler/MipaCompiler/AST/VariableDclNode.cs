@@ -161,9 +161,6 @@ namespace MipaCompiler.Node
             // get declaration type
             string varType = Helper.ConvertDeclarationTypeToC(nodeType);
 
-            // create variable that holds the new code line
-            string codeLine = varType + " ";
-
             // generate code for array size
             arr.GetSizeExpression().GenerateCode(visitor);
 
@@ -197,9 +194,13 @@ namespace MipaCompiler.Node
 
                 string allocationType = Helper.ConvertTypeToMallocTypeInC(nodeType);
 
+                // check if size is pointer
+                string prefix = "";
+                if (symTable.GetVariableSymbolByIdentifier(tmp_size).IsPointer()) prefix = "*";
+
                 // allocate memory for array
-                codeLine += $"{varName} = malloc({tmp_size} * sizeof({allocationType}";
-                visitor.AddAllocatedArray(varName);
+                string codeLine = $"{varType} {varName} = malloc({prefix}{tmp_size} * sizeof({allocationType}";
+                visitor.AddAllocated1DArray(varName);
 
                 // each string is has fixed buffer size
                 if (simpleType == "string") codeLine += Helper.GetStringBufferSize();
@@ -214,7 +215,12 @@ namespace MipaCompiler.Node
             {
                 VariableSymbol varSymbol = new VariableSymbol(size, "integer", null, symTable.GetCurrentScope());
                 symTable.DeclareVariableSymbol(varSymbol);
-                codeLine = $"int {size} = {tmp_size};";
+
+                // check if size is pointer
+                string prefix = "";
+                if (symTable.GetVariableSymbolByIdentifier(tmp_size).IsPointer()) prefix = "*";
+
+                string codeLine = $"int {size} = {prefix}{tmp_size};";
                 visitor.AddCodeLine(codeLine);
             }
         }

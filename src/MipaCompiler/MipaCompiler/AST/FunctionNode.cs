@@ -123,6 +123,12 @@ namespace MipaCompiler.Node
             // name of the function
             dcl += $"function_{name}(";
 
+            // if result type is array, then the first parameter should be size of array
+            if (resultType.Contains("array"))
+            {
+                dcl += "int * ret_arr_size, ";
+            }
+
             // iterate through all parameters and add them to declaration
             for (int i = 0; i < parameters.Count; i++)
             {
@@ -175,6 +181,16 @@ namespace MipaCompiler.Node
         private void DeclareFunctionParameterVariables(SymbolTable symTable)
         {
             int scope = symTable.GetCurrentScope() + 1; // take scope increase into account
+
+            // get return type --> no need to give symbol table
+            string resultType = SemanticAnalyzer.EvaluateTypeOfTypeNode(type, new List<string>(), null);
+
+
+            // if result type is array, then the first parameter should be size of array
+            if (resultType.Contains("array"))
+            {
+                symTable.DeclareVariableSymbol(new VariableSymbol("ret_arr_size", "integer", null, scope, true));
+            }
 
             // declare rest of the parameters
             for (int i = 0; i < parameters.Count; i++)

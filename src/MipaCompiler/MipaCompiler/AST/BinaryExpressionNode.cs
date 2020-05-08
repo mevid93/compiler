@@ -167,38 +167,11 @@ namespace MipaCompiler.Node
                     GenerateCodeForLargerThanOrEqualOperation(tmpName, lhsTmp, rhsTmp, typeLhs, typeRhs, visitor);
                     break;
                 case "[]":
+                    GenerateCodeForArrayIndexOperation(tmpName, lhsTmp, rhsTmp, typeLhs, typeRhs, visitor);
+                    break;
                 default:
                     throw new Exception("Unexpected exception: Invalid binary operation!");
             }
-            /*
-                case "[]":
-
-                    string simpleType = GetSimpleTypeFromArrayType(typeLhs);
-                    string cType = Converter.ConvertSimpleTypeToC(simpleType);
-
-                    string prefix = "&";
-                    // if array is pointer --> no prefix
-                    //if (symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer()) prefix = "";
-
-                    codeLine = $"{cType} *{tmpName} = {prefix}{lhsTmp}[{rhsTmp}];";
-                    varSymbol = new VariableSymbol(tmpName, cType, null, symTable.GetCurrentScope(), true);
-
-                    /*
-                    lhs.GenerateCode(visitor);
-                    string type = SemanticAnalyzer.EvaluateTypeOfNode(lhs, visitor.GetSymbolTable());
-                    string simpleType = GetSimpleTypeFromArrayType(type);
-                    string cType = CodeGenerator.ConvertSimpleTypeToC(simpleType);
-                    lhsTmp = visitor.GetLatestUsedTmpVariable();
-                    rhs.GenerateCode(visitor);
-                    rhsTmp = visitor.GetLatestUsedTmpVariable();
-                    counter = visitor.GetTempVariableCounter();
-                    visitor.IncreaseTmpVariableCounter();
-                    newTmpVariable = "tmp_" + counter;
-                    visitor.SetLatestTmpVariableName(newTmpVariable);
-                    line = $"{cType} {newTmpVariable} = {lhsTmp}[{rhsTmp}];";
-
-            }
-*/
         }
 
         /// <summary>
@@ -670,6 +643,19 @@ namespace MipaCompiler.Node
                 string prefixRhs = Helper.GetPrefixWhenPointerNotNeeded("boolean", rhsIsPointer);
                 visitor.AddCodeLine($"{type} {tmpName} = {prefixLhs}{lhsTmp} >= {prefixRhs}{rhsTmp};");
             }
+        }
+
+        /// <summary>
+        /// Method <c>GenerateCodeForArrayIndexOperation</c> generates code for array index operation.
+        /// </summary>
+        private void GenerateCodeForArrayIndexOperation(string tmpName, string lhsTmp, string rhsTmp, string lhsType, string rhsType, Visitor visitor)
+        {
+            SymbolTable symTable = visitor.GetSymbolTable();
+
+            string line = $"int * {tmpName} = &{lhsTmp}[{rhsTmp}];";
+            visitor.AddCodeLine(line);
+
+            symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "integer", null, symTable.GetCurrentScope(), true));
         }
     }
 }

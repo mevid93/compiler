@@ -321,11 +321,32 @@ namespace MipaCompiler.Node
             }
             else
             {
+
                 // create new temp variable
                 int counter = visitor.GetTmpVariableCounter();
                 visitor.IncreaseTmpVariableCounter();
                 string tmp = $"tmp_{counter}";
                 visitor.SetLatestTmpVariableName(tmp);
+
+                // if return type of the called function is array, then the
+                // first parameter passed to the function should be return array size
+                FunctionSymbol fs = visitor.GetSymbolTable().GetFunctionSymbolByIdentifier(id);
+                if (fs.GetReturnType().Contains("array"))
+                {
+                    if(tmp.Contains("tmp_"))
+                    {
+                        visitor.AddCodeLine($"int size_{tmp};");
+                        symTable.DeclareVariableSymbol(new VariableSymbol($"size_{tmp}", "integer", null, symTable.GetCurrentScope()));
+                        arguments = $"&size_{tmp}, " + arguments;
+                    }
+                    else
+                    {
+                        string arrayName = tmp.Substring(4);
+                        VariableSymbol arraySize = symTable.GetVariableSymbolByIdentifier($"size_{arrayName}");
+                        string prefix = arraySize.IsPointer() ? "": "&";
+                        arguments += $"int {prefix}{arraySize}";
+                    }
+                }
 
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmp, returnType, null, symTable.GetCurrentScope()));
                 visitor.AddCodeLine($"{returnType} {tmp} = function_{id}({arguments});");

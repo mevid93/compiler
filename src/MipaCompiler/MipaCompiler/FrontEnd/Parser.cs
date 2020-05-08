@@ -363,6 +363,7 @@ namespace MipaCompiler
                     switch (scanner.PeekNthToken(1).GetTokenType())
                     {
                         case TokenType.ASSIGNMENT:
+                        case TokenType.BRACKET_LEFT:
                             return ParseAssignment();
                         case TokenType.PARENTHIS_LEFT:
                             return ParseCall();
@@ -603,6 +604,20 @@ namespace MipaCompiler
             int col = inputToken.GetColumn();
             string value = inputToken.GetTokenValue();
             inputToken = scanner.ScanNextToken();
+            INode varNode = new VariableNode(row, col, value, null);
+            
+            // if assigning to array, there should be bracket next
+            if(inputToken.GetTokenType() == TokenType.BRACKET_LEFT)
+            {
+                Match(TokenType.BRACKET_LEFT);
+
+                INode indexExpression = ParseExpression();
+                indexExpression = ParseExpressionTail(indexExpression);
+                varNode = new BinaryExpressionNode(row, col, "[]", varNode, indexExpression);
+
+                Match(TokenType.BRACKET_RIGHT);
+                if (errorInStatement) return null;
+            }
 
             // parse assignment operator
             Match(TokenType.ASSIGNMENT);
@@ -613,7 +628,7 @@ namespace MipaCompiler
             expression = ParseExpressionTail(expression);
             if (errorInStatement) return null;
 
-            return new AssignmentNode(row, col, value, expression);
+            return new AssignmentNode(row, col, varNode, expression);
         }
 
         /// <summary>

@@ -338,7 +338,22 @@ namespace MipaCompiler
             // convert assignment node
             AssignmentNode assign = (AssignmentNode)node;
 
-            string identifier = assign.GetIdentifier();
+            // assignment node can have bionary expression or array
+            INode identifierNode = assign.GetIdentifier();
+
+            // get identifier name of assign target
+            string identifier = null;
+            if(identifierNode.GetNodeType() == NodeType.VARIABLE)
+            {
+                VariableNode varNode = (VariableNode)identifierNode;
+                identifier = varNode.GetName();
+            }
+            else
+            {
+                BinaryExpressionNode bin = (BinaryExpressionNode)identifierNode;
+                VariableNode varNode = (VariableNode)bin.GetLhs();
+                identifier = varNode.GetName();
+            }
 
             INode expr = assign.GetValueExpression();
             string type = EvaluateTypeOfExpressionNode(expr, errors, symbolTable);
@@ -353,8 +368,7 @@ namespace MipaCompiler
             }
 
             // check that the type of assignment expression matches the variable
-            VariableSymbol symbol = symbolTable.GetVariableSymbolByIdentifier(identifier);
-            string symtype = symbol.GetSymbolType();
+            string symtype = EvaluateTypeOfExpressionNode(identifierNode, errors, symbolTable);
 
             if (type == null || !symtype.Equals(type))
             {

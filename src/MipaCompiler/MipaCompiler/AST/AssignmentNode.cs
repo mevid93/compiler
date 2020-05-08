@@ -10,7 +10,7 @@ namespace MipaCompiler.Node
     {
         private readonly int row;               // row in source code
         private readonly int col;               // column in source code
-        private readonly string identifier;     // identifier that is assigned a value
+        private readonly INode identifier;      // identifier that is assigned a value
         private readonly INode expression;      // expression for value
 
         /// <summary>
@@ -20,7 +20,7 @@ namespace MipaCompiler.Node
         /// <param name="col">column in source code</param>
         /// <param name="identifier">identifier that is assigned value</param>
         /// <param name="expression">expression for value</param>
-        public AssignmentNode(int row, int col, string identifier, INode expression)
+        public AssignmentNode(int row, int col, INode identifier, INode expression)
         {
             this.row = row;
             this.col = col;
@@ -32,7 +32,7 @@ namespace MipaCompiler.Node
         /// Method <c>GetIdentifier</c> returns the target identifier of assignment operation.
         /// </summary>
         /// <returns>identifier</returns>
-        public string GetIdentifier()
+        public INode GetIdentifier()
         {
             return identifier;
         }
@@ -74,24 +74,44 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
-            // avaluate expression
+            switch (identifier.GetNodeType())
+            {
+                case NodeType.VARIABLE:
+                    GenerateCodeForVariableAssignment(visitor);
+                    break;
+                case NodeType.BINARY_EXPRESSION:
+                    GenerateCodeForArrayAssignment(visitor);
+                    break;
+                default:
+                    throw new Exception("Unexpected error: Invalid target for assignment operation!");
+            }
+        }
+
+        /// <summary>
+        /// Method <c>GenerateCodeForVariableAssignment</c> generates code for assignment operation
+        /// where target variable is type of integer, real, string or boolean.
+        /// </summary>
+        private void GenerateCodeForVariableAssignment(Visitor visitor)
+        {
+            // evaluate expression
             expression.GenerateCode(visitor);
 
             // get latest temp variable
             string temp = visitor.GetLatestUsedTmpVariable();
 
-            //foreach (string linec in visitor.GetCodeLines()) Console.WriteLine(linec);
-
-            // check if variable that is assigned a value is parameter
+            // get target variable name
+            VariableNode varNode = (VariableNode)identifier;
+            string identifierStr = varNode.GetName();
+            
+            // check if variable that is assigned a value is pointer
             string prefix = "";
-            if (visitor.GetSymbolTable().GetVariableSymbolByIdentifier(identifier).IsPointer())
+            if (visitor.GetSymbolTable().GetVariableSymbolByIdentifier(identifierStr).IsPointer())
             {
                 prefix = "*";
             }
 
             // check if assigned value is pointer
             string prefix2 = "";
-
             if (!temp.Equals("false") && !temp.Equals("true"))
             {
                 if (visitor.GetSymbolTable().GetVariableSymbolByIdentifier(temp).IsPointer())
@@ -101,22 +121,72 @@ namespace MipaCompiler.Node
             }
 
             // check the type of variable
-            VariableSymbol varSymbol = visitor.GetSymbolTable().GetVariableSymbolByIdentifier($"var_{identifier}");
-
-            string line = "";
+            VariableSymbol varSymbol = visitor.GetSymbolTable().GetVariableSymbolByIdentifier($"var_{identifierStr}");
 
             // string assignment is done with strcpy
             if (varSymbol.GetSymbolType().Equals("string"))
             {
-                line = $"strcpy(var_{identifier}, {temp});";
+                visitor.AddCodeLine($"strcpy(var_{identifierStr}, {temp});");
             }
+            // if array is assigned to array
+            else if (varSymbol.GetSymbolType().Contains("array"))
+            {
+                visitor.AddCodeLine($"free(var_{identifierStr});");
+
+                // check if size variables are pointers
+                string sizeName = "size_" + temp.Replace("var_", "");
+                string sizePrefix1 = visitor.GetSymbolTable().GetVariableSymbolByIdentifier($"var_{identifierStr}").IsPointer() ? "*" : "";
+                string sizePrefix2 = visitor.GetSymbolTable().GetVariableSymbolByIdentifier(sizeName).IsPointer() ? "*" : "";
+
+                visitor.AddCodeLine($"{sizePrefix1}size_{identifierStr} = {sizePrefix2}{sizeName};");
+                visitor.AddCodeLine($"var_{identifierStr} = {temp};");
+            }
+            // numeric or boolean assignment
             else
             {
-                line = $"{prefix}var_{identifier} = {prefix2}{temp};";
+                visitor.AddCodeLine($"{prefix}var_{identifierStr} = {prefix2}{temp};");
+            }
+        }
+
+        /// <summary>
+        /// Method <c>GenerateCodeForArrayAssignment</c> generates code for assignment operation
+        /// where target variable is type of array.
+        /// </summary>
+        private void GenerateCodeForArrayAssignment(Visitor visitor)
+        {
+            // evaluate expression
+            expression.GenerateCode(visitor);
+
+            // get latest temp variable
+            string temp = visitor.GetLatestUsedTmpVariable();
+
+            // get name of the variable that is assigned a value
+            BinaryExpressionNode bin = (BinaryExpressionNode)identifier;
+            VariableNode varNode = (VariableNode)bin.GetLhs();
+            string identifierStr = varNode.GetName();
+
+            // get array index where value is assigned
+            bin.GetRhs().GenerateCode(visitor);
+            string index = visitor.GetLatestUsedTmpVariable();
+
+            // check if assigned value is pointer
+            string prefix2 = "";
+            if (!temp.Equals("false") && !temp.Equals("true"))
+            {
+                if (visitor.GetSymbolTable().GetVariableSymbolByIdentifier(temp).IsPointer())
+                {
+                    prefix2 = "*";
+                }
             }
 
-            // add new code line to list of generated code lines
-            visitor.AddCodeLine(line);
+            // check the type of variable
+            VariableSymbol varSymbol = visitor.GetSymbolTable().GetVariableSymbolByIdentifier($"var_{identifierStr}");
+
+            // check if variable is integer array
+            if(varSymbol.GetSymbolType().Equals("array[] of integer"))
+            {
+                visitor.AddCodeLine($"var_{identifierStr}[{index}] = {prefix2}{temp};");
+            }
         }
     }
 }

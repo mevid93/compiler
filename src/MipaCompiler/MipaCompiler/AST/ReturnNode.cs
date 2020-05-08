@@ -66,6 +66,9 @@ namespace MipaCompiler.Node
                 // free strings that have been allocated
                 Helper.FreeAllocatedStrings(visitor, true);
 
+                // free allocated 1d arrays
+                Helper.FreeAllocated1DArrays(visitor, true);
+
                 // generate code that does not return a value
                 visitor.AddCodeLine("return;");
                 return;
@@ -80,6 +83,32 @@ namespace MipaCompiler.Node
 
             // free allocated string before return statement (avoid memory leaks)
             Helper.FreeAllocatedStrings(visitor, true, lastTmp);
+
+            // free allocated 1d arrays
+            Helper.FreeAllocated1DArrays(visitor, true, lastTmp);
+
+            // check if returned type is array
+            // if it is, then update return array size parameter
+            VariableSymbol varSymbol = visitor.GetSymbolTable().GetVariableSymbolByIdentifier(lastTmp);
+            if (varSymbol.GetSymbolType().Contains("array"))
+            {
+                string sizeName = "";
+                if (lastTmp.Contains("var_"))
+                {
+                   sizeName = lastTmp.Replace("var_", "size_");
+                }
+                else
+                {
+                    sizeName = $"size_{lastTmp}";
+                }
+
+                // check if size is pointer
+                VariableSymbol sizeSymbol = visitor.GetSymbolTable().GetVariableSymbolByIdentifier(sizeName);
+                string prefix = "";
+                if (sizeSymbol.IsPointer()) prefix = "*";
+
+                visitor.AddCodeLine($"*ret_arr_size = {prefix}{sizeName};");
+            }
 
             // generate code that returns a value
             visitor.AddCodeLine($"return {lastTmp};");

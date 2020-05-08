@@ -296,5 +296,55 @@ namespace MipaCompiler.BackEnd
                 }
             }
         }
+
+        /// <summary>
+        /// Method <c>FreeAllocated1DArrays</c> frees all 1D arrays.
+        /// Second parameter is optional and meant for strings that are returned
+        /// and should not be freed. String that is skipped, is removed from the
+        /// list of allocated strings.
+        /// </summary>
+        /// <param name="visitor">visitor object</param>
+        /// <param name="freeBeforeReturn">is return statement next statment</param>
+        /// <param name="skipString">string that should not be freed (optional)</param>
+        public static void FreeAllocated1DArrays(Visitor visitor, bool freeBeforeReturn, string skipArray = null)
+        {
+            // get list of allocated 1d arrays
+            List<string> allocatedArrays = visitor.GetAllocated1DArrays();
+
+            // get symbol table
+            SymbolTable symTable = visitor.GetSymbolTable();
+
+            // get scope level that is one below current level
+            int thresholdScope = symTable.GetCurrentScope() - 1;
+
+            // free and remove all strings from list that are above threshold scope.
+            // if freeBeforeReturn is true --> then free also other strings,
+            // but do not remove those from the list of allocated strings
+            for (int i = allocatedArrays.Count - 1; i >= 0; i--)
+            {
+                VariableSymbol varSymbol = symTable.GetVariableSymbolByIdentifier(allocatedArrays[i]);
+
+                // remove skipped string from list of allocated strings
+                if (skipArray != null && skipArray.Equals(allocatedArrays[i]))
+                {
+                    allocatedArrays.Remove(allocatedArrays[i]);
+                    continue;
+                }
+
+                // free and remove strings from list that are above threshold
+                if (varSymbol.GetCurrentScope() > thresholdScope)
+                {
+                    visitor.AddCodeLine($"free({allocatedArrays[i]});");
+                    allocatedArrays.Remove(allocatedArrays[i]);
+                    continue;
+                }
+
+                // free strings below threshold but do not remove them (only is freeBeforeReturn)
+                if (freeBeforeReturn)
+                {
+                    visitor.AddCodeLine($"free({allocatedArrays[i]});");
+                }
+            }
+        }
     }
 }

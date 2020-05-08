@@ -87,6 +87,9 @@ namespace MipaCompiler.Node
             // free allocated strings
             Helper.FreeAllocatedStrings(visitor, false);
 
+            // free allocated 1d arrays
+            Helper.FreeAllocated1DArrays(visitor, false);
+
             // if block is main function --> should return 0
             if (main) visitor.AddCodeLine("return 0;");
 

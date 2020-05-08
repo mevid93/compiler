@@ -16,7 +16,7 @@ namespace MipaCompiler
         private string latestTmpVariable;           // latest tmp variable name used
         private int tmpVariableCounter;             // counter for tmp variable
         private bool isMainBlock;                   // is current block main function
-        private List<string> allocateArrays;        // list of arrays that are allocated and need to be freed
+        private List<string> allocated1DArrays;     // list of 1D arrays that are allocated and need to be freed
         private List<string> allocatedStrings;      // list of string that are allocated and need to be freed
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace MipaCompiler
         {
             codeLines = new List<string>();
             symbolTable = new SymbolTable();
-            allocateArrays = new List<string>();
+            allocated1DArrays = new List<string>();
             allocatedStrings = new List<string>();
         }
 
@@ -145,22 +145,22 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>GetAllocatedArrays</c> returns list of allocated arrays that need to
+        /// Method <c>GetAllocated1DArrays</c> returns list of allocated 1D arrays that need to
         /// be freed.
         /// </summary>
         /// <returns>list of allocated arrays</returns>
-        public List<string> GetAllocatedArrays()
+        public List<string> GetAllocated1DArrays()
         {
-            return allocateArrays;
+            return allocated1DArrays;
         }
 
         /// <summary>
-        /// Method <c>AddAllocatedArray</c> inserts new array name to list of allocated arrays.
+        /// Method <c>AddAllocated1DArray</c> inserts new 1D array name to list of allocated arrays.
         /// </summary>
         /// <param name="array">name of new array</param>
-        public void AddAllocatedArray(string array)
+        public void AddAllocated1DArray(string array)
         {
-            allocateArrays.Add(array);
+            allocated1DArrays.Add(array);
         }
         
         /// <summary>
