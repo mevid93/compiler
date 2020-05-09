@@ -131,15 +131,21 @@ namespace MipaCompiler.Node
             // if array is assigned to array
             else if (varSymbol.GetSymbolType().Contains("array"))
             {
-                visitor.AddCodeLine($"free(var_{identifierStr});");
 
                 // check if size variables are pointers
                 string sizeName = "size_" + temp.Replace("var_", "");
+                VariableSymbol sizeSymbol = visitor.GetSymbolTable().GetVariableSymbolByIdentifier(sizeName);
                 string sizePrefix1 = visitor.GetSymbolTable().GetVariableSymbolByIdentifier($"var_{identifierStr}").IsPointer() ? "*" : "";
-                string sizePrefix2 = visitor.GetSymbolTable().GetVariableSymbolByIdentifier(sizeName).IsPointer() ? "*" : "";
+                string sizePrefix2 = sizeSymbol.IsPointer() ? "*" : "";
+
+                VariableSymbol tempVariable = visitor.GetSymbolTable().GetVariableSymbolByIdentifier(temp);
+                
+                visitor.FreeArraysBeforeArrayAssignment($"var_{identifierStr}", varSymbol.GetCurrentScope(), temp, tempVariable.GetCurrentScope());
 
                 visitor.AddCodeLine($"{sizePrefix1}size_{identifierStr} = {sizePrefix2}{sizeName};");
                 visitor.AddCodeLine($"var_{identifierStr} = {temp};");
+
+                
             }
             // numeric or boolean assignment
             else
@@ -184,6 +190,11 @@ namespace MipaCompiler.Node
 
             // check if variable is integer array
             if(varSymbol.GetSymbolType().Equals("array[] of integer"))
+            {
+                visitor.AddCodeLine($"var_{identifierStr}[{index}] = {prefix2}{temp};");
+            }
+            // check if variable is real array
+            else if (varSymbol.GetSymbolType().Equals("array[] of real"))
             {
                 visitor.AddCodeLine($"var_{identifierStr}[{index}] = {prefix2}{temp};");
             }

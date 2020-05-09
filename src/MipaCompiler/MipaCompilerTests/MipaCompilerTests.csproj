@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CodeGeneration\Program1Generation.cs" />
+    <Compile Include="CodeGeneration\Program9Generation.cs" />
     <Compile Include="CodeGeneration\Program8Generation.cs" />
     <Compile Include="CodeGeneration\Program7Generation.cs" />
     <Compile Include="CodeGeneration\Program6Generation.cs" />
@@ -67,6 +68,7 @@
     <Compile Include="TokenTests.cs" />
     <Compile Include="ParserTests.cs" />
     <Compile Include="SymbolTests\SymbolTableTests.cs" />
+    <Compile Include="MemoryMapTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -83,9 +85,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SampleFiles\InvalidSemantics\assertionFail.txt">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="SampleFiles\InvalidSemantics\arraySize.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SampleFiles\InvalidSemantics\returnType.txt">
@@ -110,6 +109,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SampleFiles\program5.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SampleFiles\program9.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SampleFiles\types1.txt">

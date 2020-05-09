@@ -338,6 +338,12 @@ namespace MipaCompiler.Node
                         visitor.AddCodeLine($"int size_{tmp};");
                         symTable.DeclareVariableSymbol(new VariableSymbol($"size_{tmp}", "integer", null, symTable.GetCurrentScope()));
                         arguments = $"&size_{tmp}, " + arguments;
+
+                        // add tmp to memory map
+                        int address = visitor.GetArrayAddressCounter();
+                        visitor.IncreaseArrayAddressCounter();
+                        
+                        visitor.GetMemoryMap().AddNewAddress(new MemoryAddress(address, tmp, symTable.GetCurrentScope()));
                     }
                     else
                     {

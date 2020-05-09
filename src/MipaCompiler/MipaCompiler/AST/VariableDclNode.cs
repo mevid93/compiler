@@ -161,11 +161,15 @@ namespace MipaCompiler.Node
             // get declaration type
             string varType = Helper.ConvertDeclarationTypeToC(nodeType);
 
-            // generate code for array size
-            arr.GetSizeExpression().GenerateCode(visitor);
+            // generate code for array size --> only if it is given
+            string tmp_size = null;
+            if (arr.GetSizeExpression() != null)
+            {
+                arr.GetSizeExpression().GenerateCode(visitor);
 
-            // get tmp variable that holds the size of the array
-            string tmp_size = visitor.GetLatestUsedTmpVariable();
+                // get tmp variable that holds the size of the array
+                tmp_size = visitor.GetLatestUsedTmpVariable();
+            }
 
             // define list where all names of the new size variables are stored
             List<string> size_name = new List<string>();
@@ -194,20 +198,34 @@ namespace MipaCompiler.Node
 
                 string allocationType = Helper.ConvertTypeToMallocTypeInC(nodeType);
 
-                // check if size is pointer
-                string prefix = "";
-                if (symTable.GetVariableSymbolByIdentifier(tmp_size).IsPointer()) prefix = "*";
+                if(tmp_size != null)
+                {
+                    // check if size is pointer
+                    string prefix = "";
+                    if (symTable.GetVariableSymbolByIdentifier(tmp_size).IsPointer()) prefix = "*";
 
-                // allocate memory for array
-                string codeLine = $"{varType} {varName} = malloc({prefix}{tmp_size} * sizeof({allocationType}";
-                visitor.AddAllocated1DArray(varName);
+                    // allocate memory for array
+                    string codeLine = $"{varType} {varName} = malloc({prefix}{tmp_size} * sizeof({allocationType}";
+                    int address = visitor.GetArrayAddressCounter();
+                    visitor.IncreaseArrayAddressCounter();
+                    visitor.GetMemoryMap().AddNewAddress(new MemoryAddress(address, varName, symTable.GetCurrentScope()));
 
-                // each string is has fixed buffer size
-                if (simpleType == "string") codeLine += Helper.GetStringBufferSize();
-                codeLine += "));";
+                    // each string is has fixed buffer size
+                    if (simpleType == "string") codeLine += Helper.GetStringBufferSize();
+                    codeLine += "));";
 
-                // add generated code line to list of code lines
-                visitor.AddCodeLine(codeLine);
+                    // add generated code line to list of code lines
+                    visitor.AddCodeLine(codeLine);
+                }
+                else
+                {
+                    // empty array initialized
+                    visitor.AddCodeLine($"{varType} {varName} = malloc(0 * sizeof({allocationType}));");
+                    int address = visitor.GetArrayAddressCounter();
+                    visitor.IncreaseArrayAddressCounter();
+                    visitor.GetMemoryMap().AddNewAddress(new MemoryAddress(address, varName, symTable.GetCurrentScope()));
+                }
+
             }
 
             // declare size variables
@@ -218,7 +236,14 @@ namespace MipaCompiler.Node
 
                 // check if size is pointer
                 string prefix = "";
-                if (symTable.GetVariableSymbolByIdentifier(tmp_size).IsPointer()) prefix = "*";
+                if(tmp_size != null)
+                {
+                    if (symTable.GetVariableSymbolByIdentifier(tmp_size).IsPointer()) prefix = "*";
+                }
+                else
+                {
+                    tmp_size = "0";
+                }
 
                 string codeLine = $"int {size} = {prefix}{tmp_size};";
                 visitor.AddCodeLine(codeLine);

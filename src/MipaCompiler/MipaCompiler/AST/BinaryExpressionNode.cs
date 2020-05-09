@@ -652,7 +652,12 @@ namespace MipaCompiler.Node
         {
             SymbolTable symTable = visitor.GetSymbolTable();
 
-            string line = $"int * {tmpName} = &{lhsTmp}[{rhsTmp}];";
+            // get array type
+            VariableSymbol variableSymbol = symTable.GetVariableSymbolByIdentifier(lhsTmp);
+            string type = variableSymbol.GetSymbolType();
+            string cType = Helper.GetElementTypeFromArrayTypeInC(type);
+
+            string line = $"{cType} * {tmpName} = &{lhsTmp}[{rhsTmp}];";
             visitor.AddCodeLine(line);
 
             symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "integer", null, symTable.GetCurrentScope(), true));

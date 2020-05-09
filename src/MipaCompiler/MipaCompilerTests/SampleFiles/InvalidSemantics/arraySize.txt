@@ -1,4 +1,0 @@
-program ArraySize;
-begin
-    var A : array [] of integer;    
-end.

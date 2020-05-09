@@ -131,7 +131,7 @@ namespace MipaCompiler.Node
             SymbolTable symTable = visitor.GetSymbolTable();
 
             // declare variables that are passed as parameters to function
-            DeclareProcedureParameterVariables(symTable);
+            DeclareProcedureParameterVariables(visitor);
 
             // get procedure forward declaration
             string forwardDeclaration = GenerateForwardDeclaration();
@@ -149,8 +149,10 @@ namespace MipaCompiler.Node
         /// <summary>
         /// Method <c>DeclareProcedureParameterVariables</c> declares parameter variables to symbol table.
         /// </summary>
-        private void DeclareProcedureParameterVariables(SymbolTable symTable)
+        private void DeclareProcedureParameterVariables(Visitor visitor)
         {
+            SymbolTable symTable = visitor.GetSymbolTable();
+
             for (int i = 0; i < parameters.Count; i++)
             {
                 INode node = parameters[i];
@@ -170,6 +172,11 @@ namespace MipaCompiler.Node
                     name = $"size_{variableNode.GetName()}";
                     varType = "integer";
                     symTable.DeclareVariableSymbol(new VariableSymbol(name, varType, null, scope, true));
+
+                    // also add array to memory map
+                    int address = visitor.GetArrayAddressCounter();
+                    visitor.IncreaseArrayAddressCounter();
+                    visitor.GetMemoryMap().AddNewAddress(new MemoryAddress(address, varName, -1));
                 }
             }
         }

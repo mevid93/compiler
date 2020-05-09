@@ -155,6 +155,24 @@ namespace MipaCompilerTests
         }
 
         [TestMethod]
+        [DeploymentItem("SampleFiles\\program9.txt")]
+        public void CheckConstraintsWorksWithValidProgram9()
+        {
+            string filename = "program9.txt";
+            Scanner scanner = new Scanner(filename);
+            Parser parser = new Parser(scanner);
+            INode ast = parser.Parse();
+
+            Assert.IsFalse(parser.ErrorsDetected());
+
+            SemanticAnalyzer analyzer = new SemanticAnalyzer(ast);
+            analyzer.CheckConstraints();
+
+            Assert.IsFalse(analyzer.ErrosDetected());
+            Assert.IsTrue(analyzer.GetDetectedErrors().Count == 0);
+        }
+
+        [TestMethod]
         [DeploymentItem("SampleFiles\\types1.txt")]
         public void CheckConstraintsWorksWithValidTypes1()
         {
@@ -257,28 +275,6 @@ namespace MipaCompilerTests
 
             Assert.IsTrue(errors.Any(s => s.Contains("SemanticError::Row 4::Column 5")));
             Assert.IsTrue(errors.Any(s => s.Contains("SemanticError::Row 4::Column 5")));
-        }
-
-        [TestMethod]
-        [DeploymentItem("SampleFiles\\InvalidSemantics\\arraySize.txt")]
-        public void CheckConstraintsWorksWithInvalidArraySizeDcl()
-        {
-            string filename = "arraySize.txt";
-            Scanner scanner = new Scanner(filename);
-            Parser parser = new Parser(scanner);
-            INode ast = parser.Parse();
-
-            Assert.IsFalse(parser.ErrorsDetected());
-
-            SemanticAnalyzer analyzer = new SemanticAnalyzer(ast);
-            analyzer.CheckConstraints();
-
-            Assert.IsTrue(analyzer.ErrosDetected());
-            Assert.IsTrue(analyzer.GetDetectedErrors().Count == 1);
-
-            List<string> errors = analyzer.GetDetectedErrors();
-
-            Assert.IsTrue(errors.Any(s => s.Contains("SemanticError::Row 3::Column 13")));
         }
 
         [TestMethod]

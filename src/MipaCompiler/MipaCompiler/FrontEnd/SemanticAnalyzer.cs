@@ -370,6 +370,12 @@ namespace MipaCompiler
             // check that the type of assignment expression matches the variable
             string symtype = EvaluateTypeOfExpressionNode(identifierNode, errors, symbolTable);
 
+            // if assignment target is real and assigned value is int --> ok
+            if(type != null && symtype != null && symtype.Equals("real") && type.Equals("integer"))
+            {
+                return;
+            }
+
             if (type == null || !symtype.Equals(type))
             {
                 // was not correct --> report error
@@ -446,7 +452,7 @@ namespace MipaCompiler
 
             // get type of variables
             INode typeNode = varDcl.GetVariableType();
-            string type = EvaluateTypeOfTypeNode(typeNode, errors, symbolTable, true);
+            string type = EvaluateTypeOfTypeNode(typeNode, errors, symbolTable);
 
             // for each variable --> check that they have not been declared in current scope
             // if not --> then declare it
@@ -530,7 +536,7 @@ namespace MipaCompiler
         /// <param name="symbolTable">symbol table</param>
         /// <param name="isInit">if array initialization type</param>
         /// <returns>type in string representation</returns>
-        public static string EvaluateTypeOfTypeNode(INode node, List<string> errors, SymbolTable symbolTable, bool isInit = false)
+        public static string EvaluateTypeOfTypeNode(INode node, List<string> errors, SymbolTable symbolTable)
         {
             if (node == null) return null;
 
@@ -538,19 +544,6 @@ namespace MipaCompiler
             {
                 case NodeType.ARRAY_TYPE:
                     ArrayTypeNode at = (ArrayTypeNode)node;
-                    if (isInit)
-                    {
-                        // array should have integer as size argument
-                        INode expr = at.GetSizeExpression();
-                        string type = EvaluateTypeOfExpressionNode(expr, errors, symbolTable);
-
-                        if (type == null || !type.Equals(STR_INTEGER))
-                        {
-                            // report error
-                            string errorMsg = "Array must have integer as size argument!";
-                            ReportError(at.GetRow(), at.GetCol(), errors, errorMsg);
-                        }
-                    }
                     string tmp = $"array[] of ";
                     SimpleTypeNode stn = (SimpleTypeNode)at.GetSimpleType();
                     tmp += stn.GetTypeValue();
@@ -662,11 +655,11 @@ namespace MipaCompiler
                     ReportError(node.GetRow(), node.GetCol(), errors, errorMsg);
                     return null;
                 case "size":
-                    // check that type is integer "array[] of integer"
-                    if (type.Equals("array[] of " + STR_INTEGER)) return STR_INTEGER;
-
+                    // check that type is array
+                    if (type.Contains("array")) return STR_INTEGER;
+                    
                     // was not correct type --> report error
-                    errorMsg = $"Cannot implicitly convert type {type} to integer!";
+                    errorMsg = $"Size operation cannot be used with type {type}!";
                     ReportError(node.GetRow(), node.GetCol(), errors, errorMsg);
                     return null;
                 default:
@@ -759,10 +752,18 @@ namespace MipaCompiler
                     return type;
                 }
             }
-
+            
+            // left hand side is null --> it is array with null index expression
+            if(left == null)
+            {
+                foreach(string type in supportedTypes)
+                {
+                    if (right.Equals(type)) return overrideReturnType == null ? right : overrideReturnType;
+                }
+            }
             // there are also cases where left and right do not have same type but still valid
             // for example, it is ok to sum integer and real
-            if ((left.Equals(STR_INTEGER) || left.Equals(STR_REAL)) && (right.Equals(STR_INTEGER) || right.Equals(STR_REAL)))
+            else if ((left.Equals(STR_INTEGER) || left.Equals(STR_REAL)) && (right.Equals(STR_INTEGER) || right.Equals(STR_REAL)))
             {
                 bool realIsSupported = false;
                 bool integerIsSupported = false;
@@ -801,15 +802,18 @@ namespace MipaCompiler
             // get expression that defines index of array
             INode expression = arrayIndex.GetRhs();
 
-            // evaluate type of index expression
-            string type = EvaluateTypeOfExpressionNode(expression, errors, symbolTable);
-
-            // check if type was not integer
-            if (!type.Equals(STR_INTEGER))
+            if(expression != null)
             {
-                // was not correct --> report error
-                string errorMsg = $"Cannot implicitly convert type {type} to integer!";
-                ReportError(expression.GetRow(), expression.GetCol(), errors, errorMsg);
+                // evaluate type of index expression
+                string type = EvaluateTypeOfExpressionNode(expression, errors, symbolTable);
+
+                // check if type was not integer
+                if (!type.Equals(STR_INTEGER))
+                {
+                    // was not correct --> report error
+                    string errorMsg = $"Cannot implicitly convert type {type} to integer!";
+                    ReportError(expression.GetRow(), expression.GetCol(), errors, errorMsg);
+                }
             }
 
             // get array

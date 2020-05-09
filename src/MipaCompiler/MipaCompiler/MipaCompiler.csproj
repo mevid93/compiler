@@ -66,6 +66,7 @@
     <Compile Include="AST\VariableNode.cs" />
     <Compile Include="AST\WhileNode.cs" />
     <Compile Include="BackEnd\Helper.cs" />
+    <Compile Include="BackEnd\MemoryMap.cs" />
     <Compile Include="FrontEnd\Parser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

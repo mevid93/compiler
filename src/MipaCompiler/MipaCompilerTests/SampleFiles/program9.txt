@@ -1,8 +1,8 @@
-program IntegerArrays;
+program RealArrays;
 
-function reverseArray (arr : array [] of integer) : array [] of integer; 
+function reverseArray (arr : array [] of real) : array [] of real; 
 begin
-    var reversed : array [arr.size] of integer;
+    var reversed : array [arr.size] of real;
 	var i : integer;
 	var j : integer;
 	i := 0;
@@ -16,7 +16,7 @@ begin
 	return reversed;
 end;
 
-procedure printArray (arr : array [] of integer);
+procedure printArray (arr : array [] of real);
 begin
     var i : integer;
 	i := 0;
@@ -28,13 +28,14 @@ begin
 end;
 
 begin
-	{* Declare array of integers *}
-    var myArray1, myArray2 : array [4] of integer;
+	{* Declare array of reals, also empty one *}
+    var myArray1, myArray2 : array [4] of real;
+	var myArray3 : array [] of real;
 
 	{* Insert values to arrays *}
-	myArray1[0] := 1;
-	myArray1[1] := 2;
-	myArray1[2] := 3;
+	myArray1[0] := 1.0;
+	myArray1[1] := 2.123e-1;
+	myArray1[2] := -3.2;
 	myArray1[3] := 4;
 	
 	myArray2 := myArray1;
@@ -42,16 +43,16 @@ begin
 	{* Function and procedure calls *}
 	printArray(myArray1);
 	printArray(myArray2);
-	myArray2 := reverseArray(myArray1);
-	printArray(myArray2);
+	myArray3 := reverseArray(myArray1);
+	printArray(myArray3);
 
-	{* Some basic operations with integers *}
+	{* Some basic operations with reals *}
 	myArray1[0] := myArray1[0] + myArray1[0];
 	myArray1[1] := myArray1[1] - myArray1[1];
 	myArray1[2] := myArray1[2] * myArray1[2];
 	myArray1[3] := myArray1[3] / myArray1[3];
-	myArray2[0] := myArray2[3] % myArray2[3];
 
 	printArray(myArray1);
 	printArray(myArray2);
+	printArray(myArray3);
 end.

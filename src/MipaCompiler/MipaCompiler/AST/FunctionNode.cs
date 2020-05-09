@@ -160,7 +160,7 @@ namespace MipaCompiler.Node
             SymbolTable symTable = visitor.GetSymbolTable();
 
             // declare variables that are passed as parameters to function
-            DeclareFunctionParameterVariables(symTable);
+            DeclareFunctionParameterVariables(visitor);
 
             // get function forward declaration
             string forwardDeclaration = GenerateForwardDeclaration();
@@ -178,8 +178,10 @@ namespace MipaCompiler.Node
         /// <summary>
         /// Method <c>DeclareFunctionParameterVariables</c> declares parameter variables to symbol table.
         /// </summary>
-        private void DeclareFunctionParameterVariables(SymbolTable symTable)
+        private void DeclareFunctionParameterVariables(Visitor visitor)
         {
+            SymbolTable symTable = visitor.GetSymbolTable();
+
             int scope = symTable.GetCurrentScope() + 1; // take scope increase into account
 
             // get return type --> no need to give symbol table
@@ -211,6 +213,11 @@ namespace MipaCompiler.Node
                     name = $"size_{name}";
                     varType = "integer";
                     symTable.DeclareVariableSymbol(new VariableSymbol(name, varType, null, scope, true));
+
+                    // also add array to memory map
+                    int address = visitor.GetArrayAddressCounter();
+                    visitor.IncreaseArrayAddressCounter();
+                    visitor.GetMemoryMap().AddNewAddress(new MemoryAddress(address, varName, -1));
                 }
             }
         }

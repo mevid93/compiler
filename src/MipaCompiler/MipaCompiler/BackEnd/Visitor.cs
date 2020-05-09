@@ -9,15 +9,17 @@ namespace MipaCompiler
     /// </summary>
     public class Visitor
     {
-        private List<string> codeLines;             // generated code lines
-        private readonly SymbolTable symbolTable;   // symbol table for storing variable, procedure and function information
-        private int whileCounter;                   // counter for while loop label
-        private int ifCounter;                      // counter for if-else structure label
-        private string latestTmpVariable;           // latest tmp variable name used
-        private int tmpVariableCounter;             // counter for tmp variable
-        private bool isMainBlock;                   // is current block main function
-        private List<string> allocated1DArrays;     // list of 1D arrays that are allocated and need to be freed
-        private List<string> allocatedStrings;      // list of string that are allocated and need to be freed
+        private List<string> codeLines;                 // generated code lines
+        private readonly SymbolTable symbolTable;       // symbol table for storing variable, procedure and function information
+        private int whileCounter;                       // counter for while loop label
+        private int ifCounter;                          // counter for if-else structure label
+        private string latestTmpVariable;               // latest tmp variable name used
+        private int tmpVariableCounter;                 // counter for tmp variable
+        private bool isMainBlock;                       // is current block main function      
+        private List<string> allocatedStrings;          // list of string that are allocated and need to be freed
+        private int arrayAddressCounter;                // count number of different addresses of arrays
+        private MemoryMap memoryMap;                    // class for handling allocated arrays
+
 
         /// <summary>
         /// Constructor <c>Visitor</c> creates new Visitor-object.
@@ -26,8 +28,8 @@ namespace MipaCompiler
         {
             codeLines = new List<string>();
             symbolTable = new SymbolTable();
-            allocated1DArrays = new List<string>();
             allocatedStrings = new List<string>();
+            memoryMap = new MemoryMap();
         }
 
         /// <summary>
@@ -145,25 +147,6 @@ namespace MipaCompiler
         }
 
         /// <summary>
-        /// Method <c>GetAllocated1DArrays</c> returns list of allocated 1D arrays that need to
-        /// be freed.
-        /// </summary>
-        /// <returns>list of allocated arrays</returns>
-        public List<string> GetAllocated1DArrays()
-        {
-            return allocated1DArrays;
-        }
-
-        /// <summary>
-        /// Method <c>AddAllocated1DArray</c> inserts new 1D array name to list of allocated arrays.
-        /// </summary>
-        /// <param name="array">name of new array</param>
-        public void AddAllocated1DArray(string array)
-        {
-            allocated1DArrays.Add(array);
-        }
-        
-        /// <summary>
         /// Method <c>GetAllocatedStrings</c> returns list of allocated strings that need to
         /// be freed.
         /// </summary>
@@ -181,6 +164,52 @@ namespace MipaCompiler
         {
             allocatedStrings.Add(allocatedString);
         }
-        
+
+        /// <summary>
+        /// Method <c>GetArrayAddressCounter</c> returns next available address number.
+        /// </summary>
+        /// <returns>next abailable address value</returns>
+        public int GetArrayAddressCounter()
+        {
+            return arrayAddressCounter;
+        }
+
+        /// <summary>
+        /// Method <c>IncreaseArrayAddressCounter</c> increases array address counter.
+        /// </summary>
+        public void IncreaseArrayAddressCounter()
+        {
+            arrayAddressCounter++;
+        }
+
+        /// <summary>
+        /// Method <c>MemoryMap</c> returns MemoryMap-object from visitor.
+        /// </summary>
+        /// <returns>memory map</returns>
+        public MemoryMap GetMemoryMap()
+        {
+            return memoryMap;
+        }
+
+        public void FreeArraysBeforeExitingScope(int newscope)
+        {
+            List<string> arrays = memoryMap.GetArraysThatNeedToBeFreedWhenExitingScope(newscope);
+
+            foreach (string arr in arrays) AddCodeLine($"free({arr});");
+        }
+
+        public void FreeArraysBeforeReturnStatement(string skipArray = null)
+        {
+            List<string> arrays = memoryMap.GetArraysThatNeedToBeFreedBeforeReturn(skipArray);
+
+            foreach (string arr in arrays) AddCodeLine($"free({arr});");
+        }
+
+        public void FreeArraysBeforeArrayAssignment(string nameOfArr, int scopeOfArr, string nameOfTargetArr, int scopeOfTargetArr)
+        {
+            string array = memoryMap.MoveArrayToPointOtherAddress(nameOfArr, scopeOfArr, nameOfTargetArr, scopeOfTargetArr);
+
+            if(array != null) AddCodeLine($"free({array});");
+        }
     }
 }
