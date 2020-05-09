@@ -1,0 +1,59 @@
+program BooleanArrays;
+
+function reverseArray (arr : array [] of boolean) : array [] of boolean; 
+begin
+    var reversed : array [arr.size] of boolean;
+	var i : integer;
+	var j : integer;
+	i := 0;
+	j := arr.size - 1;
+	while i < arr.size do
+	begin
+		reversed[j] := arr[i];
+		j := j - 1;
+		i := i + 1;
+	end;
+	return reversed;
+end;
+
+procedure printArray (arr : array [] of boolean);
+begin
+    var i : integer;
+	i := 0;
+	while i < arr.size do
+	begin
+		if arr[i] then writeln("TRUE");
+		else writeln("FALSE");
+		i := i + 1;
+	end;
+end;
+
+begin
+	{* Declare array of booleans, also empty one *}
+    var myArray1, myArray2 : array [4] of boolean;
+	var myArray3 : array [] of boolean;
+
+	{* Insert values to arrays *}
+	myArray1[0] := 1 > 2;
+	myArray1[1] := 1 = 1;
+	myArray1[2] := true;
+	myArray1[3] := true > false;
+	
+	myArray2 := myArray1;
+    
+	{* Function and procedure calls *}
+	printArray(myArray1);
+	printArray(myArray2);
+	myArray3 := reverseArray(myArray1);
+	printArray(myArray3);
+
+	{* Some basic operations with reals *}
+	myArray1[0] := myArray1[0] = myArray1[0];
+	myArray1[1] := myArray1[1] >= myArray1[1];
+	myArray1[2] := myArray1[2] <= myArray1[2];
+	myArray1[3] := myArray1[3] <> myArray1[3];
+
+	printArray(myArray1);
+	printArray(myArray2);
+	printArray(myArray3);
+end.

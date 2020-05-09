@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MipaCompiler.Symbol;
+using System;
 using System.Collections.Generic;
 
 namespace MipaCompiler.Node
@@ -104,7 +105,13 @@ namespace MipaCompiler.Node
             condition.GenerateCode(visitor);
 
             string tmp = visitor.GetLatestUsedTmpVariable();
-            visitor.AddCodeLine($"if (!{tmp}) goto label_else_{number}_entry;");
+
+            // check if last tmp is pointer
+            string prefix = "";
+            VariableSymbol varSymbol = visitor.GetSymbolTable().GetVariableSymbolByIdentifier(tmp);
+            if (varSymbol.IsPointer()) prefix = "*";
+
+            visitor.AddCodeLine($"if (!{prefix}{tmp}) goto label_else_{number}_entry;");
 
             // process then statement
             thenStatement.GenerateCode(visitor);

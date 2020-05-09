@@ -555,8 +555,18 @@ namespace MipaCompiler.Node
         {
             SymbolTable symTable = visitor.GetSymbolTable();
             int scope = visitor.GetSymbolTable().GetCurrentScope();
-            bool lhsIsPointer = symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer();
-            bool rhsIsPointer = symTable.GetVariableSymbolByIdentifier(rhsTmp).IsPointer();
+
+            bool lhsIsPointer = false;
+            bool rhsIsPointer = false;
+
+            if(!lhsTmp.Equals("false") && !lhsTmp.Equals("true"))
+            {
+                lhsIsPointer = symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer();
+            }
+            if (!rhsTmp.Equals("false") && !rhsTmp.Equals("true"))
+            {
+                rhsIsPointer = symTable.GetVariableSymbolByIdentifier(rhsTmp).IsPointer();
+            }
 
             // real case
             if (lhsType.Equals("real") || rhsType.Equals("real"))
