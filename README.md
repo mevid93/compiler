@@ -21,6 +21,8 @@ end.
 ## Example output
 ```
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 typedef int bool;
 #define true 1
@@ -33,7 +35,8 @@ typedef int bool;
 // here is the main function
 int main()
 {
-int var_i, var_j;
+int var_i;
+int var_j;
 scanf("%d %d", &var_i, &var_j);
 label_while_0_entry: ;
 bool tmp_0 = var_i != var_j;
