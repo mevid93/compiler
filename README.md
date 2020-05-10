@@ -28,6 +28,37 @@ typedef int bool;
 #define true 1
 #define false 0
 
+// hard coded function to allocate string array
+char ** allocateArrayOfStrings(int * arr_size)
+{
+char ** x = malloc(*arr_size * sizeof(char *));
+int var_i = 0;
+while_entry: ;
+if (var_i >= *arr_size) goto while_exit;
+{
+x[var_i] = malloc(256 * sizeof(char));
+var_i = var_i + 1;
+}
+goto while_entry;
+while_exit: ;
+return x;
+}
+
+// hard coded function to deallocate string array
+void deallocateArrayOfStrings(char ** arr, int * arr_size)
+{
+int var_i = 0;
+while_entry: ;
+if (var_i >= *arr_size) goto while_exit;
+{
+free(arr[var_i]);
+var_i = var_i + 1;
+}
+goto while_entry;
+while_exit: ;
+free(arr);
+}
+
 // here are forward declarations for functions and procedures (if any exists)
 
 // here are the definitions of functions and procedures (if any exists)
