@@ -79,8 +79,7 @@ namespace MipaCompiler
             if (outputFilePath == null) return;
 
             // write generated code lines to ouputfile
-            StreamWriter file = new StreamWriter(outputFilePath);
-            foreach (string line in visitor.GetCodeLines()) file.WriteLine(line);
+            File.WriteAllLines(outputFilePath, visitor.GetCodeLines());
         }
         
     }

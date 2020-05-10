@@ -743,6 +743,8 @@ namespace MipaCompiler
             string left = EvaluateTypeOfExpressionNode(lhs, errors, symbolTable);
             string right = EvaluateTypeOfExpressionNode(rhs, errors, symbolTable);
 
+            if (left == null && right == null) return null;
+
             // if left and right have same type and that type is among allowed types --> then ok
             foreach (string type in supportedTypes)
             {
