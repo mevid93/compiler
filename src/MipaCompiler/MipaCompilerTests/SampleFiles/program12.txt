@@ -1,0 +1,11 @@
+program Assertion;
+begin
+    var password : string;
+
+	writeln("Insert password:");
+	read(password);
+
+	assert(password = "YOLO123");
+
+	writeln("ACCESS GRANTED!");
+end.

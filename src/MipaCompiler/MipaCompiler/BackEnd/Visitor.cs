@@ -19,6 +19,7 @@ namespace MipaCompiler
         private List<string> allocatedStrings;          // list of string that are allocated and need to be freed
         private int arrayAddressCounter;                // count number of different addresses of arrays
         private MemoryMap memoryMap;                    // class for handling allocated arrays
+        private int assertCounter;                      // counter for number of assertions visited
 
 
         /// <summary>
@@ -210,6 +211,16 @@ namespace MipaCompiler
             string array = memoryMap.MoveArrayToPointOtherAddress(nameOfArr, scopeOfArr, nameOfTargetArr, scopeOfTargetArr);
 
             if(array != null) AddCodeLine($"free({array});");
+        }
+
+        public int GetAssertionCounter()
+        {
+            return assertCounter;
+        }
+
+        public void IncreaseAssertionCounter()
+        {
+            assertCounter++;
         }
     }
 }

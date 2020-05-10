@@ -49,6 +49,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CodeGeneration\Program12Generation.cs" />
     <Compile Include="CodeGeneration\Program11Generation.cs" />
     <Compile Include="CodeGeneration\Program1Generation.cs" />
     <Compile Include="CodeGeneration\Program10Generation.cs" />
@@ -96,6 +97,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SampleFiles\program1.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SampleFiles\program12.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SampleFiles\program11.txt">

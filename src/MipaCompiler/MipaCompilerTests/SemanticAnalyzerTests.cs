@@ -209,6 +209,24 @@ namespace MipaCompilerTests
         }
 
         [TestMethod]
+        [DeploymentItem("SampleFiles\\program12.txt")]
+        public void CheckConstraintsWorksWithValidProgram12()
+        {
+            string filename = "program12.txt";
+            Scanner scanner = new Scanner(filename);
+            Parser parser = new Parser(scanner);
+            INode ast = parser.Parse();
+
+            Assert.IsFalse(parser.ErrorsDetected());
+
+            SemanticAnalyzer analyzer = new SemanticAnalyzer(ast);
+            analyzer.CheckConstraints();
+
+            Assert.IsFalse(analyzer.ErrosDetected());
+            Assert.IsTrue(analyzer.GetDetectedErrors().Count == 0);
+        }
+
+        [TestMethod]
         [DeploymentItem("SampleFiles\\types1.txt")]
         public void CheckConstraintsWorksWithValidTypes1()
         {

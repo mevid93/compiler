@@ -59,7 +59,32 @@ namespace MipaCompiler.Node
 
         public void GenerateCode(Visitor visitor)
         {
-            // TODO
+            // create assertion entry
+            int number = visitor.GetAssertionCounter();
+            visitor.IncreaseAssertionCounter();
+            visitor.AddCodeLine($"label_assert_{number}_entry: ;");
+
+            // assertio works so that it checks the condition expression
+            // and if the expression does not evaluate as true,
+            // an error message is given, and the program will exit
+
+            // generate code from the boolean expression
+            expression.GenerateCode(visitor);
+
+            // get boolean expression hoding variable
+            string boolVar = visitor.GetLatestUsedTmpVariable();
+
+            visitor.AddCodeLine($"if ({boolVar}) goto label_assert_{number}_exit;");
+
+            // give error message
+            int rowInTargetLanguage = visitor.GetCodeLines().Count;
+            visitor.AddCodeLine($"printf(\"%s\", \"Assertion error at row {rowInTargetLanguage}... \");");
+            visitor.AddCodeLine($"printf(\"%s\\n\", \"Expected {boolVar} to be true!\");");
+            visitor.AddCodeLine($"exit(1);");
+
+            // sys exit with error status 1
+
+            visitor.AddCodeLine($"label_assert_{number}_exit: ;");
         }
     }
 }
