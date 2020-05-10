@@ -1,0 +1,63 @@
+program StringArrays;
+
+function reverseArray (arr : array [] of string) : array [] of string; 
+begin
+    var reversed : array [arr.size] of string;
+	var i : integer;
+	var j : integer;
+	i := 0;
+	j := arr.size - 1;
+	while i < arr.size do
+	begin
+		reversed[j] := arr[i];
+		j := j - 1;
+		i := i + 1;
+	end;
+	return reversed;
+end;
+
+procedure printArray (arr : array [] of string);
+begin
+    var i : integer;
+	i := 0;
+	while i < arr.size do
+	begin
+		writeln(arr[i]);
+		i := i + 1;
+	end;
+end;
+
+begin
+	{* Declare array of strings, also empty one *}
+    var myArray1, myArray2 : array [4] of string;
+	var myArray3 : array [] of string;
+
+	{* Insert values to arrays *}
+	myArray1[0] := "one";
+	myArray1[1] := "two";
+	myArray1[2] := "three";
+	myArray1[3] := "four";
+	
+	myArray2 := myArray1;
+    
+	{* Function and procedure calls *}
+	printArray(myArray1);
+	printArray(myArray2);
+	myArray3 := reverseArray(myArray1);
+	printArray(myArray3);
+
+	{* Some basic operations with strings *}
+	var eq, lteq, gt, neq : boolean;
+	var concat : string;
+	eq := myArray1[0] = myArray1[0];
+	neq := myArray1[1] <> myArray1[2];
+	lteq := myArray1[0] <= myArray1[1];
+	gt := myArray1[2] > myArray1[3];
+
+	concat := myArray1[1] + " " + myArray1[2];
+	writeln(concat);
+
+	printArray(myArray1);
+	printArray(myArray2);
+	printArray(myArray3);
+end.

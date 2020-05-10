@@ -6,13 +6,13 @@ using System;
 namespace MipaCompilerTests.CodeGeneration
 {
     [TestClass]
-    public class Program10Generation
+    public class Program11Generation
     {
         [TestMethod]
-        [DeploymentItem("SampleFiles\\program10.txt")]
-        public void CodeGenerationWorksForProgram10()
+        [DeploymentItem("SampleFiles\\program11.txt")]
+        public void CodeGenerationWorksForProgram11()
         {
-            string filename = "program10.txt";
+            string filename = "program11.txt";
             Scanner scanner = new Scanner(filename);
             Parser parser = new Parser(scanner);
             INode ast = parser.Parse();
@@ -75,14 +75,14 @@ namespace MipaCompilerTests.CodeGeneration
             Assert.AreEqual("", visitor.GetCodeLines()[i++]);
 
             Assert.AreEqual("// here are forward declarations for functions and procedures (if any exists)", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool * function_reversearray(int * ret_arr_size, bool * var_arr, int * size_arr);", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("void procedure_printarray(bool * var_arr, int * size_arr);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char ** function_reversearray(int * ret_arr_size, char ** var_arr, int * size_arr);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("void procedure_printarray(char ** var_arr, int * size_arr);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("", visitor.GetCodeLines()[i++]);
 
             Assert.AreEqual("// here are the definitions of functions and procedures (if any exists)", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool * function_reversearray(int * ret_arr_size, bool * var_arr, int * size_arr)", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char ** function_reversearray(int * ret_arr_size, char ** var_arr, int * size_arr)", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("{", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool * var_reversed = malloc(*size_arr * sizeof(bool));", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char ** var_reversed = allocateArrayOfStrings(size_arr);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int size_reversed = *size_arr;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int var_i;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int var_j;", visitor.GetCodeLines()[i++]);
@@ -95,8 +95,8 @@ namespace MipaCompilerTests.CodeGeneration
             Assert.AreEqual("bool tmp_3 = var_i < *size_arr;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("if (!tmp_3) goto label_while_0_exit;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("{", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool * tmp_4 = &var_arr[var_i];", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("var_reversed[var_j] = *tmp_4;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_4 = var_arr[var_i];", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_reversed[var_j] = tmp_4;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int tmp_5 = 1;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int tmp_6 = var_j - tmp_5;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("var_j = tmp_6;", visitor.GetCodeLines()[i++]);
@@ -112,7 +112,7 @@ namespace MipaCompilerTests.CodeGeneration
             Assert.AreEqual("}", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("", visitor.GetCodeLines()[i++]);
 
-            Assert.AreEqual("void procedure_printarray(bool * var_arr, int * size_arr)", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("void procedure_printarray(char ** var_arr, int * size_arr)", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("{", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int var_i;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int tmp_9 = 0;", visitor.GetCodeLines()[i++]);
@@ -121,19 +121,11 @@ namespace MipaCompilerTests.CodeGeneration
             Assert.AreEqual("bool tmp_10 = var_i < *size_arr;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("if (!tmp_10) goto label_while_1_exit;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("{", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("label_if_0_entry: ;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool * tmp_11 = &var_arr[var_i];", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("if (!*tmp_11) goto label_else_0_entry;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("char * tmp_12 = \"TRUE\";", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("printf(\"%s\\n\", tmp_12);", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("goto label_if_0_exit;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("label_else_0_entry: ;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("char * tmp_13 = \"FALSE\";", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("printf(\"%s\\n\", tmp_13);", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("label_if_0_exit: ;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int tmp_14 = 1;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int tmp_15 = var_i + tmp_14;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("var_i = tmp_15;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_11 = var_arr[var_i];", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("printf(\"%s\\n\", tmp_11);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_12 = 1;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_13 = var_i + tmp_12;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_i = tmp_13;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("}", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("goto label_while_1_entry;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("label_while_1_exit: ;", visitor.GetCodeLines()[i++]);
@@ -141,77 +133,92 @@ namespace MipaCompilerTests.CodeGeneration
             Assert.AreEqual("", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("", visitor.GetCodeLines()[i++]);
 
+
             Assert.AreEqual("// here is the main function", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int main()", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("{", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int tmp_16 = 4;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool * var_myarray1 = malloc(tmp_16 * sizeof(bool));", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool * var_myarray2 = malloc(tmp_16 * sizeof(bool));", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int size_myarray1 = tmp_16;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int size_myarray2 = tmp_16;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool * var_myarray3 = malloc(0 * sizeof(bool));", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_14 = 4;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char ** var_myarray1 = allocateArrayOfStrings(&tmp_14);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char ** var_myarray2 = allocateArrayOfStrings(&tmp_14);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int size_myarray1 = tmp_14;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int size_myarray2 = tmp_14;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_15 = 0;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char ** var_myarray3 = allocateArrayOfStrings(&tmp_15);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int size_myarray3 = 0;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int tmp_17 = 1;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int tmp_18 = 2;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool tmp_19 = tmp_17 > tmp_18;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int tmp_20 = 0;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("var_myarray1[tmp_20] = tmp_19;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int tmp_21 = 1;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int tmp_22 = 1;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool tmp_23 = tmp_21 == tmp_22;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int tmp_24 = 1;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("var_myarray1[tmp_24] = tmp_23;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int tmp_25 = 2;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("var_myarray1[tmp_25] = true;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool tmp_26 = true > false;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int tmp_27 = 3;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("var_myarray1[tmp_27] = tmp_26;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_16 = \"one\";", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_17 = 0;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_myarray1[tmp_17] = tmp_16;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_18 = \"two\";", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_19 = 1;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_myarray1[tmp_19] = tmp_18;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_20 = \"three\";", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_21 = 2;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_myarray1[tmp_21] = tmp_20;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_22 = \"four\";", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_23 = 3;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_myarray1[tmp_23] = tmp_22;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("free(var_myarray2);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("size_myarray2 = size_myarray1;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("var_myarray2 = var_myarray1;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("procedure_printarray(var_myarray1, &size_myarray1);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("procedure_printarray(var_myarray2, &size_myarray2);", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int size_tmp_28;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool * tmp_28 = function_reversearray(&size_tmp_28, var_myarray1, &size_myarray1);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int size_tmp_24;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char ** tmp_24 = function_reversearray(&size_tmp_24, var_myarray1, &size_myarray1);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("free(var_myarray3);", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("size_myarray3 = size_tmp_28;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("var_myarray3 = tmp_28;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("size_myarray3 = size_tmp_24;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_myarray3 = tmp_24;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("procedure_printarray(var_myarray3, &size_myarray3);", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int tmp_29 = 0;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool * tmp_30 = &var_myarray1[tmp_29];", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int tmp_31 = 0;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool * tmp_32 = &var_myarray1[tmp_31];", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool tmp_33 = *tmp_30 == *tmp_32;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int tmp_34 = 0;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("var_myarray1[tmp_34] = tmp_33;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int tmp_35 = 1;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool * tmp_36 = &var_myarray1[tmp_35];", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("bool var_eq;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("bool var_lteq;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("bool var_gt;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("bool var_neq;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * var_concat = malloc(256 * sizeof(char));", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_25 = 0;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_26 = var_myarray1[tmp_25];", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_27 = 0;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_28 = var_myarray1[tmp_27];", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("bool tmp_29 = 0 == strcmp(tmp_26, tmp_28);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_eq = tmp_29;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_30 = 1;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_31 = var_myarray1[tmp_30];", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_32 = 2;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_33 = var_myarray1[tmp_32];", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("bool tmp_34 = 0 != strcmp(tmp_31, tmp_33);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_neq = tmp_34;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_35 = 0;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_36 = var_myarray1[tmp_35];", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int tmp_37 = 1;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool * tmp_38 = &var_myarray1[tmp_37];", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool tmp_39 = *tmp_36 >= *tmp_38;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int tmp_40 = 1;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("var_myarray1[tmp_40] = tmp_39;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int tmp_41 = 2;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool * tmp_42 = &var_myarray1[tmp_41];", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int tmp_43 = 2;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool * tmp_44 = &var_myarray1[tmp_43];", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool tmp_45 = *tmp_42 <= *tmp_44;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int tmp_46 = 2;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("var_myarray1[tmp_46] = tmp_45;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int tmp_47 = 3;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool * tmp_48 = &var_myarray1[tmp_47];", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int tmp_49 = 3;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool * tmp_50 = &var_myarray1[tmp_49];", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("bool tmp_51 = *tmp_48 != *tmp_50;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int tmp_52 = 3;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("var_myarray1[tmp_52] = tmp_51;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_38 = var_myarray1[tmp_37];", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("bool tmp_39 = 0 >= strcmp(tmp_36, tmp_38);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_lteq = tmp_39;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_40 = 2;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_41 = var_myarray1[tmp_40];", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_42 = 3;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_43 = var_myarray1[tmp_42];", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("bool tmp_44 = 0 < strcmp(tmp_41, tmp_43);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_gt = tmp_44;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_45 = 1;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_46 = var_myarray1[tmp_45];", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_47 = \" \";", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_48 = malloc(256 * sizeof(char));", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("strcpy(tmp_48, tmp_46);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("strcat(tmp_48, tmp_47);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_49 = 2;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_50 = var_myarray1[tmp_49];", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_51 = malloc(256 * sizeof(char));", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("strcpy(tmp_51, tmp_48);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("strcat(tmp_51, tmp_50);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("strcpy(var_concat, tmp_51);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("printf(\"%s\\n\", var_concat);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("procedure_printarray(var_myarray1, &size_myarray1);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("procedure_printarray(var_myarray2, &size_myarray2);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("procedure_printarray(var_myarray3, &size_myarray3);", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("free(tmp_28);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("free(var_concat);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("free(tmp_24);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("free(var_myarray1);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("return 0;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("}", visitor.GetCodeLines()[i++]);
+
 
         }
     }

@@ -206,13 +206,16 @@ namespace MipaCompiler.Node
 
                     // allocate memory for array
                     string codeLine = $"{varType} {varName} = malloc({prefix}{tmp_size} * sizeof({allocationType}";
+                    codeLine += "));";
+
                     int address = visitor.GetArrayAddressCounter();
                     visitor.IncreaseArrayAddressCounter();
                     visitor.GetMemoryMap().AddNewAddress(new MemoryAddress(address, varName, symTable.GetCurrentScope()));
 
-                    // each string is has fixed buffer size
-                    if (simpleType == "string") codeLine += Helper.GetStringBufferSize();
-                    codeLine += "));";
+                    // each string arrays are allocated by callind hard coded function
+                    prefix = prefix.Equals("*") ? "" : "&";
+                    if (simpleType == "string") codeLine = $"{varType} {varName} = allocateArrayOfStrings({prefix}{tmp_size});";
+                    
 
                     // add generated code line to list of code lines
                     visitor.AddCodeLine(codeLine);
@@ -220,7 +223,18 @@ namespace MipaCompiler.Node
                 else
                 {
                     // empty array initialized
-                    visitor.AddCodeLine($"{varType} {varName} = malloc(0 * sizeof({allocationType}));");
+                    if (simpleType.Equals("string"))
+                    {
+                        int number = visitor.GetTmpVariableCounter();
+                        visitor.IncreaseTmpVariableCounter();
+                        visitor.AddCodeLine($"int tmp_{number} = 0;");
+                        visitor.AddCodeLine($"{varType} {varName} = allocateArrayOfStrings(&tmp_{number});");
+                    }
+                    else
+                    {
+                        visitor.AddCodeLine($"{varType} {varName} = malloc(0 * sizeof({allocationType}));");
+                    }
+
                     int address = visitor.GetArrayAddressCounter();
                     visitor.IncreaseArrayAddressCounter();
                     visitor.GetMemoryMap().AddNewAddress(new MemoryAddress(address, varName, symTable.GetCurrentScope()));

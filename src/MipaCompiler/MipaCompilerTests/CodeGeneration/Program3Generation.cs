@@ -40,6 +40,39 @@ namespace MipaCompilerTests.CodeGeneration
             Assert.AreEqual("#define false 0", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("", visitor.GetCodeLines()[i++]);
 
+            Assert.AreEqual("// hard coded function to allocate string array", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char ** allocateArrayOfStrings(int * arr_size)", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("{", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char ** x = malloc(*arr_size * sizeof(char *));", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int var_i = 0;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("while_entry: ;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("if (var_i >= *arr_size) goto while_exit;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("{", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("x[var_i] = malloc(256 * sizeof(char));", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_i = var_i + 1;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("}", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("goto while_entry;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("while_exit: ;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("return x;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("}", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("", visitor.GetCodeLines()[i++]);
+
+            Assert.AreEqual("// hard coded function to deallocate string array", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("void deallocateArrayOfStrings(char ** arr, int * arr_size)", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("{", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int var_i = 0;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("while_entry: ;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("if (var_i >= *arr_size) goto while_exit;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("{", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("free(arr[var_i]);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("var_i = var_i + 1;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("}", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("goto while_entry;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("while_exit: ;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("free(arr);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("}", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("", visitor.GetCodeLines()[i++]);
+
             string comment = "// here are forward declarations for functions and procedures (if any exists)";
             Assert.AreEqual(comment, visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int function_sum(int * var_data, int * size_data);", visitor.GetCodeLines()[i++]);

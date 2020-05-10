@@ -203,6 +203,11 @@ namespace MipaCompiler.Node
             {
                 visitor.AddCodeLine($"var_{identifierStr}[{index}] = {prefix2}{temp};");
             }
+            // check if variable is string array
+            else if (varSymbol.GetSymbolType().Equals("array[] of string"))
+            {
+                visitor.AddCodeLine($"var_{identifierStr}[{index}] = {temp};");
+            }
         }
     }
 }

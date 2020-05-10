@@ -117,6 +117,9 @@ namespace MipaCompiler.Node
             // insert required typedefs
             InsertTypedefs(visitor);
 
+            // inserts hard coded functions
+            InsertHardCodedFunctions(visitor);
+
             // insert function and procedure forward declarations
             InsertForwardDeclarations(visitor);
 
@@ -155,6 +158,46 @@ namespace MipaCompiler.Node
             visitor.AddCodeLine("#define true 1");
             visitor.AddCodeLine("#define false 0");
             visitor.AddCodeLine("");
+        }
+
+        /// <summary>
+        /// Method <c>InsertsHardCodedFunctions</c> inserts hard coded functions.
+        /// </summary>
+        private void InsertHardCodedFunctions(Visitor visitor)
+        {
+            visitor.AddCodeLine("// hard coded function to allocate string array");
+            visitor.AddCodeLine("char ** allocateArrayOfStrings(int * arr_size)");
+            visitor.AddCodeLine("{");
+            visitor.AddCodeLine("char ** x = malloc(*arr_size * sizeof(char *));");
+            visitor.AddCodeLine("int var_i = 0;");
+            visitor.AddCodeLine("while_entry: ;");
+            visitor.AddCodeLine("if (var_i >= *arr_size) goto while_exit;");
+            visitor.AddCodeLine("{");
+            visitor.AddCodeLine("x[var_i] = malloc(256 * sizeof(char));");
+            visitor.AddCodeLine("var_i = var_i + 1;");
+            visitor.AddCodeLine("}");
+            visitor.AddCodeLine("goto while_entry;");
+            visitor.AddCodeLine("while_exit: ;");
+            visitor.AddCodeLine("return x;");
+            visitor.AddCodeLine("}");
+            visitor.AddCodeLine("");
+
+            visitor.AddCodeLine("// hard coded function to deallocate string array");
+            visitor.AddCodeLine("void deallocateArrayOfStrings(char ** arr, int * arr_size)");
+            visitor.AddCodeLine("{");
+            visitor.AddCodeLine("int var_i = 0;");
+            visitor.AddCodeLine("while_entry: ;");
+            visitor.AddCodeLine("if (var_i >= *arr_size) goto while_exit;");
+            visitor.AddCodeLine("{");
+            visitor.AddCodeLine("free(arr[var_i]);");
+            visitor.AddCodeLine("var_i = var_i + 1;");
+            visitor.AddCodeLine("}");
+            visitor.AddCodeLine("goto while_entry;");
+            visitor.AddCodeLine("while_exit: ;");
+            visitor.AddCodeLine("free(arr);");
+            visitor.AddCodeLine("}");
+            visitor.AddCodeLine("");
+
         }
 
         /// <summary>

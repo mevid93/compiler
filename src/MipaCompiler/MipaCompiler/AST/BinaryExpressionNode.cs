@@ -667,10 +667,30 @@ namespace MipaCompiler.Node
             string type = variableSymbol.GetSymbolType();
             string cType = Helper.GetElementTypeFromArrayTypeInC(type);
 
-            string line = $"{cType} * {tmpName} = &{lhsTmp}[{rhsTmp}];";
-            visitor.AddCodeLine(line);
-
-            symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "integer", null, symTable.GetCurrentScope(), true));
+            if(type.Equals("array[] of string"))
+            {
+                string line = $"{cType} * {tmpName} = {lhsTmp}[{rhsTmp}];";
+                visitor.AddCodeLine(line);
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "string", null, symTable.GetCurrentScope(), true));
+            }
+            else if (type.Equals("array[] of integer"))
+            {
+                string line = $"{cType} * {tmpName} = &{lhsTmp}[{rhsTmp}];";
+                visitor.AddCodeLine(line);
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "integer", null, symTable.GetCurrentScope(), true));
+            }
+            else if (type.Equals("array[] of real"))
+            {
+                string line = $"{cType} * {tmpName} = &{lhsTmp}[{rhsTmp}];";
+                visitor.AddCodeLine(line);
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "real", null, symTable.GetCurrentScope(), true));
+            }
+            else if (type.Equals("array[] of boolean"))
+            {
+                string line = $"{cType} * {tmpName} = &{lhsTmp}[{rhsTmp}];";
+                visitor.AddCodeLine(line);
+                symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, symTable.GetCurrentScope(), true));
+            }
         }
     }
 }

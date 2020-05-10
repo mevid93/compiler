@@ -549,7 +549,7 @@ namespace MipaCompiler
                 else
                 {
                     break;
-                } 
+                }
                 if (inputToken.GetTokenType() != TokenType.KEYWORD_VAR && !Token.CanBeIdentifier(inputToken)) break;
             }
 
@@ -574,7 +574,7 @@ namespace MipaCompiler
 
             // parse optional expression
             INode expr = null;
-            if (inputToken.GetTokenType() != TokenType.STATEMENT_END 
+            if (inputToken.GetTokenType() != TokenType.STATEMENT_END
                 && inputToken.GetTokenType() != TokenType.KEYWORD_END
                 && inputToken.GetTokenType() != TokenType.KEYWORD_ELSE)
             {
@@ -605,9 +605,9 @@ namespace MipaCompiler
             string value = inputToken.GetTokenValue();
             inputToken = scanner.ScanNextToken();
             INode varNode = new VariableNode(row, col, value, null);
-            
+
             // if assigning to array, there should be bracket next
-            if(inputToken.GetTokenType() == TokenType.BRACKET_LEFT)
+            if (inputToken.GetTokenType() == TokenType.BRACKET_LEFT)
             {
                 Match(TokenType.BRACKET_LEFT);
 
@@ -725,7 +725,7 @@ namespace MipaCompiler
             int idRow = inputToken.GetRow();
             int idCol = inputToken.GetColumn();
             inputToken = scanner.ScanNextToken();
-            
+
             // parse left parenthis
             Match(TokenType.PARENTHIS_LEFT);
             if (errorInStatement) return null;
@@ -924,26 +924,32 @@ namespace MipaCompiler
             // if errors already detected --> return
             if (errorInStatement) return null;
 
-            // check if logical operator as next token
-            switch (inputToken.GetTokenType())
+            // keep parsig expression tail while next token
+            // is adding operator
+            while (true)
             {
-                case TokenType.ADDITION:
-                case TokenType.SUBSTRACTION:
-                case TokenType.LOGICAL_OR:
-                    // parse operator
-                    int row = inputToken.GetRow();
-                    int col = inputToken.GetColumn();
-                    string value = inputToken.GetTokenValue();
-                    inputToken = scanner.ScanNextToken();
+                switch (inputToken.GetTokenType())
+                {
+                    case TokenType.ADDITION:
+                    case TokenType.SUBSTRACTION:
+                    case TokenType.LOGICAL_OR:
+                        // parse operator
+                        int row = inputToken.GetRow();
+                        int col = inputToken.GetColumn();
+                        string value = inputToken.GetTokenValue();
+                        inputToken = scanner.ScanNextToken();
 
-                    // parse right hand side of expression
-                    INode term = ParseTerm();
-                    term = ParseTermTail(term);
-                    if (errorInStatement) return null;
+                        // parse right hand side of expression
+                        INode term = ParseTerm();
+                        term = ParseTermTail(term);
+                        if (errorInStatement) return null;
 
-                    return new BinaryExpressionNode(row, col, value, node, term);
-                default:
-                    return node;
+                        INode bin = new BinaryExpressionNode(row, col, value, node, term);
+                        node = bin;
+                        break;
+                    default:
+                        return node;
+                }
             }
         }
 
@@ -971,27 +977,33 @@ namespace MipaCompiler
             // if errors already detected --> return
             if (errorInStatement) return null;
 
-            // get token type
-            switch (inputToken.GetTokenType())
+            // keep parsig temr tail while next token
+            // is adding operator
+            while (true)
             {
-                case TokenType.MULTIPLICATION:
-                case TokenType.DIVISION:
-                case TokenType.MODULO:
-                case TokenType.LOGICAL_AND:
-                    // parse token
-                    int row = inputToken.GetRow();
-                    int col = inputToken.GetColumn();
-                    string value = inputToken.GetTokenValue();
-                    inputToken = scanner.ScanNextToken();
+                switch (inputToken.GetTokenType())
+                {
+                    case TokenType.MULTIPLICATION:
+                    case TokenType.DIVISION:
+                    case TokenType.MODULO:
+                    case TokenType.LOGICAL_AND:
+                        // parse token
+                        int row = inputToken.GetRow();
+                        int col = inputToken.GetColumn();
+                        string value = inputToken.GetTokenValue();
+                        inputToken = scanner.ScanNextToken();
 
-                    // parse factor
-                    INode factor = ParseFactor();
-                    factor = ParseFactorTail(factor);
-                    if (errorInStatement) return null;
+                        // parse factor
+                        INode factor = ParseFactor();
+                        factor = ParseFactorTail(factor);
+                        if (errorInStatement) return null;
 
-                    return new BinaryExpressionNode(row, col, value, node, factor);
-                default:
-                    return node;
+                        INode bin = new BinaryExpressionNode(row, col, value, node, factor);
+                        node = bin;
+                        break;
+                    default:
+                        return node;
+                }
             }
         }
 
@@ -1065,7 +1077,7 @@ namespace MipaCompiler
                     int rowL = inputToken.GetRow();
                     int colL = inputToken.GetColumn();
                     string oper = Match(TokenType.LOGICAL_NOT);
-          
+
                     // parse expression
                     INode factor = ParseFactor();
                     factor = ParseFactorTail(factor);

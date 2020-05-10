@@ -440,8 +440,8 @@ namespace MipaCompilerTests
             Assert.AreEqual(TokenType.VAL_STRING, scanner.ScanNextToken().GetTokenType());
             Assert.AreEqual(TokenType.STATEMENT_END, scanner.ScanNextToken().GetTokenType());
 
-            Assert.AreEqual(TokenType.KEYWORD_END, scanner.ScanNextToken().GetTokenType());
-            Assert.AreEqual(TokenType.DOT, scanner.ScanNextToken().GetTokenType());
+            Assert.AreEqual(TokenType.IDENTIFIER, scanner.ScanNextToken().GetTokenType());
+            Assert.AreEqual(TokenType.ASSIGNMENT, scanner.ScanNextToken().GetTokenType());
   
         }
     }

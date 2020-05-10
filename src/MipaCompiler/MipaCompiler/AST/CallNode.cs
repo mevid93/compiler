@@ -291,11 +291,13 @@ namespace MipaCompiler.Node
             // be accessible at the last tmp variable
             string lastTemp = visitor.GetLatestUsedTmpVariable();
 
+            // check if type of last tmp variable is string
+            VariableSymbol varSymbol = symTable.GetVariableSymbolByIdentifier(lastTemp);
+            if (varSymbol.GetSymbolType().Equals("string")) return lastTemp;
+
             // check if last tmp variable is pointer
             bool isPointer = symTable.GetVariableSymbolByIdentifier(lastTemp).IsPointer();
-
             if (isPointer) lastTemp = $"*{lastTemp}";
-
             return lastTemp;
         }
 
