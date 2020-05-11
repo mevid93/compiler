@@ -109,20 +109,20 @@ namespace MipaCompiler.Node
             // update information about latest used tmp variable to visitor
             visitor.SetLatestTmpVariableName(tmpName);
 
+            // evaluate type of left hand side
+            string typeLhs = SemanticAnalyzer.EvaluateTypeOfNode(lhs, visitor.GetSymbolTable());
+            // evaluate type of right hand side
+            string typeRhs = SemanticAnalyzer.EvaluateTypeOfNode(rhs, visitor.GetSymbolTable());
+
             // generate the code line
-            GenerateCodeForBinaryExpression(tmpName, lhsTmp, rhsTmp, visitor);
+            GenerateCodeForBinaryExpression(tmpName, lhsTmp, rhsTmp, typeLhs, typeRhs, visitor);
         }
 
         /// <summary>
         /// Method <c>GenerateCodeForBinaryExpression</c> generates the code line for binary operation.
         /// </summary>
-        private void GenerateCodeForBinaryExpression(string tmpName, string lhsTmp, string rhsTmp, Visitor visitor)
+        private void GenerateCodeForBinaryExpression(string tmpName, string lhsTmp, string rhsTmp, string typeLhs, string typeRhs, Visitor visitor)
         {
-
-            // evaluate type of left hand side
-            string typeLhs = SemanticAnalyzer.EvaluateTypeOfNode(lhs, visitor.GetSymbolTable());
-            // evaluate type of right hand side
-            string typeRhs = SemanticAnalyzer.EvaluateTypeOfNode(rhs, visitor.GetSymbolTable());
 
             // check the binary operation and generate code line for it
             switch (value)

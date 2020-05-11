@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace MipaCompiler.Node
 {
@@ -74,6 +73,7 @@ namespace MipaCompiler.Node
             // get boolean expression hoding variable
             string boolVar = visitor.GetLatestUsedTmpVariable();
 
+            // check condition
             visitor.AddCodeLine($"if ({boolVar}) goto label_assert_{number}_exit;");
 
             // give error message
@@ -81,8 +81,6 @@ namespace MipaCompiler.Node
             visitor.AddCodeLine($"printf(\"%s\", \"Assertion error at row {rowInTargetLanguage}... \");");
             visitor.AddCodeLine($"printf(\"%s\\n\", \"Expected {boolVar} to be true!\");");
             visitor.AddCodeLine($"exit(1);");
-
-            // sys exit with error status 1
 
             visitor.AddCodeLine($"label_assert_{number}_exit: ;");
         }
