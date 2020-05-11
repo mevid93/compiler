@@ -1,4 +1,5 @@
-﻿using MipaCompiler.Symbol;
+﻿using MipaCompiler.BackEnd;
+using MipaCompiler.Symbol;
 using System;
 
 namespace MipaCompiler.Node
@@ -140,7 +141,7 @@ namespace MipaCompiler.Node
 
                 VariableSymbol tempVariable = visitor.GetSymbolTable().GetVariableSymbolByIdentifier(temp);
                 
-                visitor.FreeArraysBeforeArrayAssignment($"var_{identifierStr}", varSymbol.GetCurrentScope(), temp, tempVariable.GetCurrentScope());
+                Helper.FreeArraysBeforeArrayAssignment($"var_{identifierStr}", varSymbol.GetCurrentScope(), temp, tempVariable.GetCurrentScope(), visitor);
 
                 visitor.AddCodeLine($"{sizePrefix1}size_{identifierStr} = {sizePrefix2}{sizeName};");
                 visitor.AddCodeLine($"var_{identifierStr} = {temp};");

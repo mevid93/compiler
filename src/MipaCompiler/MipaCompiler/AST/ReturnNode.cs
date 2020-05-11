@@ -67,7 +67,7 @@ namespace MipaCompiler.Node
                 Helper.FreeAllocatedStrings(visitor, true);
 
                 // free allocated arrays
-                visitor.FreeArraysBeforeReturnStatement();
+                Helper.FreeArraysBeforeReturnStatement(visitor);
 
                 // generate code that does not return a value
                 visitor.AddCodeLine("return;");
@@ -85,7 +85,7 @@ namespace MipaCompiler.Node
             Helper.FreeAllocatedStrings(visitor, true, lastTmp);
 
             // free allocated arrays
-            visitor.FreeArraysBeforeReturnStatement(lastTmp);
+            Helper.FreeArraysBeforeReturnStatement(visitor, lastTmp);
 
             // check if returned type is array
             // if it is, then update return array size parameter

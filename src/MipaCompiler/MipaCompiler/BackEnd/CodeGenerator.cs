@@ -10,9 +10,9 @@ namespace MipaCompiler
     /// </summary>
     public class CodeGenerator
     {
-        private readonly string outputFilePath;             // output file path
-        private readonly INode ast;                         // abstract syntax tree
-        private readonly Visitor visitor;                   // visitor for processing ast
+        private readonly string outputFilePath;     // output file path
+        private readonly INode ast;                 // abstract syntax tree
+        private readonly Visitor visitor;           // visitor for processing ast
 
         /// <summary>
         /// Constructor <c>CodeGenerator</c> creates new CodeGenerator-object.

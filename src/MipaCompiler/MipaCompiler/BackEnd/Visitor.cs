@@ -192,32 +192,18 @@ namespace MipaCompiler
             return memoryMap;
         }
 
-        public void FreeArraysBeforeExitingScope(int newscope)
-        {
-            List<string> arrays = memoryMap.GetArraysThatNeedToBeFreedWhenExitingScope(newscope);
-
-            foreach (string arr in arrays) AddCodeLine($"free({arr});");
-        }
-
-        public void FreeArraysBeforeReturnStatement(string skipArray = null)
-        {
-            List<string> arrays = memoryMap.GetArraysThatNeedToBeFreedBeforeReturn(skipArray);
-
-            foreach (string arr in arrays) AddCodeLine($"free({arr});");
-        }
-
-        public void FreeArraysBeforeArrayAssignment(string nameOfArr, int scopeOfArr, string nameOfTargetArr, int scopeOfTargetArr)
-        {
-            string array = memoryMap.MoveArrayToPointOtherAddress(nameOfArr, scopeOfArr, nameOfTargetArr, scopeOfTargetArr);
-
-            if(array != null) AddCodeLine($"free({array});");
-        }
-
+        /// <summary>
+        /// Method <c>GetAssertionCounter</c> returns the next available assertion lable number.
+        /// </summary>
+        /// <returns>counter value</returns>
         public int GetAssertionCounter()
         {
             return assertCounter;
         }
 
+        /// <summary>
+        /// Method <c>IncreaseAssertionCounter</c> increases the assertion counter value.
+        /// </summary>
         public void IncreaseAssertionCounter()
         {
             assertCounter++;

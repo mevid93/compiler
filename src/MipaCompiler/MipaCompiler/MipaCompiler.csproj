@@ -73,6 +73,7 @@
     <Compile Include="FrontEnd\Scanner.cs" />
     <Compile Include="FrontEnd\SemanticAnalyzer.cs" />
     <Compile Include="SymbolTable\FunctionSymbol.cs" />
+    <Compile Include="SymbolTable\ISymbol.cs" />
     <Compile Include="SymbolTable\ProcedureSymbol.cs" />
     <Compile Include="SymbolTable\VariableSymbol.cs" />
     <Compile Include="SymbolTable\SymbolTable.cs" />

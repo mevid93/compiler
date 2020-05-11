@@ -178,7 +178,7 @@ namespace MipaCompiler.BackEnd
         }
 
         /// <summary>
-        /// Method <c>ConvertDeclarationTypeToC</c> converts Mini-Pascal variable declaration
+        /// Static method <c>ConvertDeclarationTypeToC</c> converts Mini-Pascal variable declaration
         /// type into equivalent C-language type.
         /// </summary>
         /// <param name="type">variable declaration type</param>
@@ -209,7 +209,7 @@ namespace MipaCompiler.BackEnd
         }
 
         /// <summary>
-        /// Method <c>GetStringBufferSize</c> returns string buffer size in C-language.
+        /// Static method <c>GetStringBufferSize</c> returns string buffer size in C-language.
         /// </summary>
         /// <returns></returns>
         public static string GetStringBufferSize()
@@ -218,7 +218,7 @@ namespace MipaCompiler.BackEnd
         }
 
         /// <summary>
-        /// Method <c>ConvertTypeToMallocTypeInC</c> converts Mini-Pascal type into
+        /// Static method <c>ConvertTypeToMallocTypeInC</c> converts Mini-Pascal type into
         /// C-language type that is used to allocate memoery.
         /// </summary>
         /// <param name="type">Mini-Pascal type</param>
@@ -249,7 +249,7 @@ namespace MipaCompiler.BackEnd
         }
 
         /// <summary>
-        /// Method <c>GetElementTypeFromArrayTypeInC</c> converts Mini-Pascal array type
+        /// Static method <c>GetElementTypeFromArrayTypeInC</c> converts Mini-Pascal array type
         /// to C-language array element type.
         /// </summary>
         /// <param name="miniPascalArrayType">array declaration type</param>
@@ -271,7 +271,7 @@ namespace MipaCompiler.BackEnd
         }
 
         /// <summary>
-        /// Method <c>FreeStrings</c> frees all strings before return statement.
+        /// Static method <c>FreeStrings</c> frees all strings before return statement.
         /// Second parameter is optional and meant for strings that are returned
         /// and should not be freed. String that is skipped, is removed from the
         /// list of allocated strings.
@@ -317,6 +317,54 @@ namespace MipaCompiler.BackEnd
                     visitor.AddCodeLine($"free({allocatedStrings[i]});");
                 }
             }
+        }
+
+        /// <summary>
+        /// Static method <c>FreeArraysBeforeExitingScope</c> frees arrays stored in visitor
+        /// before exiting scope.
+        /// </summary>
+        /// <param name="newscope">new scope level after exiting scope</param>
+        /// <param name="visitor">code generator visitor</param>
+        public static void FreeArraysBeforeExitingScope(int newscope, Visitor visitor)
+        {
+            MemoryMap memoryMap = visitor.GetMemoryMap();
+
+            List<string> arrays = memoryMap.GetArraysThatNeedToBeFreedWhenExitingScope(newscope);
+
+            foreach (string arr in arrays) visitor.AddCodeLine($"free({arr});");
+        }
+
+        /// <summary>
+        /// Static method <c>FreeArraysBeforeReturnStatement</c> frees arrays stored in visitor
+        /// before return statement.
+        /// </summary>
+        /// <param name="skipArray">array which should not be freed</param>
+        /// <param name="visitor">code generator visitor</param>
+        public static void FreeArraysBeforeReturnStatement(Visitor visitor, string skipArray = null)
+        {
+            MemoryMap memoryMap = visitor.GetMemoryMap();
+
+            List<string> arrays = memoryMap.GetArraysThatNeedToBeFreedBeforeReturn(skipArray);
+
+            foreach (string arr in arrays) visitor.AddCodeLine($"free({arr});");
+        }
+
+        /// <summary>
+        /// Static method <c>FreeArraysBeforeArrayAssignment</c> frees arrays stored in visitor
+        /// before array assignment operation.
+        /// </summary>
+        /// <param name="nameOfArr">array variable that is assigned new address</param>
+        /// <param name="scopeOfArr">scope of array tha tis assigned a new address</param>
+        /// <param name="nameOfTargetArr">name of the array which address is assigned</param>
+        /// <param name="scopeOfTargetArr">scope of the array which address is assigned</param>
+        /// <param name="visitor">code generator visitor</param>
+        public static void FreeArraysBeforeArrayAssignment(string nameOfArr, int scopeOfArr, string nameOfTargetArr, int scopeOfTargetArr, Visitor visitor)
+        {
+            MemoryMap memoryMap = visitor.GetMemoryMap();
+
+            string array = memoryMap.MoveArrayToPointOtherAddress(nameOfArr, scopeOfArr, nameOfTargetArr, scopeOfTargetArr);
+
+            if (array != null) visitor.AddCodeLine($"free({array});");
         }
 
     }

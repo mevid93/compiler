@@ -1,12 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace MipaCompiler
 {
     /// <summary>
     /// Class <c>MemoryMap</c> contains functionality to keep record of different arrays
-    /// and where they point. Class is used for array memory free operations, so that
-    /// arrays are freed when needed.
+    /// and where they point. Class is used for array memory deallocation operations, so that
+    /// arrays are freed when they are not needed any more.
     /// </summary>
     public class MemoryMap
     {
@@ -185,7 +184,10 @@ namespace MipaCompiler
             return arrays;
         }
 
-
+        /// <summary>
+        /// Method <c>GetAddresses</c> returns list of memory addresses.
+        /// </summary>
+        /// <returns>list of addresses</returns>
         public List<MemoryAddress> GetAddresses()
         {
             return addresses;
@@ -197,7 +199,7 @@ namespace MipaCompiler
     /// </summary>
     public class MemoryAddress
     {
-        private int address;                // address where the arrays are pointing
+        private readonly int address;       // address where the arrays are pointing
         private List<ArrayInfo> arrays;     // list of arrays pointing to address
 
         /// <summary>
@@ -222,6 +224,10 @@ namespace MipaCompiler
             return address;
         }
 
+        /// <summary>
+        /// Method <c>GetArrayInfos</c> returns list of arrays pointing to the address.
+        /// </summary>
+        /// <returns></returns>
         public List<ArrayInfo> GetArrayInfos()
         {
             return arrays;
@@ -229,27 +235,48 @@ namespace MipaCompiler
         
     }
 
+    /// <summary>
+    /// Class <c>ArrayInfo</c> represents single array.
+    /// </summary>
     public class ArrayInfo
     {
-        private string arrayName;
-        private int arrayScope;
+        private readonly string arrayName;      // name of the array
+        private readonly int arrayScope;        // scope of the array
 
+        /// <summary>
+        /// Constructor <c>ArrayInfo</c> creates new ArrayInfo-object.
+        /// </summary>
+        /// <param name="arrayName">name of the array</param>
+        /// <param name="arrayScope">scope of the array</param>
         public ArrayInfo(string arrayName, int arrayScope)
         {
             this.arrayName = arrayName;
             this.arrayScope = arrayScope;
         }
 
+        /// <summary>
+        /// Method <c>GetName</c> returns name of the array.
+        /// </summary>
+        /// <returns>array name</returns>
         public string GetName()
         {
             return arrayName;
         }
 
+        /// <summary>
+        /// Method <c>GetScope</c> returns scope of the array.
+        /// </summary>
+        /// <returns>array scope</returns>
         public int GetScope()
         {
             return arrayScope;
         }
 
+        /// <summary>
+        /// Method <c>AreSame</c> checks is array is the same as the one given as parameter.
+        /// </summary>
+        /// <param name="compared">array to compare</param>
+        /// <returns>true if arrays are identical</returns>
         public bool AreSame(ArrayInfo compared)
         {
             if (compared.GetScope() == arrayScope && compared.GetName() == arrayName) return true;
