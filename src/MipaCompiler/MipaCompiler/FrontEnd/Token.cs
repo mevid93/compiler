@@ -62,7 +62,7 @@ namespace MipaCompiler
     }
 
     /// <summary>
-    /// Class <c>Token</c> represents a token scanned from source code.
+    /// Class <c>Token</c> represents a token scanned from the source code.
     /// </summary>
     public class Token
     {

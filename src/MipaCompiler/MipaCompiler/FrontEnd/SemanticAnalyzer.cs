@@ -743,7 +743,7 @@ namespace MipaCompiler
             string left = EvaluateTypeOfExpressionNode(lhs, errors, symbolTable);
             string right = EvaluateTypeOfExpressionNode(rhs, errors, symbolTable);
 
-            if (left == null && right == null) return null;
+            if (left == null ||right == null) return null;
 
             // if left and right have same type and that type is among allowed types --> then ok
             foreach (string type in supportedTypes)
@@ -755,17 +755,9 @@ namespace MipaCompiler
                 }
             }
             
-            // left hand side is null --> it is array with null index expression
-            if(left == null)
-            {
-                foreach(string type in supportedTypes)
-                {
-                    if (right.Equals(type)) return overrideReturnType == null ? right : overrideReturnType;
-                }
-            }
             // there are also cases where left and right do not have same type but still valid
             // for example, it is ok to sum integer and real
-            else if ((left.Equals(STR_INTEGER) || left.Equals(STR_REAL)) && (right.Equals(STR_INTEGER) || right.Equals(STR_REAL)))
+            if ((left.Equals(STR_INTEGER) || left.Equals(STR_REAL)) && (right.Equals(STR_INTEGER) || right.Equals(STR_REAL)))
             {
                 bool realIsSupported = false;
                 bool integerIsSupported = false;
@@ -777,7 +769,6 @@ namespace MipaCompiler
 
                 if (realIsSupported && integerIsSupported) return "real";
             }
-
 
             // was not correct --> report error
             string errorMsg = $"Operation {bin.GetOperation()} not supported between types {left} and {right}";
@@ -797,7 +788,7 @@ namespace MipaCompiler
         public static string EvaluateTypeOfArrayIndexNode(INode node, List<string> errors, SymbolTable symbolTable)
         {
             if (node == null) return null;
-
+            
             // convert to arrayindex node
             BinaryExpressionNode arrayIndex = (BinaryExpressionNode)node;
 
@@ -810,7 +801,7 @@ namespace MipaCompiler
                 string type = EvaluateTypeOfExpressionNode(expression, errors, symbolTable);
 
                 // check if type was not integer
-                if (!type.Equals(STR_INTEGER))
+                if (type == null || !type.Equals(STR_INTEGER))
                 {
                     // was not correct --> report error
                     string errorMsg = $"Cannot implicitly convert type {type} to integer!";

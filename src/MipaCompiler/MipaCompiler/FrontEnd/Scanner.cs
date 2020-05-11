@@ -8,12 +8,12 @@ namespace MipaCompiler
     /// </summary>
     public class Scanner
     {
-        private bool processingCommentblock;       // flag telling if processing multiline comment block {* *}
-        private int rowNum;                        // row of source code that is processed
-        private int colNum;                        // column of source code that is processed
-        private int tmpRowNum;                     // tmp variable to hold original row
-        private int tmpColNum;                     // tmp variable to hold original column
-        private string[] lines;                    // source code lines
+        private bool processingCommentblock;    // flag telling if processing multiline comment block {* *}
+        private int rowNum;                     // row of source code that is processed
+        private int colNum;                     // column of source code that is processed
+        private int tmpRowNum;                  // tmp variable to hold original row
+        private int tmpColNum;                  // tmp variable to hold original column
+        private string[] lines;                 // source code lines
 
         /// <summary>
         /// Constructor <c>Scanner</c> creates new Scanner-object.

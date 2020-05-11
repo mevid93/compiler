@@ -5,14 +5,14 @@ using System.IO;
 namespace MipaCompiler
 {
     /// <summary>
-    /// Class <c>Program</c> is the Driver-class for the compiler.
+    /// Class <c>Program</c> is the driver class for the compiler.
     /// </summary>
     class Program
     {
         /// <summary>
         /// Static method <c>Main</c> starts the Mini-Pascal compiler.
         /// </summary>
-        /// <param name="args">input parameters (source code file)</param>
+        /// <param name="args">input parameters (source code file && output file)</param>
         static int Main(string[] args)
         {
             // user must provide path to source code file as input parameter

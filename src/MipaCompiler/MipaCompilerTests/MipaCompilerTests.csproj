@@ -84,6 +84,9 @@
   </ItemGroup>
   <ItemGroup />
   <ItemGroup>
+    <Content Include="SampleFiles\InvalidSemantics\error2.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="SampleFiles\InvalidSemantics\error1.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

@@ -330,6 +330,27 @@ namespace MipaCompilerTests
         }
 
         [TestMethod]
+        [DeploymentItem("SampleFiles\\InvalidSemantics\\error2.txt")]
+        public void CheckConstraintsWorksWithError2()
+        {
+            string filename = "error2.txt";
+            Scanner scanner = new Scanner(filename);
+            Parser parser = new Parser(scanner);
+            INode ast = parser.Parse();
+
+            Assert.IsFalse(parser.ErrorsDetected());
+
+            SemanticAnalyzer analyzer = new SemanticAnalyzer(ast);
+            analyzer.CheckConstraints();
+
+            Assert.IsTrue(analyzer.ErrosDetected());
+            Assert.IsTrue(analyzer.GetDetectedErrors().Count != 0);
+
+            List<string> errors = analyzer.GetDetectedErrors();
+
+        }
+
+        [TestMethod]
         [DeploymentItem("SampleFiles\\InvalidSemantics\\variableDcl.txt")]
         public void CheckConstraintsWorksWithInvalidVariableDcl()
         {
