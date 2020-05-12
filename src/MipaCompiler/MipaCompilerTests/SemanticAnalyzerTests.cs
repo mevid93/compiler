@@ -414,5 +414,25 @@ namespace MipaCompilerTests
             Assert.IsFalse(analyzer.ErrosDetected());
             Assert.IsTrue(analyzer.GetDetectedErrors().Count == 0);
         }
+
+        [TestMethod]
+        [DeploymentItem("SampleFiles\\ValidSemantics\\readwriteln.txt")]
+        public void CheckConstraintsWorksWithReadWriteln()
+        {
+            string filename = "readwriteln.txt";
+            Scanner scanner = new Scanner(filename);
+            Parser parser = new Parser(scanner);
+            INode ast = parser.Parse();
+
+            //ast.PrettyPrint();
+
+            Assert.IsFalse(parser.ErrorsDetected());
+
+            SemanticAnalyzer analyzer = new SemanticAnalyzer(ast);
+            analyzer.CheckConstraints();
+
+            Assert.IsFalse(analyzer.ErrosDetected());
+            Assert.IsTrue(analyzer.GetDetectedErrors().Count == 0);
+        }
     }
 }

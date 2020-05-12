@@ -889,20 +889,10 @@ namespace MipaCompiler
             // check if procedure with same name exists in table
             bool procedureNameExists = symbolTable.IsProcedureInTable(identifier);
 
-            // could be a function call
-            FunctionSymbol fs = new FunctionSymbol(identifier, parameters, null);
-            bool functionInTable = symbolTable.IsFunctionSymbolInTable(fs);
-
-            // could be a procedure call
-            ProcedureSymbol ps = new ProcedureSymbol(identifier, parameters);
-            bool procedureInTable = symbolTable.IsProcedureSymbolInTable(ps);
-
             // is a function
-            if (functionNameExists && !procedureNameExists) return CheckFunctionCall(node, functionInTable, identifier, parameters, errors, symbolTable);
+            if (functionNameExists) return CheckFunctionCall(node, identifier, parameters, errors, symbolTable);
             // is a procedure
-            if (!functionNameExists && procedureNameExists) return CheckProcedureCall(node, procedureInTable, identifier, parameters, errors, symbolTable);
-            // can be both function or procedure call
-            if (functionNameExists && procedureNameExists) return CheckProcedureFunctionCall(node, functionInTable, procedureInTable, identifier, parameters, errors, symbolTable);
+            if (procedureNameExists) return CheckProcedureCall(node, identifier, parameters, errors, symbolTable);
             // is predefined read procedure call
             if (identifier.Equals("read")) return CheckReadCall(node, errors, symbolTable);
             // is predefined writeln procedure call
@@ -920,55 +910,49 @@ namespace MipaCompiler
         /// Returns function return type.
         /// </summary>
         /// <param name="node">function call node</param>
-        /// <param name="functionInTable">does function exist in table</param>
         /// <param name="identifier">function name</param>
         /// <param name="parameters">parameter list</param>
         /// <param name="errors">list of detected errors</param>
         /// <param name="symbolTable">symbol table</param>
         /// <returns>return type of the function return value</returns>
-        public static string CheckFunctionCall(INode node, bool functionInTable, string identifier, string[] parameters, List<string> errors, SymbolTable symbolTable)
+        public static string CheckFunctionCall(INode node, string identifier, string[] parameters, List<string> errors, SymbolTable symbolTable)
         {
-            if (functionInTable)
-            {
-                FunctionSymbol fsymbol = symbolTable.GetFunctionSymbolByIdentifierAndArguments(identifier, parameters);
-                return fsymbol.GetReturnType();
-            }
-            else
-            {
-                // incorrect arguments --> report error
-                FunctionSymbol similar = symbolTable.GetMostSimilarFunctionSymbol(identifier, parameters);
+            FunctionSymbol fsymbol = symbolTable.GetFunctionSymbolByIdentifierAndArguments(identifier, parameters);
 
-                string errorMsg = $"Procedure/Function arguments are invalid!";
-                ReportError(node.GetRow(), node.GetCol(), errors, errorMsg);
+            if(fsymbol != null) return fsymbol.GetReturnType();
+            
+            
+            // incorrect arguments --> report error
+            FunctionSymbol similar = symbolTable.GetFunctionSymbolByIdentifier(identifier);
 
-                return similar.GetReturnType();
-            }
+            string errorMsg = $"Function arguments are invalid!";
+            ReportError(node.GetRow(), node.GetCol(), errors, errorMsg);
+
+            return similar.GetReturnType();
+            
         }
 
         /// <summary>
         /// Static method <c>CheckProcedureCall</c> checks that the procedure call parameters are correct.
         /// </summary>
         /// <param name="node">procedure call node</param>
-        /// <param name="procedureInTable">procedure in table</param>
         /// <param name="identifier">procedure name</param>
         /// <param name="parameters">parameters</param>
         /// <param name="errors">list of detected erros</param>
         /// <param name="symbolTable">symbol table</param>
         /// <returns>null</returns>
-        public static string CheckProcedureCall(INode node, bool procedureInTable, string identifier, string[] parameters, List<string> errors, SymbolTable symbolTable)
+        public static string CheckProcedureCall(INode node, string identifier, string[] parameters, List<string> errors, SymbolTable symbolTable)
         {
-            if (procedureInTable)
-            {
-                ProcedureSymbol psymbol = symbolTable.GetProcedureSymbolByIdentifierAndArguments(identifier, parameters);
-            }
-            else
-            {
-                // incorrect arguments --> report error
-                ProcedureSymbol similar = symbolTable.GetMostSimilarProcedureSymbol(identifier, parameters);
 
-                string errorMsg = $"Procedure/Function arguments are invalid!";
-                ReportError(node.GetRow(), node.GetCol(), errors, errorMsg);
-            }
+            ProcedureSymbol psymbol = symbolTable.GetProcedureSymbolByIdentifierAndArguments(identifier, parameters);
+
+            if (psymbol != null) return null;
+
+            // incorrect arguments --> report error
+            ProcedureSymbol similar = symbolTable.GetProcedureSymbolByIdentifier(identifier);
+
+            string errorMsg = $"Procedure arguments are invalid!";
+            ReportError(node.GetRow(), node.GetCol(), errors, errorMsg);
             return null;
         }
 
@@ -1100,40 +1084,6 @@ namespace MipaCompiler
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// Static method <c>CheckProcedureFunctionCall</c> checks the arguments of
-        /// the function/procedure that is called.
-        /// </summary>
-        /// <param name="node">function call node</param>
-        /// <param name="functionInTable">is function in table</param>
-        /// <param name="procedureInTable">is procedure in table</param>
-        /// <param name="identifier">function/procedure name</param>
-        /// <param name="parameters">parameters</param>
-        /// <param name="errors">list of detected erros</param>
-        /// <param name="symbolTable">symbol table</param>
-        /// <returns>function return type</returns>
-        public static string CheckProcedureFunctionCall(INode node, bool functionInTable, bool procedureInTable, string identifier, string[] parameters, List<string> errors, SymbolTable symbolTable)
-        {
-            if (functionInTable)
-            {
-                FunctionSymbol f = symbolTable.GetFunctionSymbolByIdentifierAndArguments(identifier, parameters);
-                return f.GetReturnType();
-            }
-            else if (procedureInTable)
-            {
-                return null;
-            }
-            else
-            {
-                string errorMsg = "Procedure/Function arguments are invalid!";
-                ReportError(node.GetRow(), node.GetCol(), errors, errorMsg);
-
-                FunctionSymbol f = symbolTable.GetMostSimilarFunctionSymbol(identifier, parameters);
-                return f.GetReturnType();
-            }
-
         }
 
         /// <summary>

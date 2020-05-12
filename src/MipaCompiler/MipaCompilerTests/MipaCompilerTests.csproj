@@ -138,6 +138,9 @@
     <Content Include="SampleFiles\ValidSemantics\assertion.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="SampleFiles\ValidSemantics\readwriteln.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="SampleFiles\ValidSemantics\expressionWIthCall.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

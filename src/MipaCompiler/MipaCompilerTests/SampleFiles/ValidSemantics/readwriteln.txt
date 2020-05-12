@@ -1,0 +1,19 @@
+program Example;
+
+function writeln(var i : integer): integer;
+begin
+    return 1;
+end;
+
+procedure read(var i : integer);
+begin
+    i := 1 + 1;
+end;
+
+begin
+    var mj: integer;
+
+	{* Should override predifined procedures *}
+    read(mj);
+    writeln(1);
+end.
