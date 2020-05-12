@@ -17,6 +17,9 @@ namespace MipaCompiler
         private readonly List<string> errors;           // list of all detected errors
         private readonly SymbolTable symbolTable;       // symbol table to store variables, functions and procedures
         private string returnStmntType;                 // type of return value expected
+        private bool pathsInBlockReturned;              // flag tells if all execution paths in code block have returned
+        private bool lastStmntWasReturn;                // flag tells if last statements was return statement
+        private bool processingIfElseStructure;         // flag tells if processing if else structure
 
         /// <summary>
         /// Constructor <c>SemanticAnalyzer</c> creates new SemanticAnalyzer-object.
@@ -95,6 +98,7 @@ namespace MipaCompiler
 
             // do semantic analysis for the main block,
             // can be null if parsing failed
+            pathsInBlockReturned = false;
             INode block = prog.GetMainBlock();
             CheckBlock(block);
 
@@ -209,6 +213,8 @@ namespace MipaCompiler
         {
             if (node == null) return;
 
+            pathsInBlockReturned = false;
+
             symbolTable.AddScope();
 
             // convert node to function node
@@ -216,6 +222,12 @@ namespace MipaCompiler
 
             // check the function code
             CheckBlock(func.GetBlock());
+
+            if (!pathsInBlockReturned)
+            {
+                string errorMsg = $"Not all code paths return a value!";
+                ReportError(func.GetRow(), func.GetCol(), errors, errorMsg);
+            }
 
             symbolTable.RemoveScope();
         }
@@ -226,6 +238,8 @@ namespace MipaCompiler
         private void CheckProcedure(INode node)
         {
             if (node == null) return;
+
+            pathsInBlockReturned = false;
 
             symbolTable.AddScope();
 
@@ -258,8 +272,20 @@ namespace MipaCompiler
             // check semantics for each statement
             foreach (INode stmnt in statements)
             {
-                CheckStatement(stmnt);
+                if (pathsInBlockReturned)
+                {
+                    string errorMsg = $"Unreachable statement!";
+                    ReportError(stmnt.GetRow(), stmnt.GetCol(), errors, errorMsg);
+                    CheckStatement(stmnt);
+                    pathsInBlockReturned = true;
+                }
+                else
+                {
+                    CheckStatement(stmnt);
+                }
             }
+
+            if (pathsInBlockReturned == false && lastStmntWasReturn) pathsInBlockReturned = true;
 
             // remove scope
             symbolTable.RemoveScope();
@@ -271,6 +297,8 @@ namespace MipaCompiler
         private void CheckStatement(INode stmnt)
         {
             if (stmnt == null) return;
+
+            lastStmntWasReturn = false;
 
             switch (stmnt.GetNodeType())
             {
@@ -290,6 +318,11 @@ namespace MipaCompiler
                     CheckIfElse(stmnt);
                     break;
                 case NodeType.RETURN:
+                    if (!processingIfElseStructure)
+                    {
+                        pathsInBlockReturned = true;
+                    }
+                    lastStmntWasReturn = true;
                     CheckReturn(stmnt);
                     break;
                 case NodeType.VARIABLE_DCL:
@@ -408,8 +441,18 @@ namespace MipaCompiler
             INode thenStatement = ifNode.GetThenStatement();
             INode elseStatement = ifNode.GetElseStatement();
 
+            processingIfElseStructure = true;
             CheckStatement(thenStatement);
+            bool thenReturns = lastStmntWasReturn;
             CheckStatement(elseStatement);
+            bool elseReturns = lastStmntWasReturn;
+            processingIfElseStructure = false;
+            
+            if(elseStatement == null)
+            {
+                lastStmntWasReturn = false;
+            }
+            else if (elseStatement != null && thenReturns && elseReturns) pathsInBlockReturned = true;
         }
 
         /// <summary>

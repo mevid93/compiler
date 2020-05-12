@@ -1,0 +1,12 @@
+program Missing;
+
+function F (n : integer) : integer;  
+begin
+    return 1;
+	writeln("Dead code");
+	return 2;
+end;
+
+begin
+	F(1);
+end. 

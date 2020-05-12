@@ -396,6 +396,48 @@ namespace MipaCompilerTests
         }
 
         [TestMethod]
+        [DeploymentItem("SampleFiles\\InvalidSemantics\\returnMissing.txt")]
+        public void CheckConstraintsWorksWithReturnMissing()
+        {
+            string filename = "returnMissing.txt";
+            Scanner scanner = new Scanner(filename);
+            Parser parser = new Parser(scanner);
+            INode ast = parser.Parse();
+
+            Assert.IsFalse(parser.ErrorsDetected());
+
+            SemanticAnalyzer analyzer = new SemanticAnalyzer(ast);
+            analyzer.CheckConstraints();
+
+            Assert.IsTrue(analyzer.ErrosDetected());
+            Assert.IsTrue(analyzer.GetDetectedErrors().Count == 2);
+
+            List<string> errors = analyzer.GetDetectedErrors();
+            
+        }
+
+        [TestMethod]
+        [DeploymentItem("SampleFiles\\InvalidSemantics\\deadCode.txt")]
+        public void CheckConstraintsWorksWithDeadCode()
+        {
+            string filename = "deadCode.txt";
+            Scanner scanner = new Scanner(filename);
+            Parser parser = new Parser(scanner);
+            INode ast = parser.Parse();
+
+            Assert.IsFalse(parser.ErrorsDetected());
+
+            SemanticAnalyzer analyzer = new SemanticAnalyzer(ast);
+            analyzer.CheckConstraints();
+
+            Assert.IsTrue(analyzer.ErrosDetected());
+            Assert.IsTrue(analyzer.GetDetectedErrors().Count == 2);
+
+            List<string> errors = analyzer.GetDetectedErrors();
+
+        }
+
+        [TestMethod]
         [DeploymentItem("SampleFiles\\ValidSemantics\\expressionWithCall.txt")]
         public void CheckConstraintsWorksWithFunctionCallInsideExpression()
         {

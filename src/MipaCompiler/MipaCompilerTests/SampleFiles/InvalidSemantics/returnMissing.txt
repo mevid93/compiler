@@ -1,0 +1,17 @@
+program Missing;
+
+function F (n : integer) : integer;  
+begin
+    if n = 0 then
+        return 1;    
+end;
+
+function P (n : integer) : integer;  
+begin
+    writeln("return ?");    
+end;  
+
+begin
+	F(1);
+	P(2);
+end. 
