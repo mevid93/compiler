@@ -18,7 +18,7 @@ namespace MipaCompilerTests.CodeGeneration
             INode ast = parser.Parse();
 
             Visitor visitor = new Visitor();
-
+            
             ast.GenerateCode(visitor);
 
             Assert.IsTrue(visitor.GetCodeLines().Count != 0);
@@ -84,16 +84,18 @@ namespace MipaCompilerTests.CodeGeneration
             Assert.AreEqual("char * function_doublestring(char * var_value)", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("{", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("char * tmp_0 = malloc(256 * sizeof(char));", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("strcpy(tmp_0, var_value);", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("strcat(tmp_0, var_value);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("strncpy(tmp_0, var_value, 255);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_1 = strlen(tmp_0);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_2 = 255 - tmp_1;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("strncat(tmp_0, var_value, tmp_2);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("return tmp_0;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("}", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("", visitor.GetCodeLines()[i++]);
 
             Assert.AreEqual("void procedure_replacewithyolo(char * var_value)", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("{", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("char * tmp_1 = \"Yolo\";", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("strcpy(var_value, tmp_1);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_3 = \"Yolo\";", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("strncpy(var_value, tmp_3, 255);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("}", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("", visitor.GetCodeLines()[i++]);
@@ -104,20 +106,31 @@ namespace MipaCompilerTests.CodeGeneration
             Assert.AreEqual("char * var_mystring1 = malloc(256 * sizeof(char));", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("char * var_mystring2 = malloc(256 * sizeof(char));", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("char * var_mystring3 = malloc(256 * sizeof(char));", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("char * tmp_2 = \"Hello\";", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("strcpy(var_mystring1, tmp_2);", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("char * tmp_3 = \"World\";", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("strcpy(var_mystring2, tmp_3);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_4 = \"Hello\";", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("strncpy(var_mystring1, tmp_4, 255);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_5 = \"World\";", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("strncpy(var_mystring2, tmp_5, 255);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("scanf(\"%s\", var_mystring3);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("printf(\"%s\\n\", var_mystring1);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("printf(\"%s\\n\", var_mystring2);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("printf(\"%s\\n\", var_mystring3);", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("char * tmp_4 = function_doublestring(var_mystring3);", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("strcpy(var_mystring1, tmp_4);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_6 = function_doublestring(var_mystring3);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("strncpy(var_mystring1, tmp_6, 255);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("procedure_replacewithyolo(var_mystring2);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("printf(\"%s\\n\", var_mystring1);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("printf(\"%s\\n\", var_mystring2);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("printf(\"%s\\n\", var_mystring3);", visitor.GetCodeLines()[i++]);
+
+            Assert.AreEqual("char * tmp_7 = \"xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\";", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("strncpy(var_mystring1, tmp_7, 255);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char * tmp_8 = malloc(256 * sizeof(char));", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("strncpy(tmp_8, var_mystring1, 255);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_9 = strlen(tmp_8);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_10 = 255 - tmp_9;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("strncat(tmp_8, var_mystring1, tmp_10);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("strncpy(var_mystring1, tmp_8, 255);", visitor.GetCodeLines()[i++]);
+
+            Assert.AreEqual("free(tmp_8);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("free(var_mystring3);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("free(var_mystring2);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("free(var_mystring1);", visitor.GetCodeLines()[i++]);

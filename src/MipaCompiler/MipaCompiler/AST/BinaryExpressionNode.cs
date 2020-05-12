@@ -299,9 +299,25 @@ namespace MipaCompiler.Node
                 symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "string", null, scope));
                 string prefixLhs = Helper.GetPrefixWhenPointerNeeded("string", lhsIsPointer);
                 string prefixRhs = Helper.GetPrefixWhenPointerNeeded("string", rhsIsPointer);
+
+                // create new string where lhs is copied
                 visitor.AddCodeLine($"{type} {tmpName} = malloc(256 * sizeof(char));");
-                visitor.AddCodeLine($"strcpy({tmpName}, {prefixLhs}{lhsTmp});");
-                visitor.AddCodeLine($"strcat({tmpName}, {prefixRhs}{rhsTmp});");
+                visitor.AddCodeLine($"strncpy({tmpName}, {prefixLhs}{lhsTmp}, 255);");
+
+                // find out how much can be copied to lhs at max
+                int number = visitor.GetTmpVariableCounter();
+                visitor.IncreaseTmpVariableCounter();
+                visitor.AddCodeLine($"int tmp_{number} = strlen({tmpName});");
+
+                int number2 = visitor.GetTmpVariableCounter();
+                visitor.IncreaseTmpVariableCounter();
+                visitor.AddCodeLine($"int tmp_{number2} = 255 - tmp_{number};");
+
+                // copy from rhs the max amount of characters that fit to new string where lhs has been copied
+                visitor.AddCodeLine($"strncat({tmpName}, {prefixRhs}{rhsTmp}, tmp_{number2});");
+
+                // add new string to list of strings that need to be freed
+                visitor.AddAllocatedString(tmpName);
             }
         }
 

@@ -282,6 +282,7 @@ namespace MipaCompiler.BackEnd
         {
             // get list of allocated strings
             List<string> allocatedStrings = visitor.GetAllocatedStrings();
+            List<string> removedStrings = new List<string>();
 
             // get symbol table
             SymbolTable symTable = visitor.GetSymbolTable();
@@ -304,15 +305,17 @@ namespace MipaCompiler.BackEnd
                 }
 
                 // free and remove strings from list that are above threshold
-                if (varSymbol.GetCurrentScope() > thresholdScope)
+                if (varSymbol.GetCurrentScope() > thresholdScope && !removedStrings.Contains(allocatedStrings[i]))
                 {
+                    string remove = allocatedStrings[i];
                     visitor.AddCodeLine($"free({allocatedStrings[i]});");
                     allocatedStrings.Remove(allocatedStrings[i]);
+                    removedStrings.Add(remove);
                     continue;
                 }
 
                 // free strings below threshold but do not remove them (only is freeBeforeReturn)
-                if (freeBeforeReturn)
+                if (freeBeforeReturn && !removedStrings.Contains(allocatedStrings[i]))
                 {
                     visitor.AddCodeLine($"free({allocatedStrings[i]});");
                 }

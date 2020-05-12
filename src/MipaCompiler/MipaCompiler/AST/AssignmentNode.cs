@@ -127,7 +127,7 @@ namespace MipaCompiler.Node
             // string assignment is done with strcpy
             if (varSymbol.GetSymbolType().Equals("string"))
             {
-                visitor.AddCodeLine($"strcpy(var_{identifierStr}, {temp});");
+                visitor.AddCodeLine($"strncpy(var_{identifierStr}, {temp}, 255);");
             }
             // if array is assigned to array
             else if (varSymbol.GetSymbolType().Contains("array"))
