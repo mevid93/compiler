@@ -1,0 +1,26 @@
+program QuotientRemainder;
+
+function Quotient(dividend: integer, var divisor : integer) : integer;
+begin
+    return dividend / divisor;
+end;
+
+function Remainder(var dividend: integer, divisor : integer) : integer;
+begin
+    return dividend % divisor;
+end;
+
+begin
+    var dividend, divisor, quotient, remainder : integer;
+    
+    writeln("Enter dividend (integer):");
+    read(dividend);
+    writeln("Enter divisor (integer)");
+    read(divisor);
+    
+    quotient := quotient(dividend, divisor);
+    remainder := remainder(dividend, divisor);
+
+    writeln("Quotient = ", quotient);
+    writeln("Remainder = ", remainder);
+end.

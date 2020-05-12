@@ -111,6 +111,9 @@
     <Content Include="SampleFiles\program1.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="SampleFiles\program13.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="SampleFiles\program12.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
