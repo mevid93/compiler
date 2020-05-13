@@ -168,12 +168,16 @@ namespace MipaCompiler.Node
             visitor.AddCodeLine("// hard coded function to allocate string array");
             visitor.AddCodeLine("char ** allocateArrayOfStrings(int * arr_size)");
             visitor.AddCodeLine("{");
-            visitor.AddCodeLine("char ** x = malloc(*arr_size * sizeof(char *));");
+            visitor.AddCodeLine("int tmp_a = sizeof(char);");
+            visitor.AddCodeLine("int tmp_b = *arr_size * tmp_a;");
+            visitor.AddCodeLine("char ** x = malloc(tmp_b);");
             visitor.AddCodeLine("int var_i = 0;");
             visitor.AddCodeLine("while_entry: ;");
             visitor.AddCodeLine("if (var_i >= *arr_size) goto while_exit;");
             visitor.AddCodeLine("{");
-            visitor.AddCodeLine("x[var_i] = malloc(256 * sizeof(char));");
+            visitor.AddCodeLine("int tmp_c = sizeof(char);");
+            visitor.AddCodeLine("int tmp_d = 256 * tmp_c;");
+            visitor.AddCodeLine("x[var_i] = malloc(tmp_d);");
             visitor.AddCodeLine("var_i = var_i + 1;");
             visitor.AddCodeLine("}");
             visitor.AddCodeLine("goto while_entry;");

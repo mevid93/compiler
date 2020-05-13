@@ -35,6 +35,7 @@ namespace MipaCompilerTests.CodeGeneration
             Assert.AreEqual("#include <string.h>", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("#include <stdlib.h>", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("", visitor.GetCodeLines()[i++]);
+
             Assert.AreEqual("typedef int bool;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("#define true 1", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("#define false 0", visitor.GetCodeLines()[i++]);
@@ -43,12 +44,16 @@ namespace MipaCompilerTests.CodeGeneration
             Assert.AreEqual("// hard coded function to allocate string array", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("char ** allocateArrayOfStrings(int * arr_size)", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("{", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("char ** x = malloc(*arr_size * sizeof(char *));", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_a = sizeof(char);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_b = *arr_size * tmp_a;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("char ** x = malloc(tmp_b);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int var_i = 0;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("while_entry: ;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("if (var_i >= *arr_size) goto while_exit;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("{", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("x[var_i] = malloc(256 * sizeof(char));", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_c = sizeof(char);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_d = 256 * tmp_c;", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("x[var_i] = malloc(tmp_d);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("var_i = var_i + 1;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("}", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("goto while_entry;", visitor.GetCodeLines()[i++]);
@@ -73,15 +78,13 @@ namespace MipaCompilerTests.CodeGeneration
             Assert.AreEqual("}", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("", visitor.GetCodeLines()[i++]);
 
+            Assert.AreEqual("// here are forward declarations for functions and procedures (if any exists)", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("", visitor.GetCodeLines()[i++]);
 
-            string comment = "// here are forward declarations for functions and procedures (if any exists)";
-            Assert.AreEqual(comment, visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("// here are the definitions of functions and procedures (if any exists)", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("", visitor.GetCodeLines()[i++]);
-            comment = "// here are the definitions of functions and procedures (if any exists)";
-            Assert.AreEqual(comment, visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("", visitor.GetCodeLines()[i++]);
-            comment = "// here is the main function";
-            Assert.AreEqual(comment, visitor.GetCodeLines()[i++]);
+
+            Assert.AreEqual("// here is the main function", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int main()", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("{", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int var_i;", visitor.GetCodeLines()[i++]);
@@ -104,7 +107,8 @@ namespace MipaCompilerTests.CodeGeneration
             Assert.AreEqual("label_while_0_exit: ;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("printf(\"%d\\n\", var_i);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("return 0;", visitor.GetCodeLines()[i++]);
-            
+            Assert.AreEqual("}", visitor.GetCodeLines()[i++]);
+
         }
     }
 }

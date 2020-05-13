@@ -301,7 +301,15 @@ namespace MipaCompiler.Node
                 string prefixRhs = Helper.GetPrefixWhenPointerNeeded("string", rhsIsPointer);
 
                 // create new string where lhs is copied
-                visitor.AddCodeLine($"{type} {tmpName} = malloc(256 * sizeof(char));");
+                int num1 = visitor.GetTmpVariableCounter();
+                visitor.IncreaseTmpVariableCounter();
+                visitor.AddCodeLine($"int tmp_{num1} = sizeof(char);");
+
+                int num2 = visitor.GetTmpVariableCounter();
+                visitor.IncreaseTmpVariableCounter();
+                visitor.AddCodeLine($"int tmp_{num2} = 256 * tmp_{num1};");
+
+                visitor.AddCodeLine($"{type} {tmpName} = malloc(tmp_{num2});");
                 visitor.AddCodeLine($"strncpy({tmpName}, {prefixLhs}{lhsTmp}, 255);");
 
                 // find out how much can be copied to lhs at max
