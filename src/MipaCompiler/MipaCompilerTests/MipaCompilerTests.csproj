@@ -49,6 +49,7 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="CodeGeneration\Program15Generation.cs" />
     <Compile Include="CodeGeneration\Program14Generation.cs" />
     <Compile Include="CodeGeneration\Program12Generation.cs" />
     <Compile Include="CodeGeneration\Program11Generation.cs" />
@@ -143,6 +144,9 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SampleFiles\types1.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="SampleFiles\program15.txt">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="SampleFiles\ValidSemantics\assertion.txt">

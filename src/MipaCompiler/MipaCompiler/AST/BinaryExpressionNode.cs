@@ -353,9 +353,33 @@ namespace MipaCompiler.Node
         {
             SymbolTable symTable = visitor.GetSymbolTable();
             int scope = visitor.GetSymbolTable().GetCurrentScope();
-            bool lhsIsPointer = symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer();
-            bool rhsIsPointer = symTable.GetVariableSymbolByIdentifier(rhsTmp).IsPointer();
+            bool lhsIsPointer = false;
+            bool rhsIsPointer = false;
 
+            if(lhsTmp.Equals("false") || lhsTmp.Equals("true"))
+            {
+                int number = visitor.GetTmpVariableCounter();
+                visitor.IncreaseTmpVariableCounter();
+                visitor.AddCodeLine($"bool tmp_{number} = {lhsTmp};");
+                lhsTmp = $"tmp_{number}";
+            }
+            else
+            {
+                lhsIsPointer = symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer();
+            }
+
+            if (rhsTmp.Equals("false") || rhsTmp.Equals("true"))
+            {
+                int number = visitor.GetTmpVariableCounter();
+                visitor.IncreaseTmpVariableCounter();
+                visitor.AddCodeLine($"bool tmp_{number} = {rhsTmp};");
+                rhsTmp = $"tmp_{number}";
+            }
+            else
+            {
+                rhsIsPointer = symTable.GetVariableSymbolByIdentifier(rhsTmp).IsPointer();
+            }
+            
             string type = "bool";
             symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
             string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);
@@ -370,9 +394,32 @@ namespace MipaCompiler.Node
         {
             SymbolTable symTable = visitor.GetSymbolTable();
             int scope = visitor.GetSymbolTable().GetCurrentScope();
-            bool lhsIsPointer = symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer();
-            bool rhsIsPointer = symTable.GetVariableSymbolByIdentifier(rhsTmp).IsPointer();
+            bool lhsIsPointer = false;
+            bool rhsIsPointer = false;
 
+            if (lhsTmp.Equals("false") || lhsTmp.Equals("true"))
+            {
+                int number = visitor.GetTmpVariableCounter();
+                visitor.IncreaseTmpVariableCounter();
+                visitor.AddCodeLine($"bool tmp_{number} = {lhsTmp};");
+                lhsTmp = $"tmp_{number}";
+            }
+            else
+            {
+                lhsIsPointer = symTable.GetVariableSymbolByIdentifier(lhsTmp).IsPointer();
+            }
+
+            if (rhsTmp.Equals("false") || rhsTmp.Equals("true"))
+            {
+                int number = visitor.GetTmpVariableCounter();
+                visitor.IncreaseTmpVariableCounter();
+                visitor.AddCodeLine($"bool tmp_{number} = {rhsTmp};");
+                rhsTmp = $"tmp_{number}";
+            }
+            else
+            {
+                rhsIsPointer = symTable.GetVariableSymbolByIdentifier(rhsTmp).IsPointer();
+            }
             string type = "bool";
             symTable.DeclareVariableSymbol(new VariableSymbol(tmpName, "boolean", null, scope));
             string prefixLhs = Helper.GetPrefixWhenPointerNotNeeded("boolean", lhsIsPointer);

@@ -1,0 +1,8 @@
+program Expression;
+
+begin
+    var expr: boolean;
+    var expr1 : integer;
+    expr1 := 1 + 2 * 3 / 4 % 5;
+    expr := true and false or false and true;
+end.
