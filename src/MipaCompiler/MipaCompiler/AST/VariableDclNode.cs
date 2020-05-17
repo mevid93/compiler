@@ -284,7 +284,7 @@ namespace MipaCompiler.Node
             {
                 int number = visitor.GetTmpVariableCounter();
                 visitor.IncreaseTmpVariableCounter();
-                visitor.AddCodeLine($"int tmp{number} = sizeof({allocationType});");
+                visitor.AddCodeLine($"int tmp_{number} = sizeof({allocationType});");
 
                 int number2 = visitor.GetTmpVariableCounter();
                 visitor.IncreaseTmpVariableCounter();

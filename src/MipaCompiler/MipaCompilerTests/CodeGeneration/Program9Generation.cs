@@ -152,7 +152,7 @@ namespace MipaCompilerTests.CodeGeneration
             Assert.AreEqual("double * var_myarray2 = malloc(tmp_20);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int size_myarray1 = tmp_16;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int size_myarray2 = tmp_16;", visitor.GetCodeLines()[i++]);
-            Assert.AreEqual("int tmp21 = sizeof(double);", visitor.GetCodeLines()[i++]);
+            Assert.AreEqual("int tmp_21 = sizeof(double);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int tmp_22 = 0 * tmp_21;", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("double * var_myarray3 = malloc(tmp_22);", visitor.GetCodeLines()[i++]);
             Assert.AreEqual("int size_myarray3 = 0;", visitor.GetCodeLines()[i++]);
