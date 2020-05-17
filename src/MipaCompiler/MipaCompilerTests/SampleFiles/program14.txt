@@ -1,0 +1,62 @@
+program Booleans;
+
+{*
+This programs tests the basic functionality
+of booleans.
+*}
+
+function opposite (value : boolean) : boolean; 
+begin
+    return not value; 
+end;
+
+procedure opposite2 (value: boolean);
+begin
+    value := not value;
+end;
+
+begin
+    {* Declare reals *}
+    var myBoolean1 : boolean;
+    var myBoolean2: boolean;
+    var boolean : boolean;
+
+    {* Insert values *}
+    myBoolean1 := false;
+    boolean := true;
+    myBoolean2 := boolean;
+
+    {* Do basic operations *}
+    myBoolean1 := not myBoolean1;
+    boolean := boolean and myBoolean1;
+    myBoolean2 := myBoolean1 or myBoolean2;
+
+    {* function call and procedure call *}
+    boolean := opposite(myBoolean1);
+    if not boolean then writeln("1. Opposite of true is false");
+    boolean := opposite(true);
+    if not boolean then writeln("2. Opposite of true is FALSE");
+    boolean := opposite(false);
+    if boolean then writeln("3. Opposite of false is TRUE");
+    opposite2(boolean);
+    if not boolean then writeln("4. Opposite of true is FALSE");
+    opposite2(true);
+    opposite2(false);
+
+    {* comparison *}
+    var comparison : boolean;
+    myBoolean1 := false;
+    myBoolean2 := true;
+    comparison := myBoolean1 = myBoolean2;
+    if not comparison then writeln("5. false equals true is not true");
+    comparison := myBoolean1 <> myBoolean2;
+    if comparison then writeln("6. false not equals true is true");
+    comparison := myBoolean1 < myBoolean2;
+    if comparison then writeln("7. false is less than true is true");
+    comparison := myBoolean1 > myBoolean2;
+    if not comparison then writeln("8. false is larger than true is false");
+    comparison := myBoolean1 <= myBoolean2;
+    if comparison then writeln("9. false is less or equal to true is true");
+    comparison := myBoolean1 >= myBoolean2;
+    if not comparison then writeln("10. false is larger or equal to true is false");
+end.

@@ -386,7 +386,19 @@ namespace MipaCompiler.Node
 
 
                 // get proper prefix for argument
-                bool isPointer = symTable.GetVariableSymbolByIdentifier(lastTmp).IsPointer();
+                bool isPointer = false;
+                if(lastTmp.Equals("false") || lastTmp.Equals("true"))
+                {
+                    int number = visitor.GetTmpVariableCounter();
+                    visitor.IncreaseTmpVariableCounter();
+                    visitor.AddCodeLine($"bool tmp_{number} = {lastTmp};");
+                    visitor.SetLatestTmpVariableName($"tmp_{number}");
+                    lastTmp = $"tmp_{number}";
+                }
+                else
+                {
+                    isPointer = symTable.GetVariableSymbolByIdentifier(lastTmp).IsPointer();
+                }
                 string prefix = Helper.GetPrefixWhenPointerNeeded(evaluatedType, isPointer);
 
                 // add code
