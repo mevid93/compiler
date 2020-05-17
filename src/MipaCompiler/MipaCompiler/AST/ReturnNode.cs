@@ -90,7 +90,7 @@ namespace MipaCompiler.Node
             // check if returned type is array
             // if it is, then update return array size parameter
             VariableSymbol varSymbol = visitor.GetSymbolTable().GetVariableSymbolByIdentifier(lastTmp);
-            if (varSymbol.GetSymbolType().Contains("array"))
+            if (varSymbol != null && varSymbol.GetSymbolType().Contains("array"))
             {
                 string sizeName = "";
                 if (lastTmp.Contains("var_"))

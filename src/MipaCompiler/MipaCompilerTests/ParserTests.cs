@@ -50,7 +50,7 @@ namespace MipaCompilerTests
             Assert.IsNotNull(ast);
             Assert.AreEqual(NodeType.PROGRAM, ast.GetNodeType());
             ProgramNode pdn = (ProgramNode)ast;
-            Assert.AreEqual("MutualRecursion".ToLower(), pdn.GetProgramName());
+            Assert.AreEqual("EvenOrOdd".ToLower(), pdn.GetProgramName());
             Assert.IsTrue(pdn.GetFunctions().Count == 2);
             Assert.IsTrue(pdn.GetProcedures().Count == 0);
             Assert.IsFalse(pdn.GetMainBlock() == null);
@@ -60,15 +60,15 @@ namespace MipaCompilerTests
             BlockNode bn = (BlockNode)pdn.GetMainBlock();
             List<INode> statements = bn.GetStatements();
             Assert.AreEqual(NodeType.VARIABLE_DCL, statements[0].GetNodeType());
-            Assert.AreEqual(NodeType.ASSIGNMENT, statements[1].GetNodeType());
-            Assert.AreEqual(NodeType.WHILE, statements[2].GetNodeType());
-            Assert.AreEqual(NodeType.ASSIGNMENT, statements[3].GetNodeType());
-            Assert.AreEqual(NodeType.WHILE, statements[2].GetNodeType());
+            Assert.AreEqual(NodeType.CALL, statements[1].GetNodeType());
+            Assert.AreEqual(NodeType.CALL, statements[2].GetNodeType());
+            Assert.AreEqual(NodeType.VARIABLE_DCL, statements[3].GetNodeType());
+            Assert.AreEqual(NodeType.CALL, statements[2].GetNodeType());
 
             Assert.AreEqual(pdn.GetFunctions()[0].GetNodeType(), NodeType.FUNCTION);
             FunctionNode fn = (FunctionNode)pdn.GetFunctions()[0];
             SimpleTypeNode stn = (SimpleTypeNode)fn.GetReturnType();
-            Assert.AreEqual("integer", stn.GetTypeValue());
+            Assert.AreEqual("boolean", stn.GetTypeValue());
             Assert.IsTrue(fn.GetParameters().Count == 1);
             BlockNode fbn = (BlockNode)fn.GetBlock();
             Assert.AreEqual(NodeType.IF_ELSE, fbn.GetStatements()[0].GetNodeType());

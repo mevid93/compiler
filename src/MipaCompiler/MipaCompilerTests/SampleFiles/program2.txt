@@ -1,23 +1,31 @@
-program MutualRecursion;
+program EvenOrOdd;
 
-function F (n : integer) : integer;  
+{*
+This program uses mutual recursion to determine
+if user input is even, or odd number.
+*}
+
+function is_even (n : integer) : boolean;  
 begin
     if n = 0 then
-        return 1;  
+        return true;  
     else
-        return n - M (F (n-1));  
+        return is_odd(n-1);  
 end;  
 
-function M (n : integer) : integer;  
+function is_odd (n : integer) : boolean;  
 begin
-    if n = 0 then return 0;  
-else return n - F (M (n-1));  
+    if n = 0 then 
+        return false;  
+    else return is_even (n-1);  
 end;  
 
 begin
     var i : integer;      
-    i := 0; 
-    while i <= 19 do  writeln (F (i));     
-    i := 0; 
-    while i <= 19 do  writeln (M (i));  
+    writeln("Give integer:");
+    read(i);
+    var even : boolean;
+    even := is_even(i);
+    if even then writeln(i, " is EVEN number!");
+    else writeln(i, " is ODD number!");
 end. 
