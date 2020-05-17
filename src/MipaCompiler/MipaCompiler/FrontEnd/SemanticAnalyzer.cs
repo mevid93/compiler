@@ -565,6 +565,7 @@ namespace MipaCompiler
         private static void ReportError(int row, int col, List<string> errors, string errorMsg)
         {
             string message = $"SemanticError::Row {row}::Column {col}::" + errorMsg;
+            if (errors.Count > 0 && errors[errors.Count - 1].Equals(message)) return; // prevent duplicate errors
             Console.WriteLine(message);
             errors.Add(message);
         }
