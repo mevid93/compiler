@@ -31,12 +31,16 @@ typedef int bool;
 // hard coded function to allocate string array
 char ** allocateArrayOfStrings(int * arr_size)
 {
-char ** x = malloc(*arr_size * sizeof(char *));
+int tmp_a = sizeof(char);
+int tmp_b = *arr_size * tmp_a;
+char ** x = malloc(tmp_b);
 int var_i = 0;
 while_entry: ;
 if (var_i >= *arr_size) goto while_exit;
 {
-x[var_i] = malloc(256 * sizeof(char));
+int tmp_c = sizeof(char);
+int tmp_d = 256 * tmp_c;
+x[var_i] = malloc(tmp_d);
 var_i = var_i + 1;
 }
 goto while_entry;
