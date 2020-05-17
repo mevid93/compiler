@@ -465,7 +465,15 @@ namespace MipaCompiler
             // convert to return node
             ReturnNode retNode = (ReturnNode)node;
 
-            if (returnStmntType == null || returnStmntType == "") return;
+            if (returnStmntType == null || returnStmntType == "")
+            {
+                if (retNode.GetExpression() != null)
+                {
+                    string errorMsg = $"Procedure should not return a value!";
+                    ReportError(retNode.GetExpression().GetRow(), retNode.GetExpression().GetCol(), errors, errorMsg);
+                }
+                return;
+            }
 
             // check that the return value corresponds to the return type
             // of current function

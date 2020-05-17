@@ -406,7 +406,7 @@ namespace MipaCompilerTests
             analyzer.CheckConstraints();
 
             Assert.IsTrue(analyzer.ErrosDetected());
-            Assert.IsTrue(analyzer.GetDetectedErrors().Count == 1);
+            Assert.IsTrue(analyzer.GetDetectedErrors().Count == 2);
 
             List<string> errors = analyzer.GetDetectedErrors();
 

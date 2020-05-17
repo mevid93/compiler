@@ -13,7 +13,8 @@ end;
 procedure Swap (var i : integer, var j : integer);  
 begin
     var tmp : integer;    
-    tmp := i;  i := j;  j := tmp;  
+    tmp := i;  i := j;  j := tmp;
+	return 1;
 end;  
 
 begin
