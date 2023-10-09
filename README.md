@@ -95,3 +95,26 @@ return 0;
 
 ## How to
 ---
+
+Copy the project to your local machine and navigate to project root folder. Dotnet 7.0 sdk and runtime required.
+
+### Run tests
+
+```console
+foo@bar:~/compiler$ pwd
+/home/foo/compiler
+foo@bar:~/compiler$ cd MipaCompilerTests
+foo@bar:~/compiler/MipaCompilerTests$ dotnet test
+```
+
+
+### Run compiler 
+
+```console
+foo@bar:~/compiler$ pwd
+/home/foo/compiler
+foo@bar:~/compiler$ cd MipaCompiler
+foo@bar:~/compiler/MipaCompiler$ dotnet build
+foo@bar:~/compiler/MipaCompiler$ cd bin/Debug/net7.0/
+foo@bar:~/compiler/MipaCompiler/bin/Debug/net7.0$ ./MipaCompiler <mipa_program> <optional_output_file>
+```
