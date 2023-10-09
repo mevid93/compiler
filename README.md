@@ -1,6 +1,6 @@
 # Mini-Pascal Compiler
 
-Mini-Pascal compiler is a small compiler written at Code Generation course at Helsinki University. It takes Mini-Pascal program as input and generates low-level C-program as output.
+Mini-Pascal compiler. Takes Mini-Pascal program as input and generates low-level C-program as output.
 
 ## Example input
 ```
@@ -92,3 +92,6 @@ printf("%d\n", var_i);
 return 0;
 }
 ```
+
+## How to
+---
